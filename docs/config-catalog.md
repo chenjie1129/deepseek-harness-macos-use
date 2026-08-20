@@ -389,6 +389,20 @@ Depends on: [`LocalConfig`](#deepseek-aidsh-bash-local)
 
 Source: [`packages/shell/bash-sandbox/src/index.ts:35`](../packages/shell/bash-sandbox/src/index.ts)
 
+<a id="deepseek-aidsh-browser-use"></a>
+
+## `@deepseek-ai/dsh-browser-use`
+
+```ts config-catalog
+/** Config for the browser-use seam. */
+export interface Config {
+  /** Run Chromium headless. Defaults to true; set false to watch the browser drive itself. */
+  headless?: boolean
+}
+```
+
+Source: [`packages/macos-use/browser-use/src/index.ts:46`](../packages/macos-use/browser-use/src/index.ts)
+
 <a id="deepseek-aidsh-client-connection"></a>
 
 ## `@deepseek-ai/dsh-client-connection`
@@ -703,6 +717,28 @@ export interface Config {
 ```
 
 Source: [`packages/goal/goal/src/index.ts:116`](../packages/goal/goal/src/index.ts)
+
+<a id="deepseek-aidsh-gui-model"></a>
+
+## `@deepseek-ai/dsh-gui-model`
+
+```ts config-catalog
+/** Config for the GUI-grounding vision model seam. */
+export interface Config {
+  /** Literal API key; prefer {@link apiKeyEnv} so no secret enters configuration files. */
+  apiKey?: string
+  /** Credential reference resolved for each request; defaults to `GUI_MODEL_API_KEY`. */
+  apiKeyEnv?: string
+  /** Endpoint base; `/chat/completions` is appended. No default — every provider's base URL differs. */
+  baseURL: string
+  /** Vision-capable model name sent as the request's `model` field. */
+  model: string
+  /** `max_tokens` cap on the response. Defaults to 512 — one action's worth of JSON. */
+  maxOutputTokens?: number
+}
+```
+
+Source: [`packages/macos-use/gui-model/src/index.ts:38`](../packages/macos-use/gui-model/src/index.ts)
 
 <a id="deepseek-aidsh-headless"></a>
 
@@ -1331,6 +1367,22 @@ export interface LspLocalServerConfig {
 ```
 
 Source: [`packages/lsp/lsp-stdio/src/index.ts:82`](../packages/lsp/lsp-stdio/src/index.ts)
+
+<a id="deepseek-aidsh-macos-use"></a>
+
+## `@deepseek-ai/dsh-macos-use`
+
+Requires: `subprocess`
+
+```ts config-catalog
+/** Config for the macOS desktop-control seam. */
+export interface Config {
+  /** Deadline in milliseconds for one `osascript`/`screencapture`/`open` invocation. Defaults to 15000. */
+  commandTimeoutMs?: number
+}
+```
+
+Source: [`packages/macos-use/macos-use/src/index.ts:56`](../packages/macos-use/macos-use/src/index.ts)
 
 <a id="deepseek-aidsh-mcp-client"></a>
 
@@ -2635,6 +2687,22 @@ export interface Config {
 ```
 
 Source: [`packages/lsp/tool-lsp/src/index.ts:58`](../packages/lsp/tool-lsp/src/index.ts)
+
+<a id="deepseek-aidsh-tool-macos-use"></a>
+
+## `@deepseek-ai/dsh-tool-macos-use`
+
+Requires: `tools` · `macosUse` · `guiModel` · `browserUse` · `attachments`
+
+```ts config-catalog
+/** Config for the macOS-use / browser-use tool consumer. */
+export interface Config {
+  /** Default `max_steps` for `computer_use_task` / `browser_use_task` when the model omits it. Defaults to 20. */
+  defaultMaxSteps?: number
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts:25`](../packages/macos-use/tool-macos-use/src/index.ts)
 
 <a id="deepseek-aidsh-tool-pwsh"></a>
 

@@ -42,6 +42,7 @@
 | `@deepseek-ai/dsh-experimental-tool-agent-team` | `followup_task`、`interrupt_agent`、`list_agents`、`send_message`、`spawn_teammate`、`team_task_create`、`team_task_get`、`team_task_list`、`team_task_update`、`wait_agent` | `ctx.tools`、`ctx.systemPrompt`、`ctx.agentTeams`、`an exact live Team member Agent` | `tool/call`、`team/member`、`team/message/queued`、`team/message/delivered`、`team/task`、`tool/result` | - | 这 10 个工具限定于隐式 Team Lead 与持久 teammate 作用域。随产品发布的 dsh-base bundle 默认禁用该包；文档中的 Agent Teams profile patch 会启用它，并禁用旧 continuable child 的同名控制工具。 |
 | `@deepseek-ai/dsh-tool-todo` | `todo_write` | `ctx.tools`、`owning Agent session` | `tool/call`、`todo/write`、`tool/result` | - | todo_write 是会话所有的状态；UI 将最新的 todo/write 事件渲染为检查清单。`allowParallelInProgress` 是没有默认值的必填项，因此本目录明确选择 `true`，对应描述允许同时存在多个 `in_progress` 项。选择 `false` 的部署会获得同一工具，但描述会要求只能有 1 个活动任务。 |
 | `@deepseek-ai/dsh-tool-workflow` | `workflow` | `ctx.tools`、`ctx.workflowEngine`、`ctx.systemPrompt`、`a calling Agent (exec.agent parents the script children)` | `tool/call`、`tool/result` | - | - |
+| `@deepseek-ai/dsh-tool-macos-use` | `browser_click`、`browser_extract_text`、`browser_fill`、`browser_navigate`、`browser_screenshot`、`browser_use_task`、`computer_click`、`computer_key`、`computer_open_app`、`computer_run_applescript`、`computer_screenshot`、`computer_type`、`computer_use_task` | `ctx.tools`、`ctx.macosUse`、`ctx.guiModel`、`ctx.browserUse`、`ctx.attachments` | `tool/call`、`macOS or browser state`、`durable screenshot attachment`、`tool/result` | - | 截图像素存储为持久附件，但向驱动模型渲染为文本引用；独立 GUI 模型请求会在驱动 Session 日志之外消费这些像素。 |
 | `@deepseek-ai/dsh-tool-web` | `web_fetch`、`web_search` | `ctx.tools`、`ctx.web`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | web_search 和 web_fetch 将提供方选择置于 ctx.web 之后，使模型可见 schema 在更换后端时保持稳定。 |
 
 <a id="deepseek-aidsh-tool-ask-user"></a>
@@ -2172,6 +2173,300 @@ todo_write 是会话所有的状态；UI 将最新的 todo/write 事件渲染为
 ```
 
 来源：[`packages/workflow/tool-workflow/src/index.ts`](../packages/workflow/tool-workflow/src/index.ts)
+
+<a id="deepseek-aidsh-tool-macos-use"></a>
+
+## `@deepseek-ai/dsh-tool-macos-use`
+
+### `browser_click`
+
+点击当前页面上第一个匹配 CSS 或 Playwright 文本／角色选择器的元素，例如 `#submit` 或 `text=Sign in`。对于一个已知且可由选择器定位的点击，应优先使用此工具，而不是 `browser_use_task`。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "selector": {
+      "type": "string",
+      "description": "CSS or Playwright text/role selector."
+    }
+  },
+  "required": [
+    "selector"
+  ]
+}
+```
+
+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `browser_extract_text`
+
+读取第一个匹配选择器的元素内部文本；省略选择器时读取整个页面正文。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "selector": {
+      "type": "string",
+      "description": "CSS or Playwright selector; omitted = the whole page body."
+    }
+  }
+}
+```
+
+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `browser_fill`
+
+用字面文本替换第一个匹配选择器的输入框值。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "selector": {
+      "type": "string",
+      "description": "CSS or Playwright text/role selector for the input."
+    },
+    "text": {
+      "type": "string",
+      "description": "Text to set as the input's value."
+    }
+  },
+  "required": [
+    "selector",
+    "text"
+  ]
+}
+```
+
+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `browser_navigate`
+
+让自动化浏览器标签页导航到 URL；如有需要，会先启动浏览器。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "Absolute URL to load."
+    }
+  },
+  "required": [
+    "url"
+  ]
+}
+```
+
+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `browser_screenshot`
+
+捕获自动化浏览器标签页当前视口的截图，并将其作为图片返回。
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `browser_use_task`
+
+自主操作浏览器以完成任务：反复截取页面、询问已配置的 GUI 模型下一步应点击、输入或按键的位置，然后执行该动作，直至模型报告任务完成或步骤预算耗尽。可以先导航到可选的起始 URL。此工具适合开放式浏览任务；当确切选择器与步骤已知时，应优先使用 `browser_navigate`、`browser_click`、`browser_fill` 和 `browser_extract_text`。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "task": {
+      "type": "string",
+      "description": "The task to accomplish in the browser, in natural language."
+    },
+    "url": {
+      "type": "string",
+      "description": "Optional starting URL to navigate to before the loop begins."
+    },
+    "max_steps": {
+      "type": "integer",
+      "description": "Step budget before giving up. Defaults to 20."
+    }
+  },
+  "required": [
+    "task"
+  ]
+}
+```
+
+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_click`
+
+在 macOS 绝对屏幕坐标（左上角为原点，单位为点）执行单击、双击或右键单击。应先使用 `computer_screenshot` 查找目标坐标。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "x": {
+      "type": "number",
+      "description": "Absolute screen x coordinate."
+    },
+    "y": {
+      "type": "number",
+      "description": "Absolute screen y coordinate."
+    },
+    "button": {
+      "type": "string",
+      "description": "Defaults to \"left\".",
+      "enum": [
+        "left",
+        "right"
+      ]
+    },
+    "double_click": {
+      "type": "boolean",
+      "description": "Double-click instead of a single click. Ignored when button is \"right\"."
+    }
+  },
+  "required": [
+    "x",
+    "y"
+  ]
+}
+```
+
+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_key`
+
+在 macOS 上按下单个按键或组合键，例如 `return`、`escape`、`cmd+shift+t`、`a`。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "combo": {
+      "type": "string",
+      "description": "Key or \"+\"-joined modifier combo."
+    }
+  },
+  "required": [
+    "combo"
+  ]
+}
+```
+
+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_open_app`
+
+按名称启动 macOS 应用或将其置于前台，例如 `Safari`、`Notes`。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Application name as `open -a` resolves it."
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
+```
+
+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_run_applescript`
+
+通过 `osascript` 运行任意 AppleScript，以完成其他 `computer_*` 工具未直接覆盖的 macOS 自动化操作，例如读取窗口标题或控制特定应用自身的脚本字典。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "script": {
+      "type": "string",
+      "description": "Complete AppleScript source."
+    }
+  },
+  "required": [
+    "script"
+  ]
+}
+```
+
+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_screenshot`
+
+捕获当前 macOS 屏幕截图，并将其作为图片返回。
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_type`
+
+通过按键事件向当前聚焦的 macOS 元素输入字面文本。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "Text to type."
+    }
+  },
+  "required": [
+    "text"
+  ]
+}
+```
+
+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_use_task`
+
+自主操作 macOS 桌面以完成任务：反复截取屏幕、询问已配置的 GUI 模型下一步应点击、输入或按键的位置，然后执行该动作，直至模型报告任务完成或步骤预算耗尽。此工具适合开放式桌面任务；对于一个已知的具体操作，应优先使用基础 `computer_*` 工具。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "task": {
+      "type": "string",
+      "description": "The task to accomplish on the desktop, in natural language."
+    },
+    "max_steps": {
+      "type": "integer",
+      "description": "Step budget before giving up. Defaults to 20."
+    }
+  },
+  "required": [
+    "task"
+  ]
+}
+```
+
+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+截图像素存储为持久附件，但向驱动模型渲染为文本引用；独立 GUI 模型请求会在驱动 Session 日志之外消费这些像素。
 
 <a id="deepseek-aidsh-tool-web"></a>
 

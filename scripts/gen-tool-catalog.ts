@@ -63,6 +63,10 @@ import * as ToolTeam from '@deepseek-ai/dsh-experimental-tool-agent-team'
 import * as ToolTodo from '@deepseek-ai/dsh-tool-todo'
 import * as ToolSubagent from '@deepseek-ai/dsh-tool-subagent'
 import * as ToolWeb from '@deepseek-ai/dsh-tool-web'
+import BrowserUseService from '@deepseek-ai/dsh-browser-use'
+import GuiModelService from '@deepseek-ai/dsh-gui-model'
+import MacosUseService from '@deepseek-ai/dsh-macos-use'
+import * as ToolMacosUse from '@deepseek-ai/dsh-tool-macos-use'
 import VmWorkflowEngine from '@deepseek-ai/dsh-workflow-worker-thread'
 import * as ToolRalph from '@deepseek-ai/dsh-tool-ralph'
 import * as ToolWorkflow from '@deepseek-ai/dsh-tool-workflow'
@@ -588,6 +592,23 @@ const TOOL_PACKAGES: ToolPackage[] = [
       await ctx.plugin(VmWorkflowEngine, { provider: 'mock' })
       await ctx.plugin(ToolWorkflow)
     },
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-macos-use',
+    dir: 'tool-macos-use',
+    source: 'packages/macos-use/tool-macos-use/src/index.ts',
+    requires: ['ctx.tools', 'ctx.macosUse', 'ctx.guiModel', 'ctx.browserUse', 'ctx.attachments'],
+    writes: ['tool/call', 'macOS or browser state', 'durable screenshot attachment', 'tool/result'],
+    async mount(ctx) {
+      await ctx.plugin(LocalSubprocessRuntime)
+      await ctx.plugin(MacosUseService)
+      await ctx.plugin(BrowserUseService)
+      await ctx.plugin(GuiModelService, { baseURL: 'https://example.invalid/v1', model: 'catalog' })
+      await ctx.plugin(CatalogAttachmentStore)
+      await ctx.plugin(ToolMacosUse)
+    },
+    note:
+      'Screenshot pixels are stored as durable attachments but rendered to the driving model as text references; the independent GUI-model request consumes the pixels outside the driving Session log.',
   },
   {
     pkg: '@deepseek-ai/dsh-tool-web',

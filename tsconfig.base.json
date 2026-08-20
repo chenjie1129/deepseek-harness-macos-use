@@ -260,6 +260,7 @@
         "./packages/jobs/*/src",
         "./packages/experimental/*/src",
         "./packages/workflow/*/src",
+        "./packages/macos-use/*/src",
         "./packages/web/*/src",
         "./packages/attachment/*/src",
         "./packages/spill/*/src",

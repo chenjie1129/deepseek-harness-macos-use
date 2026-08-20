@@ -11,6 +11,10 @@ export type PluginsSettingsLocaleKey =
   | 'webSearchTitle' | 'webSearchDescription'
   | 'webSearchApiKey' | 'webSearchApiKeyHint' | 'webSearchApiKeySet' | 'webSearchApiKeyUnset'
   | 'webSearchBaseUrl' | 'webSearchBaseUrlHint' | 'webSearchMaxUses' | 'webSearchMaxUsesHint'
+  | 'guiModelTitle' | 'guiModelDescription'
+  | 'guiModelApiKey' | 'guiModelApiKeyHint' | 'guiModelApiKeySet' | 'guiModelApiKeyUnset'
+  | 'guiModelBaseUrl' | 'guiModelBaseUrlHint' | 'guiModelModel' | 'guiModelModelHint'
+  | 'guiModelMaxOutputTokens' | 'guiModelMaxOutputTokensHint'
 
 /** English copy. */
 export const en: Record<PluginsSettingsLocaleKey, string> = {
@@ -51,6 +55,18 @@ export const en: Record<PluginsSettingsLocaleKey, string> = {
   webSearchBaseUrlHint: 'Leave blank to use the provider default.',
   webSearchMaxUses: 'Max searches per request',
   webSearchMaxUsesHint: 'How many times one request may search before it must answer.',
+  guiModelTitle: 'GUI model',
+  guiModelDescription: 'The vision model that decides where to click for computer_use_task / browser_use_task.',
+  guiModelApiKey: 'API key',
+  guiModelApiKeyHint: 'Stored outside the settings file. Leave blank to keep the current key.',
+  guiModelApiKeySet: 'A key is configured.',
+  guiModelApiKeyUnset: 'No key is configured; GUI grounding is unavailable until one is.',
+  guiModelBaseUrl: 'Endpoint',
+  guiModelBaseUrlHint: 'An OpenAI-compatible vision chat-completions base; /chat/completions is appended.',
+  guiModelModel: 'Model',
+  guiModelModelHint: 'The vision-capable model name sent with each request.',
+  guiModelMaxOutputTokens: 'Max response tokens',
+  guiModelMaxOutputTokensHint: 'Upper bound on the response length for one action decision.',
 }
 
 /** Simplified Chinese copy. */
@@ -92,4 +108,16 @@ export const zh: Record<PluginsSettingsLocaleKey, string> = {
   webSearchBaseUrlHint: '留空则使用提供方默认地址。',
   webSearchMaxUses: '单次请求最多搜索次数',
   webSearchMaxUsesHint: '一次请求在必须作答前最多可以搜索多少次。',
+  guiModelTitle: 'GUI 模型',
+  guiModelDescription: '为 computer_use_task / browser_use_task 决定点击位置的视觉模型。',
+  guiModelApiKey: 'API Key',
+  guiModelApiKeyHint: '不写入设置文件。留空表示保持当前密钥。',
+  guiModelApiKeySet: '已配置密钥。',
+  guiModelApiKeyUnset: '未配置密钥；配置之前 GUI 定位不可用。',
+  guiModelBaseUrl: '接口地址',
+  guiModelBaseUrlHint: '兼容 OpenAI 的视觉 chat-completions 接口地址；会自动追加 /chat/completions。',
+  guiModelModel: '模型',
+  guiModelModelHint: '每次请求携带的视觉模型名称。',
+  guiModelMaxOutputTokens: '最大响应 token 数',
+  guiModelMaxOutputTokensHint: '单次动作决策响应长度的上限。',
 }

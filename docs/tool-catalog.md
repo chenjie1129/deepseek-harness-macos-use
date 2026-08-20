@@ -40,6 +40,7 @@ This table connects model-visible tool names to the plugin package and service s
 | `@deepseek-ai/dsh-experimental-tool-agent-team` | `followup_task`, `interrupt_agent`, `list_agents`, `send_message`, `spawn_teammate`, `team_task_create`, `team_task_get`, `team_task_list`, `team_task_update`, `wait_agent` | `ctx.tools`, `ctx.systemPrompt`, `ctx.agentTeams`, `an exact live Team member Agent` | `tool/call`, `team/member`, `team/message/queued`, `team/message/delivered`, `team/task`, `tool/result` | - | All ten tools are scoped to implicit Team Leads and durable teammates. The shipped dsh-base bundle keeps the package disabled; the documented Agent Teams profile patch enables it while disabling the legacy continuable-child control names. |
 | `@deepseek-ai/dsh-tool-todo` | `todo_write` | `ctx.tools`, `owning Agent session` | `tool/call`, `todo/write`, `tool/result` | - | todo_write is session-owned state; UIs render the latest todo/write event as a checklist. `allowParallelInProgress` is required with no default, so the catalog states its choice: `true`, whose description invites several `in_progress` items. A deployment choosing `false` receives the same tool with a description asking for exactly one active task. |
 | `@deepseek-ai/dsh-tool-workflow` | `workflow` | `ctx.tools`, `ctx.workflowEngine`, `ctx.systemPrompt`, `a calling Agent (exec.agent parents the script children)` | `tool/call`, `tool/result` | - | - |
+| `@deepseek-ai/dsh-tool-macos-use` | `browser_click`, `browser_extract_text`, `browser_fill`, `browser_navigate`, `browser_screenshot`, `browser_use_task`, `computer_click`, `computer_key`, `computer_open_app`, `computer_run_applescript`, `computer_screenshot`, `computer_type`, `computer_use_task` | `ctx.tools`, `ctx.macosUse`, `ctx.guiModel`, `ctx.browserUse`, `ctx.attachments` | `tool/call`, `macOS or browser state`, `durable screenshot attachment`, `tool/result` | - | Screenshot pixels are stored as durable attachments but rendered to the driving model as text references; the independent GUI-model request consumes the pixels outside the driving Session log. |
 | `@deepseek-ai/dsh-tool-web` | `web_fetch`, `web_search` | `ctx.tools`, `ctx.web`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | web_search and web_fetch keep provider selection behind ctx.web so model-visible schemas stay stable across backend swaps. |
 
 <a id="deepseek-aidsh-tool-ask-user"></a>
@@ -2168,6 +2169,300 @@ Constraints: concurrency and total-agent caps apply; no filesystem, network, tim
 ```
 
 Source: [`packages/workflow/tool-workflow/src/index.ts`](../packages/workflow/tool-workflow/src/index.ts)
+
+<a id="deepseek-aidsh-tool-macos-use"></a>
+
+## `@deepseek-ai/dsh-tool-macos-use`
+
+### `browser_click`
+
+Click the first element matching a CSS or Playwright text/role selector on the current page, e.g. "#submit" or 'text=Sign in'. Prefer this over browser_use_task for one known, selector-addressable click.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "selector": {
+      "type": "string",
+      "description": "CSS or Playwright text/role selector."
+    }
+  },
+  "required": [
+    "selector"
+  ]
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `browser_extract_text`
+
+Read the inner text of the first element matching a selector, or the whole page body when omitted.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "selector": {
+      "type": "string",
+      "description": "CSS or Playwright selector; omitted = the whole page body."
+    }
+  }
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `browser_fill`
+
+Replace the value of the first input matching a selector with literal text.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "selector": {
+      "type": "string",
+      "description": "CSS or Playwright text/role selector for the input."
+    },
+    "text": {
+      "type": "string",
+      "description": "Text to set as the input's value."
+    }
+  },
+  "required": [
+    "selector",
+    "text"
+  ]
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `browser_navigate`
+
+Navigate the automated browser tab to a URL, launching the browser first if needed.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "Absolute URL to load."
+    }
+  },
+  "required": [
+    "url"
+  ]
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `browser_screenshot`
+
+Capture a screenshot of the automated browser tab's current viewport and return it as an image.
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `browser_use_task`
+
+Autonomously operate the browser to accomplish a task: repeatedly screenshots the page, asks the configured GUI model where to click/type/press next, and executes that action, until the model reports the task done or the step budget runs out. Optionally navigates to a starting URL first. Use this for open-ended browsing tasks; prefer browser_navigate/browser_click/browser_fill/browser_extract_text when the exact selectors and steps are already known.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "task": {
+      "type": "string",
+      "description": "The task to accomplish in the browser, in natural language."
+    },
+    "url": {
+      "type": "string",
+      "description": "Optional starting URL to navigate to before the loop begins."
+    },
+    "max_steps": {
+      "type": "integer",
+      "description": "Step budget before giving up. Defaults to 20."
+    }
+  },
+  "required": [
+    "task"
+  ]
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_click`
+
+Click, double-click, or right-click at absolute macOS screen coordinates (top-left origin, in points). Take a computer_screenshot first to find target coordinates.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "x": {
+      "type": "number",
+      "description": "Absolute screen x coordinate."
+    },
+    "y": {
+      "type": "number",
+      "description": "Absolute screen y coordinate."
+    },
+    "button": {
+      "type": "string",
+      "description": "Defaults to \"left\".",
+      "enum": [
+        "left",
+        "right"
+      ]
+    },
+    "double_click": {
+      "type": "boolean",
+      "description": "Double-click instead of a single click. Ignored when button is \"right\"."
+    }
+  },
+  "required": [
+    "x",
+    "y"
+  ]
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_key`
+
+Press a single key or modifier combo on macOS, e.g. "return", "escape", "cmd+shift+t", "a".
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "combo": {
+      "type": "string",
+      "description": "Key or \"+\"-joined modifier combo."
+    }
+  },
+  "required": [
+    "combo"
+  ]
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_open_app`
+
+Launch or bring to the front a macOS application by name, e.g. "Safari", "Notes".
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Application name as `open -a` resolves it."
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_run_applescript`
+
+Run arbitrary AppleScript via `osascript` for macOS automation the other computer_* tools do not cover directly (e.g. reading window titles, controlling a specific application's own scripting dictionary).
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "script": {
+      "type": "string",
+      "description": "Complete AppleScript source."
+    }
+  },
+  "required": [
+    "script"
+  ]
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_screenshot`
+
+Capture a screenshot of the current macOS screen and return it as an image.
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_type`
+
+Type literal text into the currently focused macOS element via keystroke events.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "Text to type."
+    }
+  },
+  "required": [
+    "text"
+  ]
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+### `computer_use_task`
+
+Autonomously operate the macOS desktop to accomplish a task: repeatedly screenshots the screen, asks the configured GUI model where to click/type/press next, and executes that action, until the model reports the task done or the step budget runs out. Use this for open-ended desktop tasks; prefer the primitive computer_* tools for one specific, already-known action.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "task": {
+      "type": "string",
+      "description": "The task to accomplish on the desktop, in natural language."
+    },
+    "max_steps": {
+      "type": "integer",
+      "description": "Step budget before giving up. Defaults to 20."
+    }
+  },
+  "required": [
+    "task"
+  ]
+}
+```
+
+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
+
+Screenshot pixels are stored as durable attachments but rendered to the driving model as text references; the independent GUI-model request consumes the pixels outside the driving Session log.
 
 <a id="deepseek-aidsh-tool-web"></a>
 

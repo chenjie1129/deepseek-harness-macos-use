@@ -458,6 +458,55 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'browserUse',
+    summary: 'Browser-use service.',
+    description: 'Browser-use service. Registered as `ctx.browserUse` (one instance per context). Requires Playwright\'s Chromium browser to be installed (`pnpm exec playwright install chromium`) — a missing browser surfaces as `BROWSER_USE_LAUNCH_FAILED` on first use, not at plugin load.',
+    methods: [
+      {
+        signature: 'async navigate(request: NavigateRequest, signal?: AbortSignal): Promise<void>',
+        description: 'Navigate the active tab, launching the browser first if needed.',
+        parameters: [{ name: 'request', description: 'absolute URL to load.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
+      },
+      {
+        signature: 'async clickSelector(request: ClickSelectorRequest, signal?: AbortSignal): Promise<void>',
+        description: 'Click the first element matching a CSS or Playwright text/role selector.',
+        parameters: [{ name: 'request', description: 'selector identifying the element.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
+      },
+      {
+        signature: 'async fillSelector(request: FillSelectorRequest, signal?: AbortSignal): Promise<void>',
+        description: 'Fill the first matching input, replacing its current value.',
+        parameters: [{ name: 'request', description: 'selector and literal replacement text.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
+      },
+      {
+        signature: 'async extractText(request: ExtractTextRequest = {}, signal?: AbortSignal): Promise<string>',
+        description: 'Read the first matching element, or the whole page body when the selector is omitted.',
+        parameters: [{ name: 'request', description: 'optional selector.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
+        returns: 'the element\'s inner text.',
+      },
+      {
+        signature: 'async clickAt(request: ClickAtRequest, signal?: AbortSignal): Promise<void>',
+        description: 'Click at absolute pixel coordinates within the current viewport.',
+        parameters: [{ name: 'request', description: 'point and optional double-click flag.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
+      },
+      {
+        signature: 'async type(request: TypeTextRequest, signal?: AbortSignal): Promise<void>',
+        description: 'Type literal text into the currently focused element.',
+        parameters: [{ name: 'request', description: 'text to type.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
+      },
+      {
+        signature: 'async key(request: KeyPressRequest, signal?: AbortSignal): Promise<void>',
+        description: 'Press a key or modifier combo using Playwright\'s vocabulary.',
+        parameters: [{ name: 'request', description: 'key or combo such as `"Enter"` or `"Control+A"`.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
+      },
+      {
+        signature: 'async screenshot(signal?: AbortSignal): Promise<BrowserScreenshotResult>',
+        description: 'Capture the current viewport.',
+        parameters: [{ name: 'signal', description: 'rejects before dispatch when already aborted.' }],
+        returns: 'base64-encoded PNG bytes.',
+      },
+    ],
+  },
+  {
     key: 'clientModules',
     summary: 'The web plugin table service: incremental `dsh.client` scan + wire composition + bundle route + index tap.',
     description: 'The web plugin table service: incremental `dsh.client` scan + wire composition + bundle route + index tap. Construction runs the activation scan synchronously — a malformed declaration or missing bundle among the already-loaded entries aggregates into one loud throw (FAILED fiber; the boot activation audit reports it).',
@@ -808,6 +857,20 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'guiModel',
+    summary: 'GUI-grounding vision model service.',
+    description: 'GUI-grounding vision model service. Registered as `ctx.guiModel` (one instance per context). Sends the screenshot as a `data:image/png;base64,...` `image_url` content part alongside the task and prior-step history, and parses the single JSON action object the model is instructed to answer with.',
+    methods: [
+      {
+        signature: 'async nextAction(request: NextActionRequest, signal?: AbortSignal): Promise<GuiAction>',
+        description: 'Ask the model for the single next action toward `request.task`, given the current screenshot.',
+        parameters: [{ name: 'request', description: 'screenshot, task, and prior-step history.' }, { name: 'signal', description: 'aborts the request.' }],
+        returns: 'the parsed, validated next action.',
+        throws: ['{GuiModelError} `GUI_MODEL_REQUEST_FAILED` on a non-2xx response or network failure, or `GUI_MODEL_MALFORMED_RESPONSE` when the model\'s answer cannot be parsed into a valid action.'],
+      },
+    ],
+  },
+  {
     key: 'invariants',
     summary: 'Package-owned invariant registry with global and regex-based selection.',
     description: 'Package-owned invariant registry with global and regex-based selection.',
@@ -976,6 +1039,56 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Select a provider by the file\'s extension and run one query. Selection is per-query and order-independent; no match throws `LspError` `LSP_UNAVAILABLE`.',
         parameters: [{ name: 'request', description: 'the normalized query.' }, { name: 'signal', description: 'optional cancellation forwarded to the selected provider.' }],
         returns: 'the normalized, closed-union result.',
+      },
+    ],
+  },
+  {
+    key: 'macosUse',
+    summary: 'macOS desktop-control service.',
+    description: 'macOS desktop-control service. Registered as `ctx.macosUse` (one instance per context). Every action shells out through `ctx.subprocess` — never `node:child_process` directly — to `osascript`, `screencapture`, or `open`. GUI automation and screen capture require the host process to hold Accessibility and Screen Recording permission respectively in System Settings; macOS prompts for both on first use and denies silently (an empty capture, a script that compiles but has no visible effect) until granted.',
+    methods: [
+      {
+        signature: 'async screenshot(signal?: AbortSignal): Promise<ScreenshotResult>',
+        description: 'Capture the full screen.',
+        parameters: [{ name: 'signal', description: 'aborts the capture.' }],
+        returns: 'the capture as base64-encoded PNG bytes.',
+      },
+      {
+        signature: 'async click(request: ClickRequest, signal?: AbortSignal): Promise<void>',
+        description: 'Click, double-click, or right-click at absolute screen coordinates.',
+        parameters: [{ name: 'request', description: 'target point, button, and held modifiers.' }, { name: 'signal', description: 'aborts the click.' }],
+      },
+      {
+        signature: 'async type(request: TypeTextRequest, signal?: AbortSignal): Promise<void>',
+        description: 'Type literal text via keystroke events into the currently focused element.',
+        parameters: [{ name: 'request', description: 'the text to type.' }, { name: 'signal', description: 'aborts the keystrokes.' }],
+      },
+      {
+        signature: 'async key(request: KeyPressRequest, signal?: AbortSignal): Promise<void>',
+        description: 'Press a single key or modifier combo.',
+        parameters: [{ name: 'request', description: 'a combo like `"return"`, `"cmd+shift+t"`, or `"a"`.' }, { name: 'signal', description: 'aborts the keystroke.' }],
+      },
+      {
+        signature: 'async scroll(request: ScrollRequest, signal?: AbortSignal): Promise<void>',
+        description: 'Scroll by repeating an arrow/page key a bounded number of times — System Events exposes no scroll-wheel event, so this is an approximation, not a trackpad-accurate scroll delta.',
+        parameters: [{ name: 'request', description: 'direction and step count.' }, { name: 'signal', description: 'aborts the scroll.' }],
+      },
+      {
+        signature: 'async openApp(request: OpenAppRequest, signal?: AbortSignal): Promise<void>',
+        description: 'Launch or activate an application by name.',
+        parameters: [{ name: 'request', description: 'the application name as `open -a` resolves it.' }, { name: 'signal', description: 'aborts the launch.' }],
+      },
+      {
+        signature: 'async runAppleScript(request: RunAppleScriptRequest | string, signal?: AbortSignal): Promise<string>',
+        description: 'Run caller-supplied AppleScript.',
+        parameters: [{ name: 'request', description: 'complete AppleScript source, or its shorthand string form.' }, { name: 'signal', description: 'aborts the script.' }],
+        returns: 'the script\'s stdout, trimmed.',
+      },
+      {
+        signature: 'async frontmostApp(signal?: AbortSignal): Promise<string>',
+        description: 'Resolve the frontmost application.',
+        parameters: [{ name: 'signal', description: 'aborts the lookup.' }],
+        returns: 'the frontmost process\'s name.',
       },
     ],
   },
@@ -2845,8 +2958,24 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type Branded<B extends string> = string & {\n    readonly [BRAND]: B;\n};',
   },
   {
+    name: 'BrowserScreenshotResult',
+    declaration: 'export interface BrowserScreenshotResult {\n    pngBase64: string;\n}',
+  },
+  {
     name: 'CancelOptions',
     declaration: 'export interface CancelOptions {\n    keepInbox?: boolean | undefined;\n}',
+  },
+  {
+    name: 'ClickAtRequest',
+    declaration: 'export interface ClickAtRequest {\n    x: number;\n    y: number;\n    doubleClick?: boolean;\n}',
+  },
+  {
+    name: 'ClickRequest',
+    declaration: 'export interface ClickRequest {\n    x: number;\n    y: number;\n    button?: MouseButton;\n    doubleClick?: boolean;\n    modifiers?: readonly KeyModifier[];\n}',
+  },
+  {
+    name: 'ClickSelectorRequest',
+    declaration: 'export interface ClickSelectorRequest {\n    selector: string;\n}',
   },
   {
     name: 'ClientResponse',
@@ -3149,6 +3278,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface EpochHeader {\n    config: LlmCallConfig;\n    adapterDefaults?: LlmCallConfigAdapterDefaults;\n    system?: string;\n    tools?: ToolSchema[];\n}',
   },
   {
+    name: 'ExtractTextRequest',
+    declaration: 'export interface ExtractTextRequest {\n    selector?: string;\n}',
+  },
+  {
     name: 'FileDiff',
     declaration: 'export interface FileDiff {\n    path: string;\n    oldText: string | null;\n    newText: string;\n}',
   },
@@ -3159,6 +3292,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'FileReferenceCandidate',
     declaration: 'export interface FileReferenceCandidate {\n    path: string;\n    kind: \'file\' | \'directory\';\n}',
+  },
+  {
+    name: 'FillSelectorRequest',
+    declaration: 'export interface FillSelectorRequest {\n    selector: string;\n    text: string;\n}',
   },
   {
     name: 'FinishReason',
@@ -3251,6 +3388,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'GoalView',
     declaration: 'export interface GoalView extends GoalSnapshot {\n    readonly roundsStarted: number;\n    readonly createdAt: number;\n    readonly updatedAt: number;\n    readonly activation: GoalActivation;\n}',
+  },
+  {
+    name: 'GuiAction',
+    declaration: 'export interface GuiAction {\n    kind: GuiActionKind;\n    x?: number;\n    y?: number;\n    text?: string;\n    combo?: string;\n    direction?: \'up\' | \'down\' | \'left\' | \'right\';\n    amount?: number;\n    ms?: number;\n    summary?: string;\n    reason?: string;\n}',
+  },
+  {
+    name: 'GuiActionKind',
+    declaration: 'export type GuiActionKind = \'click\' | \'double_click\' | \'right_click\' | \'type\' | \'key\' | \'scroll\' | \'wait\' | \'done\';',
+  },
+  {
+    name: 'GuiActionLogEntry',
+    declaration: 'export interface GuiActionLogEntry {\n    action: GuiAction;\n    outcome?: string;\n}',
   },
   {
     name: 'ImageAttachmentLimits',
@@ -3363,6 +3512,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'JsonValue',
     declaration: 'export type JsonValue = null | boolean | number | string | JsonValue[] | {\n    [key: string]: JsonValue;\n};',
+  },
+  {
+    name: 'KeyModifier',
+    declaration: 'export type KeyModifier = \'command\' | \'control\' | \'option\' | \'shift\';',
   },
   {
     name: 'KnobState',
@@ -3589,12 +3742,28 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ModelModalityMap {\n    text: \'text\';\n    image: \'image\';\n}',
   },
   {
+    name: 'MouseButton',
+    declaration: 'export type MouseButton = \'left\' | \'right\';',
+  },
+  {
+    name: 'NavigateRequest',
+    declaration: 'export interface NavigateRequest {\n    url: string;\n}',
+  },
+  {
+    name: 'NextActionRequest',
+    declaration: 'export interface NextActionRequest {\n    screenshotPngBase64: string;\n    task: string;\n    history?: readonly GuiActionLogEntry[];\n}',
+  },
+  {
     name: 'ObjectJsonSchema',
     declaration: 'export type ObjectJsonSchema = JsonSchemaNode & {\n    type: \'object\';\n};',
   },
   {
     name: 'OneShotSubagentDescriptorData',
     declaration: 'export interface OneShotSubagentDescriptorData extends SubagentDescriptorBase {\n    readonly mode: \'one-shot\';\n    readonly label?: string;\n}',
+  },
+  {
+    name: 'OpenAppRequest',
+    declaration: 'export interface OpenAppRequest {\n    name: string;\n}',
   },
   {
     name: 'PermissionSelect',
@@ -3777,6 +3946,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type RpcResult<T> = {\n    ok: true;\n    value: T;\n} | {\n    ok: false;\n    error: RpcError;\n};',
   },
   {
+    name: 'RunAppleScriptRequest',
+    declaration: 'export interface RunAppleScriptRequest {\n    script: string;\n}',
+  },
+  {
     name: 'RunnerFailureRule',
     declaration: 'export interface RunnerFailureRule {\n    allowedExitCodes?: readonly number[];\n    fatalSignatures: readonly string[];\n    informationalLines?: readonly string[];\n}',
   },
@@ -3823,6 +3996,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'ScopeKey',
     declaration: 'export type ScopeKey = object;',
+  },
+  {
+    name: 'ScreenshotResult',
+    declaration: 'export interface ScreenshotResult {\n    pngBase64: string;\n}',
+  },
+  {
+    name: 'ScrollRequest',
+    declaration: 'export interface ScrollRequest {\n    direction: \'up\' | \'down\' | \'left\' | \'right\';\n    amount?: number;\n}',
   },
   {
     name: 'SearchFileMatches',

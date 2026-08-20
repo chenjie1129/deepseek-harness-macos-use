@@ -1,0 +1,20 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib/types"
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    { "path": "../../../vendor/cordis" },
+    { "path": "../../../vendor/schemastery" },
+    { "path": "../../attachment/attachment" },
+    { "path": "../../core/tools" },
+    { "path": "../browser-use" },
+    { "path": "../gui-model" },
+    { "path": "../macos-use" },
+    { "path": "../../runtime-diagnostics/invariants" }
+  ]
+}
