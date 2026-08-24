@@ -15,6 +15,8 @@ This repository contains only the macOS GUI/browser-control plugin developed for
 
 The plugin configuration page includes a **Show step screenshots** switch for the task loops. It is on by default: when a step has a screenshot, the image is saved and shown alongside that step's user-facing output. Turning it off omits those per-step images without changing the GUI model's internal screen capture or the final screenshot reference.
 
+Retina and other oversized captures are downscaled only for durable display storage, using the active attachment limits. The original screenshot still grounds GUI actions, so normalization does not change their coordinate system.
+
 ## Compatibility
 
 The source and integration patch were validated against DeepSeek Harness release `0.1.0-rc.8`, base commit [`141eb6f`](https://github.com/deepseek-ai/deepseek-harness/commit/141eb6fef83422698aef7a981029e843e8161534). The package manifests intentionally retain Harness `workspace:^` dependencies because these packages are designed to be composed inside that workspace.
@@ -48,4 +50,4 @@ See the [integration guide](docs/integration.md) and [architecture decision](doc
 
 ## Current limits
 
-Focused feature tests, the full GUI test suite, the production build, contract lint, all 28 documentation gates, whitespace checks, and targeted TypeScript builds passed on the compatible base. The assembled web replay also built successfully; three pre-existing replay expectations remain unrelated to this plugin change. Live provider compatibility and a real desktop/browser end-to-end suite still require deployment credentials and operating-system permissions.
+Focused feature tests, the full GUI test suite, the production build, contract lint, all 28 documentation gates, whitespace checks, and targeted TypeScript builds passed on the compatible base. A clean-profile UI smoke captured a real 3840×2160 macOS screen, stored and displayed it at 2000×1125 with the switch on, and confirmed that the same step had no image block after the switch was turned off through the plugin page. The assembled web replay also built successfully; three pre-existing replay expectations remain unrelated to this plugin change. Live third-party provider compatibility and action-taking desktop/browser end-to-end tests still require deployment credentials and operating-system permissions.

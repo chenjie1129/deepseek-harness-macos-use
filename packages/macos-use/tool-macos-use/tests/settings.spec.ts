@@ -10,6 +10,8 @@ import { SettingsProvider } from '@deepseek-ai/dsh-settings'
 import type { SettingsNamespace } from '@deepseek-ai/dsh-settings'
 import * as plugin from '../src/index.ts'
 
+const TINY_PNG_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/l5JiYQAAAABJRU5ErkJggg=='
+
 /** The smallest real provider: one in-memory document, always writable. */
 class MemorySettings extends SettingsProvider {
   doc: Record<string, unknown> = {}
@@ -41,16 +43,26 @@ async function boot() {
     height: 2,
     ...input.name === undefined ? {} : { name: input.name },
   }))
-  ctx.provide('attachments', { saveImage } as never)
+  ctx.provide('attachments', {
+    imageLimits: {
+      maxImageBytes: 3.5 * 1024 * 1024,
+      maxImagesPerMessage: 20,
+      maxMessageImageBytes: 100 * 1024 * 1024,
+      maxImagePixels: 40_000_000,
+      maxImageDimension: 2000,
+      mediaTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif'],
+    },
+    saveImage,
+  } as never)
   ctx.provide('guiModel', {
     nextAction: () => Promise.resolve({ kind: 'done', summary: 'Finished.' }),
   } as never)
   ctx.provide('macosUse', {
-    screenshot: () => Promise.resolve({ pngBase64: Buffer.from('png').toString('base64') }),
+    screenshot: () => Promise.resolve({ pngBase64: TINY_PNG_BASE64 }),
   } as never)
   ctx.provide('browserUse', {
     navigate: () => Promise.resolve(),
-    screenshot: () => Promise.resolve({ pngBase64: Buffer.from('png').toString('base64') }),
+    screenshot: () => Promise.resolve({ pngBase64: TINY_PNG_BASE64 }),
   } as never)
   await ctx.plugin(plugin, {})
   return { ctx, saveImage }

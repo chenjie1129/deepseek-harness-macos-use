@@ -17,6 +17,7 @@ import type {} from '@deepseek-ai/dsh-macos-use'
 import type { GuiAction } from '@deepseek-ai/dsh-gui-model'
 import type {} from '@deepseek-ai/dsh-browser-use'
 import { browserTaskExecutor, macosTaskExecutor } from './executors.ts'
+import { fitPngToAttachmentLimits } from './image.ts'
 import { runGuiTask } from './loop.ts'
 import type { TaskStepLog } from './loop.ts'
 
@@ -200,11 +201,20 @@ async function saveStepScreenshots(
   pngImages: readonly string[],
   namePrefix: string,
 ): Promise<ImageAttachmentRef[]> {
-  return Promise.all(pngImages.map(async (pngBase64, index) => ctx.attachments.saveImage({
-    data: Buffer.from(pngBase64, 'base64'),
+  const refs: ImageAttachmentRef[] = []
+  for (const [index, pngBase64] of pngImages.entries()) {
+    refs.push(await saveScreenshot(ctx, pngBase64, `${namePrefix}-step-${String(index + 1)}.png`))
+  }
+  return refs
+}
+
+async function saveScreenshot(ctx: Context, pngBase64: string, name: string): Promise<ImageAttachmentRef> {
+  const data = await fitPngToAttachmentLimits(Buffer.from(pngBase64, 'base64'), ctx.attachments.imageLimits)
+  return ctx.attachments.saveImage({
+    data,
     mediaType: 'image/png',
-    name: `${namePrefix}-step-${String(index + 1)}.png`,
-  })))
+    name,
+  })
 }
 
 export function apply(ctx: Context, config: Config = {}): void {
@@ -228,7 +238,7 @@ export function apply(ctx: Context, config: Config = {}): void {
     },
     async execute(_args, exec) {
       const { pngBase64 } = await ctx.macosUse.screenshot(exec.signal)
-      const ref = await ctx.attachments.saveImage({ data: Buffer.from(pngBase64, 'base64'), mediaType: 'image/png', name: 'screenshot.png' })
+      const ref = await saveScreenshot(ctx, pngBase64, 'screenshot.png')
       return ref
     },
   }))
@@ -360,7 +370,7 @@ export function apply(ctx: Context, config: Config = {}): void {
         ? await saveStepScreenshots(ctx, result.stepScreenshotsPngBase64, 'computer-use-task')
         : []
       const { pngBase64 } = await ctx.macosUse.screenshot(exec.signal)
-      const finalScreenshot = await ctx.attachments.saveImage({ data: Buffer.from(pngBase64, 'base64'), mediaType: 'image/png', name: 'computer-use-task-result.png' })
+      const finalScreenshot = await saveScreenshot(ctx, pngBase64, 'computer-use-task-result.png')
       return {
         completed: result.completed,
         summary: result.summary,
@@ -447,7 +457,7 @@ export function apply(ctx: Context, config: Config = {}): void {
     },
     async execute(_args, exec) {
       const { pngBase64 } = await ctx.browserUse.screenshot(exec.signal)
-      const ref = await ctx.attachments.saveImage({ data: Buffer.from(pngBase64, 'base64'), mediaType: 'image/png', name: 'browser-screenshot.png' })
+      const ref = await saveScreenshot(ctx, pngBase64, 'browser-screenshot.png')
       return ref
     },
   }))
@@ -492,7 +502,7 @@ export function apply(ctx: Context, config: Config = {}): void {
         ? await saveStepScreenshots(ctx, result.stepScreenshotsPngBase64, 'browser-use-task')
         : []
       const { pngBase64 } = await ctx.browserUse.screenshot(exec.signal)
-      const finalScreenshot = await ctx.attachments.saveImage({ data: Buffer.from(pngBase64, 'base64'), mediaType: 'image/png', name: 'browser-use-task-result.png' })
+      const finalScreenshot = await saveScreenshot(ctx, pngBase64, 'browser-use-task-result.png')
       return {
         completed: result.completed,
         summary: result.summary,

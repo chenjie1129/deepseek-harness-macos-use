@@ -22,6 +22,8 @@ config:
 
 `showStepScreenshots` is live on the plugin configuration page and defaults to `true`. Turning it off prevents per-step screenshots from being saved or shown; the GUI loop still captures each screen privately because the vision model needs it to choose an action, and the final screenshot reference remains part of the model-facing task result.
 
+Before any primitive, step, or final screenshot is stored, the tool downscales a copy when necessary to satisfy the active attachment byte, pixel, and per-side limits. GUI grounding keeps the original capture, so storage normalization does not change the coordinate system used for desktop or browser actions.
+
 ## Model Experience
 
 ### Tool schemas

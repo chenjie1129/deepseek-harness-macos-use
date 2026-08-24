@@ -17,6 +17,8 @@ English | [中文](README.zh.md)
 
 The same configuration surface exposes `tool-macos-use.showStepScreenshots`. It defaults on and shows the screenshot used for each `computer_use_task` or `browser_use_task` step beside that step's result; turn it off to avoid saving and displaying those per-step captures.
 
+Stored screenshots are automatically downscaled when a Retina or large browser capture exceeds the active attachment limits. The original pixels still ground GUI actions; only the durable display copy is normalized.
+
 ## Known Limitations and Deferred Work
 
 - This package group has focused unit coverage and participates in the repository build and documentation gates, but it does not yet have a keyless assembled GUI snapshot or a real desktop/browser end-to-end suite.

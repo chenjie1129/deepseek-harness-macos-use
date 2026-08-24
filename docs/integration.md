@@ -30,6 +30,8 @@ config:
 
 `macos-use` accepts an optional `commandTimeoutMs` (default behavior is documented in its package README). `browser-use` accepts `headless`, and `tool-macos-use` accepts `defaultMaxSteps` plus the live `showStepScreenshots` switch. The switch defaults to `true`; when enabled, each available task-step screenshot is saved and displayed with that step's output. Turning it off omits the per-step images while preserving the final screenshot reference.
 
+Before primitive, step, and final screenshots enter durable storage, `tool-macos-use` downscales a copy when required by the active attachment byte, pixel, or per-side limit. The GUI model still receives the original capture so action coordinates are unchanged.
+
 Install Chromium from the integrated Harness workspace:
 
 ```bash
@@ -44,4 +46,4 @@ The plugin can execute arbitrary AppleScript and control desktop/browser interfa
 
 ## Verification performed
 
-On the supported base, the feature-focused tests, 3,965-test GUI suite, production build, contract lint, 28 documentation gates, whitespace checks, and targeted TypeScript builds passed. The assembled web replay built successfully; its run reported 79 passed, one skipped, and three unrelated pre-existing failures (the official-logo snapshot, Node 22 development loader, and an existing plan-review golden). Live provider and real GUI end-to-end checks were not run because they require credentials and macOS permission grants.
+On the supported base, the feature-focused tests, 3,965-test GUI suite, production build, contract lint, 28 documentation gates, whitespace checks, and targeted TypeScript builds passed. A clean-profile browser inspection ran `computer_use_task` against a deterministic local vision response and a real 3840×2160 macOS capture. With the default-on switch, the inline image loaded visibly at a 2000×1125 natural size; after switching it off and saving through the plugin page, the next result contained zero step-image blocks and retained the final screenshot reference. The model-facing result was text-only in both runs. The assembled web replay built successfully; its run reported 79 passed, one skipped, and three unrelated pre-existing failures (the official-logo snapshot, Node 22 development loader, and an existing plan-review golden). A live third-party provider and action-taking desktop/browser end-to-end run were not performed.

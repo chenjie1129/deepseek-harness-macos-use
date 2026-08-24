@@ -1,6 +1,6 @@
 diff --git a/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.i18n.yaml b/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.i18n.yaml
 new file mode 100644
-index 0000000000000000000000000000000000000000..814e62387cfdc87b456ba7e9832c57ab15809501
+index 0000000000000000000000000000000000000000..1361b59cded6a59aaf9c3254d260408edcd54825
 --- /dev/null
 +++ b/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.i18n.yaml
 @@ -0,0 +1,6 @@
@@ -8,11 +8,11 @@ index 0000000000000000000000000000000000000000..814e62387cfdc87b456ba7e9832c57ab
 +# side as of the last confirmed-consistent state. Both languages carry equal authority;
 +# after editing either side, bring the other along and re-record with:
 +#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-21-macos-gui-use.md
-+2026-08-21-macos-gui-use.md: bbd1229130eae5ce098d394d2cd821c3b94c1279
-+2026-08-21-macos-gui-use.zh.md: 31aa5463ca3dcdfc507c0a15ed2b8c92cea94df9
++2026-08-21-macos-gui-use.md: b90071e2e42c0c768bd018a1d4f4178ae1286235
++2026-08-21-macos-gui-use.zh.md: 548ce18e5c55a36c6de7aebb52e30f661e44bef6
 diff --git a/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.md b/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..bbd1229130eae5ce098d394d2cd821c3b94c1279
+index 0000000000000000000000000000000000000000..b90071e2e42c0c768bd018a1d4f4178ae1286235
 --- /dev/null
 +++ b/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.md
 @@ -0,0 +1,38 @@
@@ -39,7 +39,7 @@ index 0000000000000000000000000000000000000000..bbd1229130eae5ce098d394d2cd821c3
 +
 +## Security and durability
 +
-+macOS Accessibility and Screen Recording permissions remain host-controlled. Arbitrary AppleScript and GUI actions run through the ordinary tool execution and deployment policy surface; this package family does not create a persistent permission grant. Screenshot bytes are stored through `ctx.attachments`, while the driving model receives text references because its primary adapter rejects image tool-result content. GUI-model requests and intermediate decisions remain outside the driving Session log. When the default-on setting is enabled, the final task result retains each step's grounding screenshot as UI-only presentation metadata alongside the completion state, summary, action/outcome list, and final screenshot reference; disabling it omits those per-step attachments.
++macOS Accessibility and Screen Recording permissions remain host-controlled. Arbitrary AppleScript and GUI actions run through the ordinary tool execution and deployment policy surface; this package family does not create a persistent permission grant. Screenshot bytes are stored through `ctx.attachments`, while the driving model receives text references because its primary adapter rejects image tool-result content. GUI-model requests and intermediate decisions remain outside the driving Session log. When the default-on setting is enabled, the final task result retains each step's grounding screenshot as UI-only presentation metadata alongside the completion state, summary, action/outcome list, and final screenshot reference; disabling it omits those per-step attachments. Every stored screenshot copy is normalized against the active byte, decoded-pixel, and per-side limits, preventing Retina captures from failing after execution while the original capture continues to ground GUI actions and coordinates.
 +
 +## Alternatives considered
 +
@@ -56,7 +56,7 @@ index 0000000000000000000000000000000000000000..bbd1229130eae5ce098d394d2cd821c3
 +Products can compose desktop execution, browser execution, GUI grounding, and model-facing tools independently while keeping the driving model text-only. The separation adds explicit configuration and installation requirements: Playwright Chromium must be present, the host must have operating-system permissions, and a compatible vision endpoint must be configured. Intermediate GUI steps and their enabled screenshots are observable together in the final result but are not independently streamed Session events.
 diff --git a/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.zh.md b/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.zh.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..31aa5463ca3dcdfc507c0a15ed2b8c92cea94df9
+index 0000000000000000000000000000000000000000..548ce18e5c55a36c6de7aebb52e30f661e44bef6
 --- /dev/null
 +++ b/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.zh.md
 @@ -0,0 +1,38 @@
@@ -83,7 +83,7 @@ index 0000000000000000000000000000000000000000..31aa5463ca3dcdfc507c0a15ed2b8c92
 +
 +## 安全与持久性
 +
-+macOS“辅助功能”和“屏幕录制”权限仍由宿主控制。任意 AppleScript 和 GUI 操作通过常规工具执行与部署策略界面运行；这组包不会创建持久权限授权。截图字节通过 `ctx.attachments` 保存，而驱动模型只接收文本引用，因为其主要适配器拒绝图片工具结果内容。GUI 模型请求与中间决策位于驱动 Session 日志之外。默认开启的设置启用时，最终任务结果会把每一步的决策截图作为仅 UI 展示元数据，与完成状态、摘要、动作与结果列表和最终截图引用一起保留；关闭后会省略这些每步附件。
++macOS“辅助功能”和“屏幕录制”权限仍由宿主控制。任意 AppleScript 和 GUI 操作通过常规工具执行与部署策略界面运行；这组包不会创建持久权限授权。截图字节通过 `ctx.attachments` 保存，而驱动模型只接收文本引用，因为其主要适配器拒绝图片工具结果内容。GUI 模型请求与中间决策位于驱动 Session 日志之外。默认开启的设置启用时，最终任务结果会把每一步的决策截图作为仅 UI 展示元数据，与完成状态、摘要、动作与结果列表和最终截图引用一起保留；关闭后会省略这些每步附件。每份存储副本都会按当前字节、解码像素总数和单边尺寸限制进行规范化，避免 Retina 截图在执行后保存失败，同时原始截图仍用于 GUI 操作定位和坐标。
 +
 +## 考虑过的替代方案
 +
@@ -485,7 +485,7 @@ index b6b0aba72729f9b9b752347ab00cd76a45c248d9..00bfb9a03f7095edd740ad8c32afcf4e
  | `ctx.directoryPicker` | `seam` | `directory-picker` | `directory-picker-native`, `directory-picker-browse` | `apiproxy` | - | 带判别标记的交互能力：原生后端在 Host 显示设备上打开一个操作系统选择器，浏览后端为应用内浏览器提供列表与创建原语；双端后端通过其浏览器侧填充 ui-workspace 目录流程的 slot（不通过协议发布）。 |
  | `ctx.webServer` | `core` | `webserver` | - | `connection`, `modules`, `hmr` | - | 普通的 node:http 载体：具名路由注册表、索引转换 tap，以及静态 dist 回退；Web 传输插件注册自己的路由。 |
 diff --git a/docs/config-catalog.i18n.yaml b/docs/config-catalog.i18n.yaml
-index d9fa142513dde4b398f0ad19609dcf41014d6db7..6dded37ed0ee83d40bf2f8491d00f500c866d360 100644
+index d9fa142513dde4b398f0ad19609dcf41014d6db7..c11efc563aca5825ee339f2bca239405db29cc87 100644
 --- a/docs/config-catalog.i18n.yaml
 +++ b/docs/config-catalog.i18n.yaml
 @@ -2,5 +2,5 @@
@@ -494,10 +494,10 @@ index d9fa142513dde4b398f0ad19609dcf41014d6db7..6dded37ed0ee83d40bf2f8491d00f500
  #   pnpm run verify-translation-pairing --write docs/config-catalog.md
 -config-catalog.md: 867ddd5ad8351a5cd25af92727466960c55c649a
 -config-catalog.zh.md: 66fe15ee31018f3df95e62e69fe539cdd7570add
-+config-catalog.md: 286c8f8d8619585917d933a648053cfac75a94f4
-+config-catalog.zh.md: b511571a150d84c403c046b1b23b8709f1df4d12
++config-catalog.md: f234b5fa04621050fc12e83e073faa5ccc818c98
++config-catalog.zh.md: 22e59abc398d4ed94a554c3e225b9db89d0a0d00
 diff --git a/docs/config-catalog.md b/docs/config-catalog.md
-index 867ddd5ad8351a5cd25af92727466960c55c649a..286c8f8d8619585917d933a648053cfac75a94f4 100644
+index 867ddd5ad8351a5cd25af92727466960c55c649a..f234b5fa04621050fc12e83e073faa5ccc818c98 100644
 --- a/docs/config-catalog.md
 +++ b/docs/config-catalog.md
 @@ -389,6 +389,20 @@ Depends on: [`LocalConfig`](#deepseek-aidsh-bash-local)
@@ -593,13 +593,13 @@ index 867ddd5ad8351a5cd25af92727466960c55c649a..286c8f8d8619585917d933a648053cfa
 +}
 +```
 +
-+Source: [`packages/macos-use/tool-macos-use/src/index.ts:27`](../packages/macos-use/tool-macos-use/src/index.ts)
++Source: [`packages/macos-use/tool-macos-use/src/index.ts:28`](../packages/macos-use/tool-macos-use/src/index.ts)
 +
  <a id="deepseek-aidsh-tool-pwsh"></a>
  
  ## `@deepseek-ai/dsh-tool-pwsh`
 diff --git a/docs/config-catalog.zh.md b/docs/config-catalog.zh.md
-index 66fe15ee31018f3df95e62e69fe539cdd7570add..b511571a150d84c403c046b1b23b8709f1df4d12 100644
+index 66fe15ee31018f3df95e62e69fe539cdd7570add..22e59abc398d4ed94a554c3e225b9db89d0a0d00 100644
 --- a/docs/config-catalog.zh.md
 +++ b/docs/config-catalog.zh.md
 @@ -391,6 +391,20 @@ export type Config = LocalConfig
@@ -695,7 +695,7 @@ index 66fe15ee31018f3df95e62e69fe539cdd7570add..b511571a150d84c403c046b1b23b8709
 +}
 +```
 +
-+来源：[`packages/macos-use/tool-macos-use/src/index.ts:27`](../packages/macos-use/tool-macos-use/src/index.ts)
++来源：[`packages/macos-use/tool-macos-use/src/index.ts:28`](../packages/macos-use/tool-macos-use/src/index.ts)
 +
  <a id="deepseek-aidsh-tool-pwsh"></a>
  
@@ -3163,7 +3163,7 @@ index 5b5fcaa216ca348ae037a290ec77e63286d24ee5..7a16b11bc895d55128340dc3c10fde7e
      const block = (id: string, mediaType: string) =>
        `{"type":"image","attachment":{"attachmentId":"${id}","mediaType":"${mediaType}","bytes":4,"width":2,"height":2}}`
 diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
-index 02e1555769ddd43f8b439a1ffee0699238922b38..fe23c6bcffb2ea3f2d55306c43962e25ebd08045 100644
+index 02e1555769ddd43f8b439a1ffee0699238922b38..1c75661b38479deb700fd4f10c0c5085f5bfa69b 100644
 --- a/pnpm-lock.yaml
 +++ b/pnpm-lock.yaml
 @@ -153,6 +153,9 @@ importers:
@@ -3206,7 +3206,7 @@ index 02e1555769ddd43f8b439a1ffee0699238922b38..fe23c6bcffb2ea3f2d55306c43962e25
        '@deepseek-ai/dsh-tool-pwsh':
          specifier: workspace:^
          version: link:../../packages/shell/tool-pwsh
-@@ -5729,6 +5741,94 @@ importers:
+@@ -5729,6 +5741,97 @@ importers:
          specifier: workspace:^
          version: link:../../core/tools
  
@@ -3272,6 +3272,9 @@ index 02e1555769ddd43f8b439a1ffee0699238922b38..fe23c6bcffb2ea3f2d55306c43962e25
 +      '@deepseek-ai/schemastery':
 +        specifier: link:../../../vendor/schemastery
 +        version: link:../../../vendor/schemastery
++      sharp:
++        specifier: ^0.35.3
++        version: 0.35.3(@types/node@22.20.0)
 +    devDependencies:
 +      '@deepseek-ai/cordis':
 +        specifier: workspace:^

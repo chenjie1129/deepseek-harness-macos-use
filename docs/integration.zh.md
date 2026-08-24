@@ -30,6 +30,8 @@ config:
 
 `macos-use` 可设置 `commandTimeoutMs`，`browser-use` 可设置 `headless`，`tool-macos-use` 可设置 `defaultMaxSteps`，并提供实时 `showStepScreenshots` 开关。该开关默认为 `true`；开启时，每个存在的任务步骤截图都会被保存并随该步输出显示。关闭后会省略每步图片，但保留最终截图引用。具体默认行为见各包 README。
 
+基础、每步和最终截图进入持久存储前，`tool-macos-use` 会在当前附件字节、像素总数或单边尺寸限制要求时缩小一份副本。GUI 模型仍接收原始截图，因此动作坐标不会改变。
+
 请在集成后的 Harness 工作区安装 Chromium：
 
 ```bash
@@ -44,4 +46,4 @@ corepack pnpm exec playwright install chromium
 
 ## 已完成的验证
 
-在支持的基线上，聚焦功能测试、包含 3,965 个通过用例的 GUI 套件、生产构建、契约 lint、28 项文档检查、空白检查和定向 TypeScript 构建均通过。组装后的 Web 回放成功构建；运行结果为 79 个通过、1 个跳过和 3 个无关的既有失败（官方 Logo 快照、Node 22 开发加载器以及现有 plan-review golden）。真实视觉提供方和真实 GUI 端到端测试未执行，因为它们需要凭据和 macOS 权限。
+在支持的基线上，聚焦功能测试、包含 3,965 个通过用例的 GUI 套件、生产构建、契约 lint、28 项文档检查、空白检查和定向 TypeScript 构建均通过。干净 profile 的浏览器检查使用确定性的本地视觉响应运行 `computer_use_task`，并捕获真实的 3840×2160 macOS 屏幕。默认开关开启时，内联图片以 2000×1125 的自然尺寸完整加载并可见；随后在插件页面关闭并保存开关，下一次结果含 0 个每步图片块，同时保留最终截图引用。两次运行中，面向模型的结果都只有文本。组装后的 Web 回放成功构建；运行结果为 79 个通过、1 个跳过和 3 个无关的既有失败（官方 Logo 快照、Node 22 开发加载器以及现有 plan-review golden）。未执行真实第三方提供方以及会执行动作的桌面／浏览器端到端测试。
