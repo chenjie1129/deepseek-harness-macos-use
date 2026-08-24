@@ -51,6 +51,20 @@ export interface ClickAtRequest {
   doubleClick?: boolean
 }
 
+/** Arguments to move the browser pointer without clicking. */
+export interface MoveAtRequest {
+  x: number
+  y: number
+}
+
+/** Arguments to drag between two viewport coordinates. */
+export interface DragAtRequest {
+  x: number
+  y: number
+  toX: number
+  toY: number
+}
+
 /** Arguments to {@link BrowserUseService.type}. */
 export interface TypeTextRequest {
   text: string

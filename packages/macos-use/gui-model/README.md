@@ -10,7 +10,7 @@ GUI-grounding vision-model seam (`ctx.guiModel`) that sends a screenshot, task, 
 
 - `nextAction({ screenshotPngBase64, task, history? }, signal?)` -> `GuiAction`
 
-A `GuiAction` is `{ kind: 'click'|'double_click'|'right_click'|'type'|'key'|'scroll'|'wait'|'done', x?, y?, text?, combo?, direction?, amount?, ms?, summary?, reason? }`. The service validates the required fields for the selected action before returning it.
+A `GuiAction` is `{ kind: 'click'|'double_click'|'right_click'|'move'|'drag'|'type'|'key'|'scroll'|'open_app'|'focus_window'|'wait'|'done', x?, y?, toX?, toY?, text?, combo?, app?, windowTitle?, direction?, amount?, ms?, summary?, reason? }`. The service validates the required fields for the selected action before returning it.
 
 ## Config
 
@@ -21,6 +21,8 @@ config:
   model: some-vision-model # required
   maxOutputTokens: 512 # optional
 ```
+
+All four values are visually managed on the GUI Model card in Plugin Configuration. The API key is stored through the credential seam rather than returned in settings responses.
 
 ## Model Experience
 
@@ -34,8 +36,8 @@ Each `nextAction` call sends the stable system instruction below, the task, prio
 
 ```markdown
 You are a GUI grounding model. You are given a screenshot and a task. Respond with exactly one JSON object describing the single next action to take toward completing the task — no prose, no markdown fences, just the JSON object. Its shape is:
-{"kind": "click"|"double_click"|"right_click"|"type"|"key"|"scroll"|"wait"|"done", "x"?: number, "y"?: number, "text"?: string, "combo"?: string, "direction"?: "up"|"down"|"left"|"right", "amount"?: number, "ms"?: number, "summary"?: string, "reason"?: string}
-"x"/"y" are pixel coordinates in the screenshot for click/double_click/right_click. "text" is literal text to type. "combo" is a key or modifier combo like "return" or "cmd+shift+t". "direction"/"amount" are for scroll. "ms" is a pause duration for wait. Choose "done" with a "summary" only once the task is fully accomplished.
+{"kind": "click"|"double_click"|"right_click"|"move"|"drag"|"type"|"key"|"scroll"|"open_app"|"focus_window"|"wait"|"done", "x"?: number, "y"?: number, "toX"?: number, "toY"?: number, "text"?: string, "combo"?: string, "app"?: string, "windowTitle"?: string, "direction"?: "up"|"down"|"left"|"right", "amount"?: number, "ms"?: number, "summary"?: string, "reason"?: string}
+"x"/"y" are pixel coordinates in the screenshot for click/double_click/right_click/move and the drag start; "toX"/"toY" are the drag destination. "text" is literal text to type. "combo" is a key or modifier combo like "return" or "cmd+shift+t". "app" names an application for open_app/focus_window; "windowTitle" narrows focus_window. "direction"/"amount" are for scroll. "ms" is a pause duration for wait. Choose "done" with a "summary" only once the task is fully accomplished.
 ```
 
 #### Token effect

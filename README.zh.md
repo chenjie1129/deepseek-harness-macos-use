@@ -8,12 +8,16 @@
 
 | 包 | Harness 能力 | 用途 |
 |---|---|---|
-| [`@deepseek-ai/dsh-macos-use`](packages/macos-use/macos-use) | `ctx.macosUse` | 截图、System Events 自动化、启动应用和执行 AppleScript |
-| [`@deepseek-ai/dsh-browser-use`](packages/macos-use/browser-use) | `ctx.browserUse` | 通过 Playwright Chromium 导航、选择器操作、坐标操作与截图 |
+| [`@deepseek-ai/dsh-macos-use`](packages/macos-use/macos-use) | `ctx.macosUse` | 脱敏全屏与精确窗口截图、应用／窗口发现、辅助功能状态、指针操作和 AppleScript |
+| [`@deepseek-ai/dsh-browser-use`](packages/macos-use/browser-use) | `ctx.browserUse` | 可实时配置的 Playwright Chromium 导航、选择器／坐标操作、拖动与截图 |
 | [`@deepseek-ai/dsh-gui-model`](packages/macos-use/gui-model) | `ctx.guiModel` | 调用兼容 OpenAI 的视觉端点，把截图转换成经过校验的 GUI 动作 |
 | [`@deepseek-ai/dsh-tool-macos-use`](packages/macos-use/tool-macos-use) | 面向模型的工具 | 桌面／浏览器基础工具，以及有步骤上限的 `computer_use_task`／`browser_use_task` 循环 |
 
-插件配置页面新增了 **显示每步截图** 开关。它默认开启：当某一步存在截图时，图片会被保存，并与该步的用户输出一起显示。关闭后不会保存或展示这些每步图片，但不会影响 GUI 模型内部捕获屏幕，也不会移除最终截图引用。
+## P0 可靠性与安全
+
+插件提供 22 个面向模型的工具，包括应用／窗口发现、精确窗口截图、语义辅助功能快照、会过期的元素令牌、指针移动与拖动、聚焦、滚动、中止，以及有边界的桌面／浏览器任务循环。自主任务具有总超时、单任务锁和紧急停止能力。
+
+所有可调整的智能体配置都能在 Harness 的**插件配置**页面中可视化完成。GUI 模型卡包含 API 凭据引用、端点、模型和响应上限；GUI 智能体卡包含步骤与超时限制、语义快照大小、浏览器可见性、应用允许／拒绝列表、确认控制、单任务锁、截图隐私排除项和紧急停止。**显示每步截图**默认开启：当某一步存在截图时，图片会被保存，并与该步的用户输出一起显示。关闭后不会保存或展示这些每步图片，但不会影响 GUI 模型私下用于定位的截图，也不会移除最终截图引用。
 
 Retina 和其他超大截图只会在持久展示存储前按当前附件限制缩小。GUI 操作仍由原始截图定位，因此规范化不会改变动作坐标系。
 
@@ -50,4 +54,4 @@ corepack pnpm exec playwright install chromium
 
 ## 当前限制
 
-在兼容基线上，聚焦功能测试、完整 GUI 测试套件、生产构建、契约 lint、全部 28 项文档门禁、空白检查和定向 TypeScript 构建均已通过。干净 profile 的 UI 冒烟测试捕获了真实的 3840×2160 macOS 屏幕；开关开启时以 2000×1125 保存并显示，随后在插件页面关闭开关，同一步骤不再含图片块。组装后的 Web 回放也成功构建；仍有 3 个与本插件变更无关的既有回放预期失败。真实第三方视觉提供方兼容性以及会执行动作的桌面／浏览器端到端测试，仍需要部署凭据和操作系统权限。
+在兼容基线上，P0 聚焦测试通过 121 项，完整 GUI 套件通过 3,968 项并跳过 1 项，生产构建通过，全部 28 项文档门禁也通过。干净 profile 的 UI 冒烟使用真实 macOS 截图服务和确定性的本地视觉端点：GUI 模型收到 PNG，Harness 在第 1 步内联显示了 2000×1125 图片。同一次浏览器检查也确认全部智能体配置都位于可视化插件配置页面。组装后的 Web 回放成功构建，通过 79 个文件并跳过 1 个；仍有 3 个与本插件变更无关的既有回放预期失败。真实第三方提供方兼容性以及会执行动作的桌面／浏览器端到端测试，仍需要部署凭据和合适的操作系统权限。

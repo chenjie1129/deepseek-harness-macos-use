@@ -10,18 +10,20 @@ The harness can edit files and run shell commands, but it has no explicit capabi
 
 ## Decision
 
-The implementation adds a four-package `macos-use` family. A dedicated GUI-model service sends screenshots to a configurable OpenAI-compatible vision endpoint, so GUI grounding does not require the driving model to accept image inputs. The endpoint, model, output cap, and credential reference are live plugin settings.
+The implementation adds a four-package `macos-use` family. A dedicated GUI-model service sends screenshots to a configurable OpenAI-compatible vision endpoint, so GUI grounding does not require the driving model to accept image inputs. The endpoint, model, output cap, and credential reference are live visual plugin settings. P0 adds a semantic window-observation path alongside pixels: application and window discovery, exact-window capture, flattened Accessibility elements, and opaque element tokens that expire after a new snapshot or window-geometry change.
 
 ## Capability split
 
-- `@deepseek-ai/dsh-macos-use` owns macOS screenshots, System Events actions, application launch, and AppleScript execution through `ctx.subprocess`.
-- `@deepseek-ai/dsh-browser-use` owns one lazily launched Playwright Chromium page and exposes selector, text, keyboard, coordinate, and screenshot operations.
+- `@deepseek-ai/dsh-macos-use` owns redacted full-screen and exact-window capture, application/window discovery, Accessibility state, System Events actions, CoreGraphics pointer movement/dragging, application launch, and AppleScript execution through `ctx.subprocess`.
+- `@deepseek-ai/dsh-browser-use` owns one lazily launched Playwright Chromium page and exposes selector, text, keyboard, coordinate, drag, and screenshot operations; a live headed/headless change safely restarts that browser on its next action.
 - `@deepseek-ai/dsh-gui-model` owns one independent screenshot-to-action request and validates the returned action union.
 - `@deepseek-ai/dsh-tool-macos-use` owns the model-facing primitive schemas plus bounded desktop and browser action loops.
 
 ## Security and durability
 
-macOS Accessibility and Screen Recording permissions remain host-controlled. Arbitrary AppleScript and GUI actions run through the ordinary tool execution and deployment policy surface; this package family does not create a persistent permission grant. Screenshot bytes are stored through `ctx.attachments`, while the driving model receives text references because its primary adapter rejects image tool-result content. GUI-model requests and intermediate decisions remain outside the driving Session log. A default-on presentation setting can retain each step's grounding screenshot as authorized UI-only result content, while the final task result still retains the completion state, summary, action/outcome list, and final screenshot reference. Stored copies are normalized to the active attachment limits without changing the original grounding pixels or action coordinates.
+macOS Accessibility and Screen Recording permissions remain host-controlled. Denied applications override the allow list. Full-screen capture masks excluded-app windows, while an exact-window request for excluded content fails closed. Arbitrary AppleScript, drag, destructive keys, and destructive task intent can require one-shot confirmation. A single-task lock, task deadline, command deadline, explicit abort tool, and visual emergency stop bound autonomous control; this package family does not create a persistent permission grant.
+
+Screenshot bytes are stored through `ctx.attachments`, while the driving model receives text references because its primary adapter rejects image tool-result content. GUI-model requests and intermediate decisions remain outside the driving Session log. A default-on presentation setting can retain each step's grounding screenshot as authorized UI-only result content, while the final task result still retains the completion state, summary, action/outcome list, and final screenshot reference. Stored copies are normalized to the active attachment limits without changing the original grounding pixels or action coordinates.
 
 ## Alternatives considered
 
@@ -31,8 +33,8 @@ macOS Accessibility and Screen Recording permissions remain host-controlled. Arb
 
 ## Verification
 
-Focused suites cover AppleScript construction, macOS service behavior, GUI response parsing and requests, browser lifecycle and actions, settings-card registration, and bounded task-loop execution. The packages pass repository build, hygiene, generated-catalog, bilingual-documentation, and pre-push typecheck gates. Live provider credentials, macOS permission grants, and a real GUI end-to-end suite remain deployment checks.
+Focused suites cover AppleScript and native-script construction, macOS service behavior, semantic-token expiry, task coordination and abort, GUI response parsing and requests, browser lifecycle/actions, policy confirmations, visual settings-card registration, and bounded task-loop execution. The packages pass repository build, generated-catalog, bilingual-documentation, and full GUI gates. A clean-profile live UI test also exercised a real screenshot through the local vision boundary and displayed it inline in Step 1. Live third-party provider credentials and action-taking desktop/browser runs remain deployment checks.
 
 ## Consequences
 
-Products can compose desktop execution, browser execution, GUI grounding, and model-facing tools independently while keeping the driving model text-only. The separation adds explicit configuration and installation requirements: Playwright Chromium must be present, the host must have operating-system permissions, and a compatible vision endpoint must be configured. Intermediate GUI steps are observable in the final result, optionally with their screenshots, but are not independently durable Session events.
+Products can compose desktop execution, browser execution, GUI grounding, and model-facing tools independently while keeping the driving model text-only. Every adjustable P0 agent option is presented visually in the GUI Model or GUI Agent card on the Plugin Configuration page; the deployment file remains an auditable representation, not the only way to configure the agent. The separation adds explicit installation requirements: Playwright Chromium must be present and the host must have operating-system permissions. Intermediate GUI steps are observable in the final result, optionally with their screenshots, but are not independently durable Session events.

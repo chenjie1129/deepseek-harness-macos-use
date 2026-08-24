@@ -21,6 +21,18 @@ function requireText(action: GuiAction): string {
   return action.text
 }
 
+function requireDestination(action: GuiAction): { toX: number; toY: number } {
+  if (action.toX === undefined || action.toY === undefined) {
+    throw new Error('"drag" action is missing toX/toY')
+  }
+  return { toX: action.toX, toY: action.toY }
+}
+
+function requireApp(action: GuiAction): string {
+  if (action.app === undefined) throw new Error(`"${action.kind}" action is missing app`)
+  return action.app
+}
+
 function requireCombo(action: GuiAction): string {
   if (action.combo === undefined) throw new Error('"key" action is missing combo')
   return action.combo
@@ -53,6 +65,15 @@ export function macosTaskExecutor(ctx: Context): TaskExecutor {
           const { x, y } = requireXY(action)
           return ctx.macosUse.click({ x, y, button: 'right' }, signal)
         }
+        case 'move': {
+          const { x, y } = requireXY(action)
+          return ctx.macosUse.move({ x, y }, signal)
+        }
+        case 'drag': {
+          const { x, y } = requireXY(action)
+          const { toX, toY } = requireDestination(action)
+          return ctx.macosUse.drag({ x, y, toX, toY }, signal)
+        }
         case 'type':
           return ctx.macosUse.type({ text: requireText(action) }, signal)
         case 'key':
@@ -62,6 +83,13 @@ export function macosTaskExecutor(ctx: Context): TaskExecutor {
             direction: requireDirection(action),
             ...action.amount !== undefined ? { amount: action.amount } : {},
           }, signal)
+        case 'open_app':
+          return ctx.macosUse.openApp({ name: requireApp(action) }, signal)
+        case 'focus_window':
+          return ctx.macosUse.focusWindow({
+            app: requireApp(action),
+            ...action.windowTitle === undefined ? {} : { title: action.windowTitle },
+          }, signal).then(() => {})
         default:
           throw new Error(`unsupported action kind for computer_use_task: ${action.kind}`)
       }
@@ -97,6 +125,15 @@ export function browserTaskExecutor(ctx: Context): TaskExecutor {
         }
         case 'right_click':
           throw new Error('right_click is not supported for browser_use_task')
+        case 'move': {
+          const { x, y } = requireXY(action)
+          return ctx.browserUse.moveAt({ x, y }, signal)
+        }
+        case 'drag': {
+          const { x, y } = requireXY(action)
+          const { toX, toY } = requireDestination(action)
+          return ctx.browserUse.dragAt({ x, y, toX, toY }, signal)
+        }
         case 'type':
           return ctx.browserUse.type({ text: requireText(action) }, signal)
         case 'key':
@@ -107,6 +144,9 @@ export function browserTaskExecutor(ctx: Context): TaskExecutor {
           for (let index = 0; index < steps; index += 1) await ctx.browserUse.key({ key }, signal)
           return
         }
+        case 'open_app':
+        case 'focus_window':
+          throw new Error(`${action.kind} is not supported for browser_use_task`)
         default:
           throw new Error(`unsupported action kind for browser_use_task: ${action.kind}`)
       }

@@ -8,7 +8,6 @@
 
 import { Buffer } from 'node:buffer'
 import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { JsonValue, ToolResult, ToolResultView } from '@deepseek-ai/dsh-tools'
 import type { ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
@@ -16,40 +15,22 @@ import { installSettingsSection, settingsNamespace } from '@deepseek-ai/dsh-sett
 import type {} from '@deepseek-ai/dsh-macos-use'
 import type { GuiAction } from '@deepseek-ai/dsh-gui-model'
 import type {} from '@deepseek-ai/dsh-browser-use'
+import { TaskCoordinator } from './coordinator.ts'
 import { browserTaskExecutor, macosTaskExecutor } from './executors.ts'
 import { fitPngToAttachmentLimits } from './image.ts'
 import { runGuiTask } from './loop.ts'
 import type { TaskStepLog } from './loop.ts'
+import { approveAutonomousAction, guiPreExecutionDecision } from './policy.ts'
+import { Config, DEFAULT_MAX_STEPS, resolveSettings } from './settings.ts'
+import { ElementTokenStore } from './tokens.ts'
 
 export const name = 'tool-macos-use'
 export const inject = ['tools', 'macosUse', 'guiModel', 'browserUse', 'attachments']
-
-/** Config for the macOS-use / browser-use tool consumer. */
-export interface Config {
-  /** Default `max_steps` for `computer_use_task` / `browser_use_task` when the model omits it. Defaults to 20. */
-  defaultMaxSteps?: number
-  /** Save and show the screenshot that grounded each task step. Defaults to true. */
-  showStepScreenshots?: boolean
-}
-
-const TOOL_MACOS_USE_DEFAULT_MAX_STEPS = 20
-const TOOL_MACOS_USE_DEFAULT_SHOW_STEP_SCREENSHOTS = true
-
-export const Config: z<Config> = z.object({
-  defaultMaxSteps: z.number().step(1).min(1).default(TOOL_MACOS_USE_DEFAULT_MAX_STEPS),
-  showStepScreenshots: z.boolean().default(TOOL_MACOS_USE_DEFAULT_SHOW_STEP_SCREENSHOTS),
-})
+export { Config } from './settings.ts'
+export type { Config as ToolMacosUseConfig } from './settings.ts'
 
 /** Live settings namespace for user-owned task presentation preferences. */
 export const TOOL_MACOS_USE_SETTINGS_NAMESPACE = settingsNamespace('tool-macos-use')
-
-interface TaskPresentationSettings {
-  showStepScreenshots?: boolean
-}
-
-const TaskPresentationSettings: z<TaskPresentationSettings> = z.object({
-  showStepScreenshots: z.boolean().default(TOOL_MACOS_USE_DEFAULT_SHOW_STEP_SCREENSHOTS),
-})
 
 const IMAGE_REF_SCHEMA = {
   type: 'object',
@@ -61,6 +42,45 @@ const IMAGE_REF_SCHEMA = {
     width: { type: 'number', required: true },
     height: { type: 'number', required: true },
     name: { type: 'string' },
+  },
+} as const
+
+const BOUNDS_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    x: { type: 'number', required: true },
+    y: { type: 'number', required: true },
+    width: { type: 'number', required: true },
+    height: { type: 'number', required: true },
+  },
+} as const
+
+const WINDOW_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    id: { type: 'integer', required: true },
+    app: { type: 'string', required: true },
+    pid: { type: 'integer', required: true },
+    title: { type: 'string', required: true },
+    bounds: { ...BOUNDS_SCHEMA, required: true },
+    onScreen: { type: 'boolean', required: true },
+  },
+} as const
+
+const ELEMENT_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    token: { type: 'string', required: true },
+    role: { type: 'string', required: true },
+    subrole: { type: 'string' },
+    name: { type: 'string' },
+    value: { type: 'string' },
+    description: { type: 'string' },
+    enabled: { type: 'boolean', required: true },
+    bounds: BOUNDS_SCHEMA,
   },
 } as const
 
@@ -218,25 +238,61 @@ async function saveScreenshot(ctx: Context, pngBase64: string, name: string): Pr
 }
 
 export function apply(ctx: Context, config: Config = {}): void {
-  const defaultMaxSteps = config.defaultMaxSteps ?? TOOL_MACOS_USE_DEFAULT_MAX_STEPS
-  const taskPresentationEntry: TaskPresentationSettings = {
-    showStepScreenshots: config.showStepScreenshots ?? TOOL_MACOS_USE_DEFAULT_SHOW_STEP_SCREENSHOTS,
+  const coordinator = new TaskCoordinator()
+  const tokens = new ElementTokenStore()
+  let current = () => config
+  let live = resolveSettings(config)
+  let lastAbortRevision = live.abortRevision
+  const synchronize = () => {
+    const next = resolveSettings(current())
+    ctx.macosUse.configure({
+      commandTimeoutMs: next.commandTimeoutMs,
+      allowedApps: next.allowedApps,
+      deniedApps: next.deniedApps,
+      excludedScreenshotApps: next.excludedScreenshotApps,
+      maxElementsPerSnapshot: next.maxElementsPerSnapshot,
+    })
+    ctx.browserUse.configureHeadless(next.browserHeadless)
+    if (next.abortRevision > lastAbortRevision) coordinator.abort('GUI task aborted from Plugin Configuration')
+    lastAbortRevision = next.abortRevision
+    live = next
   }
-  let currentTaskPresentation = () => taskPresentationEntry
-  installSettingsSection(ctx, TOOL_MACOS_USE_SETTINGS_NAMESPACE, TaskPresentationSettings, taskPresentationEntry, {
-    setSource: (source) => { currentTaskPresentation = source },
-    onChange: () => {},
+  synchronize()
+  installSettingsSection(ctx, TOOL_MACOS_USE_SETTINGS_NAMESPACE, Config, config, {
+    setSource: (source) => { current = source },
+    onChange: synchronize,
   })
+
+  ctx.on('tools/pre-execute', (exec, next) => {
+    const decision = guiPreExecutionDecision(exec, live, coordinator.hasActiveTask())
+    return decision === undefined ? next() : Promise.resolve(decision)
+  })
+
+  const pointFor = async (
+    args: { x?: number; y?: number; element?: string },
+    exec: { agent?: object; signal: AbortSignal },
+  ): Promise<{ x: number; y: number }> => {
+    if (args.element !== undefined) {
+      const windowId = tokens.windowId(exec.agent)
+      if (windowId === undefined) throw new Error('element token is stale; call computer_get_window_state again')
+      const window = (await ctx.macosUse.listWindows(exec.signal)).find(candidate => candidate.id === windowId)
+      if (window === undefined) throw new Error('element token is stale; its window is no longer available')
+      return tokens.resolve(exec.agent, args.element, window)
+    }
+    if (args.x === undefined || args.y === undefined) throw new Error('provide x/y or an element token')
+    return { x: args.x, y: args.y }
+  }
 
   ctx.tools.register(defineTool({
     name: 'computer_screenshot',
-    description: 'Capture a screenshot of the current macOS screen and return it as an image.',
+    description: 'Capture the current macOS screen. Windows owned by apps in the visual screenshot-exclusion list are redacted.',
     parameters: {},
     output: {
       schema: IMAGE_REF_SCHEMA,
       render: (_args, value) => [{ type: 'text', text: describeScreenshot(value as unknown as ImageAttachmentRef) }],
     },
     async execute(_args, exec) {
+      tokens.invalidate(exec.agent)
       const { pngBase64 } = await ctx.macosUse.screenshot(exec.signal)
       const ref = await saveScreenshot(ctx, pngBase64, 'screenshot.png')
       return ref
@@ -244,12 +300,128 @@ export function apply(ctx: Context, config: Config = {}): void {
   }))
 
   ctx.tools.register(defineTool({
-    name: 'computer_click',
-    description: 'Click, double-click, or right-click at absolute macOS screen coordinates (top-left origin, in points). '
-      + 'Take a computer_screenshot first to find target coordinates.',
+    name: 'computer_list_apps',
+    description: 'List running foreground-capable macOS applications allowed by the visual app policy.',
+    parameters: {},
+    output: {
+      schema: {
+        type: 'array',
+        items: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            name: { type: 'string', required: true },
+            bundleId: { type: 'string' },
+            pid: { type: 'integer', required: true },
+            active: { type: 'boolean', required: true },
+            hidden: { type: 'boolean', required: true },
+          },
+        },
+      },
+      render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }],
+    },
+    execute: async (_args, exec) => [...await ctx.macosUse.listApps(exec.signal)],
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'computer_list_windows',
+    description: 'List exact on-screen macOS windows with ids, titles, apps, and bounds.',
+    parameters: {},
+    output: {
+      schema: { type: 'array', items: WINDOW_SCHEMA },
+      render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }],
+    },
+    execute: async (_args, exec) => [...await ctx.macosUse.listWindows(exec.signal)],
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'computer_screenshot_window',
+    description: 'Capture one exact allowed window. Sensitive screenshot-excluded apps fail closed.',
     parameters: {
-      x: { type: 'number', required: true, description: 'Absolute screen x coordinate.' },
-      y: { type: 'number', required: true, description: 'Absolute screen y coordinate.' },
+      window_id: { type: 'integer', description: 'CoreGraphics window id from computer_list_windows.' },
+      app: { type: 'string', description: 'Application name when window_id is omitted.' },
+      title: { type: 'string', description: 'Exact window title when selecting by app.' },
+    },
+    output: {
+      schema: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          window: { ...WINDOW_SCHEMA, required: true },
+          screenshot: { ...IMAGE_REF_SCHEMA, required: true },
+        },
+      },
+      render: (_args, value) => [{
+        type: 'text',
+        text: `Window captured: ${JSON.stringify(value.window)}. ${describeScreenshot(value.screenshot as unknown as ImageAttachmentRef)}`,
+      }],
+    },
+    async execute(args, exec) {
+      tokens.invalidate(exec.agent)
+      const result = await ctx.macosUse.screenshotWindow({
+        ...args.window_id === undefined ? {} : { id: args.window_id },
+        ...args.app === undefined ? {} : { app: args.app },
+        ...args.title === undefined ? {} : { title: args.title },
+      }, exec.signal)
+      const screenshot = await saveScreenshot(ctx, result.pngBase64, `window-${String(result.window.id)}.png`)
+      return { window: result.window, screenshot }
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'computer_get_window_state',
+    description: 'Capture one exact window and return its structured Accessibility controls with opaque tokens. '
+      + 'Tokens become stale after the next snapshot or if the window moves/resizes.',
+    parameters: {
+      window_id: { type: 'integer', description: 'CoreGraphics window id from computer_list_windows.' },
+      app: { type: 'string', description: 'Application name when window_id is omitted.' },
+      title: { type: 'string', description: 'Exact window title when selecting by app.' },
+    },
+    output: {
+      schema: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          snapshotId: { type: 'string', required: true },
+          window: { ...WINDOW_SCHEMA, required: true },
+          screenshot: { ...IMAGE_REF_SCHEMA, required: true },
+          elements: { type: 'array', required: true, items: ELEMENT_SCHEMA },
+          truncated: { type: 'boolean', required: true },
+        },
+      },
+      render: (_args, value) => [{
+        type: 'text',
+        text: `Window state ${value.snapshotId}: ${JSON.stringify(value.elements)}. `
+          + describeScreenshot(value.screenshot as unknown as ImageAttachmentRef),
+      }],
+    },
+    async execute(args, exec) {
+      const state = await ctx.macosUse.windowState({
+        ...args.window_id === undefined ? {} : { id: args.window_id },
+        ...args.app === undefined ? {} : { app: args.app },
+        ...args.title === undefined ? {} : { title: args.title },
+        maxElements: live.maxElementsPerSnapshot,
+      }, exec.signal)
+      const tokenized = tokens.create(exec.agent, state.window, state.elements)
+      const screenshot = await saveScreenshot(ctx, state.pngBase64, `window-state-${String(state.window.id)}.png`)
+      return {
+        snapshotId: tokenized.snapshotId,
+        window: state.window,
+        screenshot,
+        elements: [...tokenized.elements],
+        truncated: state.truncated,
+      }
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'computer_click',
+    description: 'Click, double-click, or right-click using either an opaque element token from '
+      + 'computer_get_window_state or absolute macOS screen coordinates.',
+    parameters: {
+      element: { type: 'string', description: 'Snapshot-scoped element token. Prefer this over coordinates.' },
+      x: { type: 'number', description: 'Absolute screen x coordinate when element is omitted.' },
+      y: { type: 'number', description: 'Absolute screen y coordinate when element is omitted.' },
       button: { type: 'string', enum: ['left', 'right'] as const, description: 'Defaults to "left".' },
       double_click: { type: 'boolean', description: 'Double-click instead of a single click. Ignored when button is "right".' },
     },
@@ -258,9 +430,9 @@ export function apply(ctx: Context, config: Config = {}): void {
       render: () => [{ type: 'text', text: 'clicked' }],
     },
     async execute(args, exec) {
+      const point = await pointFor(args, exec)
       await ctx.macosUse.click({
-        x: args.x,
-        y: args.y,
+        ...point,
         ...args.button !== undefined ? { button: args.button } : {},
         ...args.double_click !== undefined ? { doubleClick: args.double_click } : {},
       }, exec.signal)
@@ -270,16 +442,91 @@ export function apply(ctx: Context, config: Config = {}): void {
 
   ctx.tools.register(defineTool({
     name: 'computer_type',
-    description: 'Type literal text into the currently focused macOS element via keystroke events.',
+    description: 'Type literal text into the focused macOS element, optionally focusing a fresh semantic element token first.',
     parameters: {
       text: { type: 'string', required: true, description: 'Text to type.' },
+      element: { type: 'string', description: 'Optional token from computer_get_window_state to focus before typing.' },
     },
     output: {
       schema: { type: 'object', additionalProperties: false, properties: {} },
       render: () => [{ type: 'text', text: 'typed' }],
     },
     async execute(args, exec) {
+      if (args.element !== undefined) {
+        const point = await pointFor({ element: args.element }, exec)
+        await ctx.macosUse.click(point, exec.signal)
+      }
       await ctx.macosUse.type({ text: args.text }, exec.signal)
+      return {}
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'computer_move',
+    description: 'Move the macOS pointer to a semantic element token or absolute screen coordinate without clicking.',
+    parameters: {
+      element: { type: 'string', description: 'Snapshot-scoped element token.' },
+      x: { type: 'number', description: 'Absolute screen x when element is omitted.' },
+      y: { type: 'number', description: 'Absolute screen y when element is omitted.' },
+    },
+    output: {
+      schema: { type: 'object', additionalProperties: false, properties: {} },
+      render: () => [{ type: 'text', text: 'moved' }],
+    },
+    async execute(args, exec) {
+      await ctx.macosUse.move(await pointFor(args, exec), exec.signal)
+      return {}
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'computer_drag',
+    description: 'Drag from a semantic element token or coordinate to an absolute destination. Human confirmation is on by default.',
+    parameters: {
+      element: { type: 'string', description: 'Snapshot-scoped token for the drag start.' },
+      x: { type: 'number', description: 'Absolute start x when element is omitted.' },
+      y: { type: 'number', description: 'Absolute start y when element is omitted.' },
+      to_x: { type: 'number', required: true, description: 'Absolute destination x.' },
+      to_y: { type: 'number', required: true, description: 'Absolute destination y.' },
+      duration_ms: { type: 'integer', description: 'Drag duration; defaults to 300ms.' },
+    },
+    output: {
+      schema: { type: 'object', additionalProperties: false, properties: {} },
+      render: () => [{ type: 'text', text: 'dragged' }],
+    },
+    async execute(args, exec) {
+      const point = await pointFor(args, exec)
+      await ctx.macosUse.drag({
+        ...point,
+        toX: args.to_x,
+        toY: args.to_y,
+        ...args.duration_ms === undefined ? {} : { durationMs: args.duration_ms },
+      }, exec.signal)
+      return {}
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'computer_scroll',
+    description: 'Scroll the frontmost app, optionally focusing a fresh semantic element token first.',
+    parameters: {
+      direction: { type: 'string', required: true, enum: ['up', 'down', 'left', 'right'] as const },
+      amount: { type: 'integer', description: 'Bounded scroll step count; defaults to 5.' },
+      element: { type: 'string', description: 'Optional token to focus before scrolling.' },
+    },
+    output: {
+      schema: { type: 'object', additionalProperties: false, properties: {} },
+      render: () => [{ type: 'text', text: 'scrolled' }],
+    },
+    async execute(args, exec) {
+      if (args.element !== undefined) {
+        const point = await pointFor({ element: args.element }, exec)
+        await ctx.macosUse.click(point, exec.signal)
+      }
+      await ctx.macosUse.scroll({
+        direction: args.direction,
+        ...args.amount === undefined ? {} : { amount: args.amount },
+      }, exec.signal)
       return {}
     },
   }))
@@ -334,6 +581,41 @@ export function apply(ctx: Context, config: Config = {}): void {
   }))
 
   ctx.tools.register(defineTool({
+    name: 'computer_focus_window',
+    description: 'Bring one exact allowed macOS window to the front by id or app/title.',
+    parameters: {
+      window_id: { type: 'integer', description: 'CoreGraphics window id from computer_list_windows.' },
+      app: { type: 'string', description: 'Application name when window_id is omitted.' },
+      title: { type: 'string', description: 'Exact window title when selecting by app.' },
+    },
+    output: {
+      schema: WINDOW_SCHEMA,
+      render: (_args, value) => [{ type: 'text', text: `focused ${JSON.stringify(value)}` }],
+    },
+    execute: (args, exec) => ctx.macosUse.focusWindow({
+      ...args.window_id === undefined ? {} : { id: args.window_id },
+      ...args.app === undefined ? {} : { app: args.app },
+      ...args.title === undefined ? {} : { title: args.title },
+    }, exec.signal),
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'computer_abort',
+    description: 'Immediately cancel every active computer_use_task/browser_use_task owned by this plugin instance.',
+    parameters: {},
+    output: {
+      schema: {
+        type: 'object',
+        additionalProperties: false,
+        properties: { aborted: { type: 'integer', required: true } },
+      },
+      render: (_args, value) => [{ type: 'text', text: `aborted ${String(value.aborted)} active GUI task(s)` }],
+    },
+    isConcurrencySafe: () => true,
+    execute: () => Promise.resolve({ aborted: coordinator.abort() }),
+  }))
+
+  ctx.tools.register(defineTool({
     name: 'computer_use_task',
     description: 'Autonomously operate the macOS desktop to accomplish a task: repeatedly screenshots the screen, '
       + 'asks the configured GUI model where to click/type/press next, and executes that action, until the model '
@@ -341,7 +623,7 @@ export function apply(ctx: Context, config: Config = {}): void {
       + 'primitive computer_* tools for one specific, already-known action.',
     parameters: {
       task: { type: 'string', required: true, description: 'The task to accomplish on the desktop, in natural language.' },
-      max_steps: { type: 'integer', description: `Step budget before giving up. Defaults to ${String(defaultMaxSteps)}.` },
+      max_steps: { type: 'integer', description: `Step budget before giving up. Defaults to ${String(DEFAULT_MAX_STEPS)} unless changed visually.` },
     },
     output: {
       schema: {
@@ -358,25 +640,36 @@ export function apply(ctx: Context, config: Config = {}): void {
       presentationMeta: (_args, value) => taskPresentationMeta(taskResultValue(value)),
     },
     async execute(args, exec) {
-      const showStepScreenshots = currentTaskPresentation().showStepScreenshots
-        ?? TOOL_MACOS_USE_DEFAULT_SHOW_STEP_SCREENSHOTS
-      const result = await runGuiTask(ctx.guiModel, macosTaskExecutor(ctx), {
-        task: args.task,
-        maxSteps: args.max_steps ?? defaultMaxSteps,
-        retainStepScreenshots: showStepScreenshots,
-        signal: exec.signal,
+      const settings = live
+      return coordinator.run(exec, {
+        singleActiveTask: settings.singleActiveTask,
+        timeoutMs: settings.taskTimeoutMs,
+      }, async (signal) => {
+        const result = await runGuiTask(ctx.guiModel, macosTaskExecutor(ctx), {
+          task: args.task,
+          maxSteps: args.max_steps ?? settings.defaultMaxSteps,
+          retainStepScreenshots: settings.showStepScreenshots,
+          signal,
+          beforeAction: (action, actionSignal) => approveAutonomousAction(
+            ctx,
+            exec,
+            action,
+            settings,
+            actionSignal ?? signal,
+          ),
+        })
+        const stepScreenshots = settings.showStepScreenshots
+          ? await saveStepScreenshots(ctx, result.stepScreenshotsPngBase64, 'computer-use-task')
+          : []
+        const { pngBase64 } = await ctx.macosUse.screenshot(signal)
+        const finalScreenshot = await saveScreenshot(ctx, pngBase64, 'computer-use-task-result.png')
+        return {
+          completed: result.completed,
+          summary: result.summary,
+          steps: encodeSteps(result.steps, stepScreenshots),
+          finalScreenshot,
+        }
       })
-      const stepScreenshots = showStepScreenshots
-        ? await saveStepScreenshots(ctx, result.stepScreenshotsPngBase64, 'computer-use-task')
-        : []
-      const { pngBase64 } = await ctx.macosUse.screenshot(exec.signal)
-      const finalScreenshot = await saveScreenshot(ctx, pngBase64, 'computer-use-task-result.png')
-      return {
-        completed: result.completed,
-        summary: result.summary,
-        steps: encodeSteps(result.steps, stepScreenshots),
-        finalScreenshot,
-      }
     },
     presentResult: (_args, result) => presentTaskResult(result),
   }))
@@ -472,7 +765,7 @@ export function apply(ctx: Context, config: Config = {}): void {
     parameters: {
       task: { type: 'string', required: true, description: 'The task to accomplish in the browser, in natural language.' },
       url: { type: 'string', description: 'Optional starting URL to navigate to before the loop begins.' },
-      max_steps: { type: 'integer', description: `Step budget before giving up. Defaults to ${String(defaultMaxSteps)}.` },
+      max_steps: { type: 'integer', description: `Step budget before giving up. Defaults to ${String(DEFAULT_MAX_STEPS)} unless changed visually.` },
     },
     output: {
       schema: {
@@ -489,26 +782,37 @@ export function apply(ctx: Context, config: Config = {}): void {
       presentationMeta: (_args, value) => taskPresentationMeta(taskResultValue(value)),
     },
     async execute(args, exec) {
-      if (args.url !== undefined) await ctx.browserUse.navigate({ url: args.url }, exec.signal)
-      const showStepScreenshots = currentTaskPresentation().showStepScreenshots
-        ?? TOOL_MACOS_USE_DEFAULT_SHOW_STEP_SCREENSHOTS
-      const result = await runGuiTask(ctx.guiModel, browserTaskExecutor(ctx), {
-        task: args.task,
-        maxSteps: args.max_steps ?? defaultMaxSteps,
-        retainStepScreenshots: showStepScreenshots,
-        signal: exec.signal,
+      const settings = live
+      return coordinator.run(exec, {
+        singleActiveTask: settings.singleActiveTask,
+        timeoutMs: settings.taskTimeoutMs,
+      }, async (signal) => {
+        if (args.url !== undefined) await ctx.browserUse.navigate({ url: args.url }, signal)
+        const result = await runGuiTask(ctx.guiModel, browserTaskExecutor(ctx), {
+          task: args.task,
+          maxSteps: args.max_steps ?? settings.defaultMaxSteps,
+          retainStepScreenshots: settings.showStepScreenshots,
+          signal,
+          beforeAction: (action, actionSignal) => approveAutonomousAction(
+            ctx,
+            exec,
+            action,
+            settings,
+            actionSignal ?? signal,
+          ),
+        })
+        const stepScreenshots = settings.showStepScreenshots
+          ? await saveStepScreenshots(ctx, result.stepScreenshotsPngBase64, 'browser-use-task')
+          : []
+        const { pngBase64 } = await ctx.browserUse.screenshot(signal)
+        const finalScreenshot = await saveScreenshot(ctx, pngBase64, 'browser-use-task-result.png')
+        return {
+          completed: result.completed,
+          summary: result.summary,
+          steps: encodeSteps(result.steps, stepScreenshots),
+          finalScreenshot,
+        }
       })
-      const stepScreenshots = showStepScreenshots
-        ? await saveStepScreenshots(ctx, result.stepScreenshotsPngBase64, 'browser-use-task')
-        : []
-      const { pngBase64 } = await ctx.browserUse.screenshot(exec.signal)
-      const finalScreenshot = await saveScreenshot(ctx, pngBase64, 'browser-use-task-result.png')
-      return {
-        completed: result.completed,
-        summary: result.summary,
-        steps: encodeSteps(result.steps, stepScreenshots),
-        finalScreenshot,
-      }
     },
     presentResult: (_args, result) => presentTaskResult(result),
   }))

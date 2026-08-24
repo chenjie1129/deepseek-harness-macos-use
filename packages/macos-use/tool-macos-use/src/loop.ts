@@ -57,7 +57,14 @@ const MAX_WAIT_MS = 5000
 export async function runGuiTask(
   guiModel: GuiModelService,
   executor: TaskExecutor,
-  options: { task: string; maxSteps: number; retainStepScreenshots?: boolean; signal?: AbortSignal },
+  options: {
+    task: string
+    maxSteps: number
+    retainStepScreenshots?: boolean
+    signal?: AbortSignal
+    /** Optional safety gate evaluated immediately before each model-selected action. */
+    beforeAction?: (action: GuiAction, signal?: AbortSignal) => Promise<void>
+  },
 ): Promise<RunTaskResult> {
   const steps: TaskStepLog[] = []
   const stepScreenshotsPngBase64: string[] = []
@@ -85,6 +92,7 @@ export async function runGuiTask(
       continue
     }
     try {
+      await options.beforeAction?.(action, options.signal)
       await executor.perform(action, options.signal)
       steps.push({ action, outcome: 'ok' })
     } catch (error) {

@@ -11,6 +11,9 @@ const mock = vi.hoisted(() => {
   const type = vi.fn(() => Promise.resolve())
   const goto = vi.fn(() => Promise.resolve(null))
   const screenshot = vi.fn(() => Promise.resolve(Buffer.from('png')))
+  const move = vi.fn(() => Promise.resolve())
+  const down = vi.fn(() => Promise.resolve())
+  const up = vi.fn(() => Promise.resolve())
   const closeContext = vi.fn(() => Promise.resolve())
   const closeBrowser = vi.fn(() => Promise.resolve())
   const first = vi.fn(() => ({ click, fill, innerText }))
@@ -19,7 +22,7 @@ const mock = vi.hoisted(() => {
     isClosed: vi.fn(() => false),
     goto,
     locator,
-    mouse: { click, dblclick },
+    mouse: { click, dblclick, move, down, up },
     keyboard: { type, press: key },
     screenshot,
     context: vi.fn(),
@@ -35,6 +38,7 @@ const mock = vi.hoisted(() => {
     closeContext,
     context,
     dblclick,
+    down,
     fill,
     first,
     goto,
@@ -42,9 +46,11 @@ const mock = vi.hoisted(() => {
     key,
     launch,
     locator,
+    move,
     page,
     screenshot,
     type,
+    up,
   }
 })
 
@@ -78,6 +84,8 @@ describe('browser-use service', () => {
     await expect(ctx.browserUse.extractText({ selector: 'main' })).resolves.toBe('page text')
     await ctx.browserUse.clickAt({ x: 12, y: 34 })
     await ctx.browserUse.clickAt({ x: 56, y: 78, doubleClick: true })
+    await ctx.browserUse.moveAt({ x: 90, y: 91 })
+    await ctx.browserUse.dragAt({ x: 10, y: 20, toX: 30, toY: 40 })
     await ctx.browserUse.type({ text: 'hello' })
     await ctx.browserUse.key({ key: 'Enter' })
     await expect(ctx.browserUse.screenshot()).resolves.toEqual({ pngBase64: Buffer.from('png').toString('base64') })
@@ -90,6 +98,13 @@ describe('browser-use service', () => {
     expect(mock.locator.mock.calls).toEqual([['#submit'], ['#name'], ['body'], ['main']])
     expect(mock.click).toHaveBeenCalledWith(12, 34)
     expect(mock.dblclick).toHaveBeenCalledWith(56, 78)
+    expect(mock.move.mock.calls).toEqual([
+      [90, 91],
+      [10, 20],
+      [30, 40, { steps: 12 }],
+    ])
+    expect(mock.down).toHaveBeenCalledOnce()
+    expect(mock.up).toHaveBeenCalledOnce()
     expect(mock.type).toHaveBeenCalledWith('hello')
     expect(mock.key).toHaveBeenCalledWith('Enter')
   })
@@ -103,6 +118,19 @@ describe('browser-use service', () => {
     expect(mock.launch).toHaveBeenCalledWith({ headless: false })
     expect(mock.closeContext).toHaveBeenCalledOnce()
     expect(mock.closeBrowser).toHaveBeenCalledOnce()
+  })
+
+  it('applies a visual headless setting change to a fresh browser instance', async () => {
+    const { ctx } = await bench()
+    await ctx.browserUse.navigate({ url: 'about:blank' })
+
+    ctx.browserUse.configureHeadless(false)
+    await Promise.resolve()
+    await ctx.browserUse.navigate({ url: 'about:blank' })
+
+    expect(mock.closeContext).toHaveBeenCalledOnce()
+    expect(mock.closeBrowser).toHaveBeenCalledOnce()
+    expect(mock.launch.mock.calls).toEqual([[{ headless: true }], [{ headless: false }]])
   })
 
   it('reports browser launch failures with the stable launch error code', async () => {

@@ -8,12 +8,16 @@ This repository contains only the macOS GUI/browser-control plugin developed for
 
 | Package | Harness capability | Purpose |
 |---|---|---|
-| [`@deepseek-ai/dsh-macos-use`](packages/macos-use/macos-use) | `ctx.macosUse` | Screenshots, System Events automation, application launch, and AppleScript |
-| [`@deepseek-ai/dsh-browser-use`](packages/macos-use/browser-use) | `ctx.browserUse` | Playwright Chromium navigation, selector actions, coordinate actions, and screenshots |
+| [`@deepseek-ai/dsh-macos-use`](packages/macos-use/macos-use) | `ctx.macosUse` | Redacted screen and exact-window capture, application/window discovery, Accessibility state, pointer actions, and AppleScript |
+| [`@deepseek-ai/dsh-browser-use`](packages/macos-use/browser-use) | `ctx.browserUse` | Live-configurable Playwright Chromium navigation, selector/coordinate actions, dragging, and screenshots |
 | [`@deepseek-ai/dsh-gui-model`](packages/macos-use/gui-model) | `ctx.guiModel` | OpenAI-compatible vision requests that turn screenshots into validated GUI actions |
 | [`@deepseek-ai/dsh-tool-macos-use`](packages/macos-use/tool-macos-use) | model-facing tools | Desktop/browser primitives and bounded `computer_use_task` / `browser_use_task` loops |
 
-The plugin configuration page includes a **Show step screenshots** switch for the task loops. It is on by default: when a step has a screenshot, the image is saved and shown alongside that step's user-facing output. Turning it off omits those per-step images without changing the GUI model's internal screen capture or the final screenshot reference.
+## P0 reliability and safety
+
+The plugin exposes 22 model-facing tools, including app/window discovery, exact-window screenshots, semantic Accessibility snapshots, expiring element tokens, pointer movement and drag, focus, scroll, abort, and bounded desktop/browser task loops. Autonomous work has a wall-clock deadline, a single-task lock, and an emergency stop.
+
+Every adjustable agent setting is visible on Harness's **Plugin Configuration** page. The GUI Model card contains the API credential reference, endpoint, model, and response limit. The GUI Agent card contains step and timeout limits, semantic snapshot size, browser visibility, app allow/deny lists, confirmation controls, the single-task lock, screenshot privacy exclusions, and the emergency stop. **Show step screenshots** is on by default: when a step has a screenshot, the image is saved and shown alongside that step's user-facing output. Turning it off omits those per-step images without changing the GUI model's private grounding capture or the final screenshot reference.
 
 Retina and other oversized captures are downscaled only for durable display storage, using the active attachment limits. The original screenshot still grounds GUI actions, so normalization does not change their coordinate system.
 
@@ -50,4 +54,4 @@ See the [integration guide](docs/integration.md) and [architecture decision](doc
 
 ## Current limits
 
-Focused feature tests, the full GUI test suite, the production build, contract lint, all 28 documentation gates, whitespace checks, and targeted TypeScript builds passed on the compatible base. A clean-profile UI smoke captured a real 3840×2160 macOS screen, stored and displayed it at 2000×1125 with the switch on, and confirmed that the same step had no image block after the switch was turned off through the plugin page. The assembled web replay also built successfully; three pre-existing replay expectations remain unrelated to this plugin change. Live third-party provider compatibility and action-taking desktop/browser end-to-end tests still require deployment credentials and operating-system permissions.
+Focused P0 suites passed 121 tests, the full GUI suite passed 3,968 tests with one skip, the production build passed, and all 28 documentation gates passed on the compatible base. A clean-profile UI smoke used the real macOS screenshot service and a deterministic local vision endpoint: the GUI model received a PNG and Harness displayed the resulting 2000×1125 image inline in Step 1. The same browser inspection confirmed all agent configuration on the visual Plugin Configuration page. The assembled web replay built successfully and passed 79 files with one skip; three pre-existing replay expectations remain unrelated to this plugin change. Live third-party provider compatibility and action-taking desktop/browser end-to-end tests still require deployment credentials and suitable operating-system permissions.

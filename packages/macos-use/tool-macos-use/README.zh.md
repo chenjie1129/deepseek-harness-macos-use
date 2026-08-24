@@ -6,7 +6,7 @@
 
 ## 工具
 
-基础 macOS 工具包括 `computer_screenshot`、`computer_click`、`computer_type`、`computer_key`、`computer_open_app` 和 `computer_run_applescript`。
+基础 macOS 工具包括 `computer_screenshot`、`computer_list_apps`、`computer_list_windows`、`computer_screenshot_window`、`computer_get_window_state`、`computer_click`、`computer_move`、`computer_drag`、`computer_type`、`computer_key`、`computer_scroll`、`computer_open_app`、`computer_focus_window`、`computer_run_applescript` 和 `computer_abort`。
 
 基础浏览器工具包括 `browser_navigate`、`browser_click`、`browser_fill`、`browser_extract_text` 和 `browser_screenshot`。
 
@@ -16,11 +16,28 @@
 
 ```yaml
 config:
-  defaultMaxSteps: 20 # optional
-  showStepScreenshots: true # optional
+  defaultMaxSteps: 20
+  taskTimeoutMs: 120000
+  commandTimeoutMs: 15000
+  maxElementsPerSnapshot: 250
+  showStepScreenshots: true
+  browserHeadless: true
+  allowedApps: '' # comma/newline list
+  deniedApps: '' # comma/newline list
+  excludedScreenshotApps: | # comma/newline list
+    Passwords
+    1Password
+    Keychain Access
+  confirmAppleScript: true
+  confirmDestructiveActions: true
+  singleActiveTask: true
 ```
 
-`showStepScreenshots` 会实时显示在插件配置页面，默认值为 `true`。关闭后，每步截图不会被保存或显示；GUI 循环仍会在内部捕获屏幕，因为视觉模型需要截图来选择动作，最终截图引用也仍是面向模型任务结果的一部分。
+所有值都在插件配置页面实时管理。同一卡片还提供紧急停止按钮，可立即中止活动自主 GUI 任务。`showStepScreenshots` 默认值为 `true`；关闭后，每步截图不会被保存或显示，但 GUI 循环仍会在内部捕获屏幕供视觉模型使用。
+
+`computer_get_window_state` 会为可操作的无障碍元素返回不透明令牌。`computer_click`、`computer_move` 和 `computer_drag` 可接受令牌并重新解析当前中心点。智能体获取更新语义快照，或来源窗口移动、缩放后，令牌即失效。
+
+拒绝列表始终优先于允许列表。开启相应开关时，任意 AppleScript、拖拽、破坏性按键组合和破坏性任务意图会请求确认。单任务锁和超时限制自主循环；`computer_abort` 与可视化紧急停止可立即取消任务。
 
 在保存基础、每步或最终截图前，工具会在需要时缩小一份副本，以满足当前附件存储的字节、像素总数和单边尺寸限制。GUI 定位仍使用原始截图，因此存储规范化不会改变桌面或浏览器操作所使用的坐标系。
 
@@ -34,7 +51,7 @@ config:
 
 #### Token 影响
 
-包可见时，每个请求都会发送十三个固定 schema；`defaultMaxSteps` 只会改变一个任务参数的说明。
+包可见时，每个请求都会发送二十二个固定 schema；`defaultMaxSteps` 只会改变一个任务参数的说明。
 
 #### KV 缓存影响
 
@@ -57,6 +74,6 @@ config:
 ## 已知限制与后续工作
 
 - GUI 模型请求与决策发生在驱动 Session 日志之外。启用的每步截图会作为最终工具结果中的持久 UI 展示元数据保存，而不是独立流式 Session 事件。
-- `computer_run_applescript` 接受任意脚本源，所有桌面与浏览器操作依赖部署工具策略及宿主操作系统权限，而不是包专用批准层。
+- 确认只对当前动作有效。插件不会创建持久权限，也不会替代 macOS 的辅助功能和屏幕录制控制。
 - GUI 模型请求失败会中止任务工具；没有重试、恢复或局部持久子步骤记录。
-- 已有聚焦的工具循环测试，但组装模型快照与真实桌面或浏览器端到端套件留待后续实现。
+- 无障碍元素质量因应用而异；没有有效边界的控件不能通过令牌定位。

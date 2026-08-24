@@ -6,6 +6,9 @@
 /** Discriminates {@link MacosUseError} causes. */
 export type MacosUseErrorCode =
   | 'MACOS_USE_COMMAND_FAILED'
+  | 'MACOS_USE_APP_BLOCKED'
+  | 'MACOS_USE_SCREENSHOT_BLOCKED'
+  | 'MACOS_USE_WINDOW_NOT_FOUND'
   | 'MACOS_USE_UNSUPPORTED_KEY'
   | 'MACOS_USE_TIMED_OUT'
 
@@ -29,6 +32,61 @@ export interface ScreenshotResult {
   pngBase64: string
 }
 
+/** One running foreground-capable macOS application. */
+export interface MacosApplication {
+  name: string
+  bundleId?: string
+  pid: number
+  active: boolean
+  hidden: boolean
+}
+
+/** Screen-space bounds in macOS points. */
+export interface ScreenBounds {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/** One CoreGraphics window suitable for exact capture and focus targeting. */
+export interface MacosWindow {
+  id: number
+  app: string
+  pid: number
+  title: string
+  bounds: ScreenBounds
+  onScreen: boolean
+}
+
+/** One visible Accessibility element inside a window snapshot. */
+export interface AccessibilityElement {
+  role: string
+  subrole?: string
+  name?: string
+  value?: string
+  description?: string
+  enabled: boolean
+  bounds?: ScreenBounds
+}
+
+/** Exact window screenshot plus the semantic controls discovered in it. */
+export interface WindowStateResult {
+  window: MacosWindow
+  pngBase64: string
+  elements: readonly AccessibilityElement[]
+  truncated: boolean
+}
+
+/** Live safety and runtime settings enforced by {@link MacosUseService}. */
+export interface MacosUseRuntimeSettings {
+  commandTimeoutMs: number
+  allowedApps: readonly string[]
+  deniedApps: readonly string[]
+  excludedScreenshotApps: readonly string[]
+  maxElementsPerSnapshot: number
+}
+
 /** Arguments to {@link MacosUseService.click}. */
 export interface ClickRequest {
   /** Absolute screen x coordinate in points. */
@@ -41,6 +99,22 @@ export interface ClickRequest {
   doubleClick?: boolean
   /** Modifier keys held for the duration of the click. */
   modifiers?: readonly KeyModifier[]
+}
+
+/** Arguments to move the pointer without clicking. */
+export interface MoveRequest {
+  x: number
+  y: number
+}
+
+/** Arguments to drag from one absolute screen point to another. */
+export interface DragRequest {
+  x: number
+  y: number
+  toX: number
+  toY: number
+  /** Duration in milliseconds. Defaults to 300; clamped to [50, 5000]. */
+  durationMs?: number
 }
 
 /** Arguments to {@link MacosUseService.type}. */
@@ -66,6 +140,19 @@ export interface ScrollRequest {
 export interface OpenAppRequest {
   /** Application name as `open -a` resolves it, e.g. `"Safari"`. */
   name: string
+}
+
+/** Select one exact window. `id` takes priority over app/title matching. */
+export interface WindowTarget {
+  id?: number
+  app?: string
+  title?: string
+}
+
+/** Arguments for an Accessibility snapshot. */
+export interface WindowStateRequest extends WindowTarget {
+  /** Maximum flattened elements. The live plugin setting supplies the default. */
+  maxElements?: number
 }
 
 /** Arguments to {@link MacosUseService.runAppleScript}. */

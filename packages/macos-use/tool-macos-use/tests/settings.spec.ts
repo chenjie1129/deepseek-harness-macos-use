@@ -58,9 +58,11 @@ async function boot() {
     nextAction: () => Promise.resolve({ kind: 'done', summary: 'Finished.' }),
   } as never)
   ctx.provide('macosUse', {
+    configure: vi.fn(),
     screenshot: () => Promise.resolve({ pngBase64: TINY_PNG_BASE64 }),
   } as never)
   ctx.provide('browserUse', {
+    configureHeadless: vi.fn(),
     navigate: () => Promise.resolve(),
     screenshot: () => Promise.resolve({ pngBase64: TINY_PNG_BASE64 }),
   } as never)

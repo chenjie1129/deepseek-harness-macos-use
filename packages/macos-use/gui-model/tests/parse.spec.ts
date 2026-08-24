@@ -63,6 +63,24 @@ describe('parseGuiAction', () => {
       amount: 3,
     })
   })
+
+  it('parses the P0 move, drag, open-app, and focus-window actions', () => {
+    expect(parseGuiAction('{"kind":"move","x":10,"y":20}')).toEqual({ kind: 'move', x: 10, y: 20 })
+    expect(parseGuiAction('{"kind":"drag","x":1,"y":2,"toX":3,"toY":4}')).toEqual({
+      kind: 'drag', x: 1, y: 2, toX: 3, toY: 4,
+    })
+    expect(parseGuiAction('{"kind":"open_app","app":"Notes"}')).toEqual({ kind: 'open_app', app: 'Notes' })
+    expect(parseGuiAction('{"kind":"focus_window","app":"Notes","windowTitle":"P0"}')).toEqual({
+      kind: 'focus_window', app: 'Notes', windowTitle: 'P0',
+    })
+  })
+
+  it('rejects incomplete P0 actions', () => {
+    expect(() => parseGuiAction('{"kind":"move","x":1}')).toThrow(GuiModelError)
+    expect(() => parseGuiAction('{"kind":"drag","x":1,"y":2,"toX":3}')).toThrow(GuiModelError)
+    expect(() => parseGuiAction('{"kind":"open_app"}')).toThrow(GuiModelError)
+    expect(() => parseGuiAction('{"kind":"focus_window"}')).toThrow(GuiModelError)
+  })
 })
 
 describe('buildUserPrompt', () => {

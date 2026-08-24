@@ -13,6 +13,8 @@ Browser-control capability seam (`ctx.browserUse`) backed by one Playwright Chro
 - `fillSelector({ selector, text }, signal?)`
 - `extractText({ selector? }, signal?)` -> text
 - `clickAt({ x, y, doubleClick? }, signal?)`
+- `moveAt({ x, y }, signal?)`
+- `dragAt({ x, y, toX, toY }, signal?)`
 - `type({ text }, signal?)`
 - `key({ key }, signal?)` using Playwright key names such as `Enter` and `Control+A`
 - `screenshot(signal?)` -> `{ pngBase64 }`
@@ -25,6 +27,8 @@ Failures raise `BrowserUseError` with a stable `code`.
 config:
   headless: true # optional, default true
 ```
+
+`headless` is live-managed by the macOS-use card on the Plugin Configuration page. Changing it retires the active browser and launches the next action in the selected mode.
 
 ## Model Experience
 
@@ -40,4 +44,4 @@ This service registers no prompt or schema directly, so loading it does not chan
 - One browser context and one page are supported; multi-tab and multi-context workflows are deferred.
 - `key` uses Playwright key names rather than the macOS service's `cmd+shift+t`-style vocabulary.
 - Cancellation is checked before dispatch, but an already-running Playwright operation is not interrupted through the signal.
-- The unit suite covers lazy launch, page reuse, actions, disposal, pre-dispatch cancellation, and stable error codes; a real-browser end-to-end suite is deferred.
+- The unit suite covers lazy launch, live headed/headless reconfiguration, page reuse, pointer movement and dragging, disposal, pre-dispatch cancellation, and stable error codes.

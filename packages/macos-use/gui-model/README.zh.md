@@ -10,7 +10,7 @@ GUI 定位视觉模型接缝（`ctx.guiModel`），它把截图、任务和历�
 
 - `nextAction({ screenshotPngBase64, task, history? }, signal?)` -> `GuiAction`
 
-`GuiAction` 的结构为 `{ kind: 'click'|'double_click'|'right_click'|'type'|'key'|'scroll'|'wait'|'done', x?, y?, text?, combo?, direction?, amount?, ms?, summary?, reason? }`。服务会在返回前校验所选动作的必填字段。
+`GuiAction` 的结构为 `{ kind: 'click'|'double_click'|'right_click'|'move'|'drag'|'type'|'key'|'scroll'|'open_app'|'focus_window'|'wait'|'done', x?, y?, toX?, toY?, text?, combo?, app?, windowTitle?, direction?, amount?, ms?, summary?, reason? }`。服务会在返回前校验所选动作的必填字段。
 
 ## 配置
 
@@ -21,6 +21,8 @@ config:
   model: some-vision-model # required
   maxOutputTokens: 512 # optional
 ```
+
+四项配置都在插件配置的 GUI Model 卡片中可视化管理。API 密钥通过凭据接缝保存，不会出现在设置响应中。
 
 ## 模型体验
 
@@ -34,8 +36,8 @@ config:
 
 ```markdown
 You are a GUI grounding model. You are given a screenshot and a task. Respond with exactly one JSON object describing the single next action to take toward completing the task — no prose, no markdown fences, just the JSON object. Its shape is:
-{"kind": "click"|"double_click"|"right_click"|"type"|"key"|"scroll"|"wait"|"done", "x"?: number, "y"?: number, "text"?: string, "combo"?: string, "direction"?: "up"|"down"|"left"|"right", "amount"?: number, "ms"?: number, "summary"?: string, "reason"?: string}
-"x"/"y" are pixel coordinates in the screenshot for click/double_click/right_click. "text" is literal text to type. "combo" is a key or modifier combo like "return" or "cmd+shift+t". "direction"/"amount" are for scroll. "ms" is a pause duration for wait. Choose "done" with a "summary" only once the task is fully accomplished.
+{"kind": "click"|"double_click"|"right_click"|"move"|"drag"|"type"|"key"|"scroll"|"open_app"|"focus_window"|"wait"|"done", "x"?: number, "y"?: number, "toX"?: number, "toY"?: number, "text"?: string, "combo"?: string, "app"?: string, "windowTitle"?: string, "direction"?: "up"|"down"|"left"|"right", "amount"?: number, "ms"?: number, "summary"?: string, "reason"?: string}
+"x"/"y" are pixel coordinates in the screenshot for click/double_click/right_click/move and the drag start; "toX"/"toY" are the drag destination. "text" is literal text to type. "combo" is a key or modifier combo like "return" or "cmd+shift+t". "app" names an application for open_app/focus_window; "windowTitle" narrows focus_window. "direction"/"amount" are for scroll. "ms" is a pause duration for wait. Choose "done" with a "summary" only once the task is fully accomplished.
 ```
 
 #### Token 影响

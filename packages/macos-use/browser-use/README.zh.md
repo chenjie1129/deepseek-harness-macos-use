@@ -13,6 +13,8 @@
 - `fillSelector({ selector, text }, signal?)`
 - `extractText({ selector? }, signal?)` -> text
 - `clickAt({ x, y, doubleClick? }, signal?)`
+- `moveAt({ x, y }, signal?)`
+- `dragAt({ x, y, toX, toY }, signal?)`
 - `type({ text }, signal?)`
 - `key({ key }, signal?)` 使用 Playwright 键名，例如 `Enter` 和 `Control+A`
 - `screenshot(signal?)` -> `{ pngBase64 }`
@@ -25,6 +27,8 @@
 config:
   headless: true # optional, default true
 ```
+
+`headless` 由插件配置页面中的 macOS Use 卡片实时管理。修改后会关闭活动浏览器，下一次动作按新模式启动。
 
 ## 模型体验
 
@@ -40,4 +44,4 @@ config:
 - 仅支持一个浏览器上下文与一个页面；多标签页和多上下文工作流留待后续实现。
 - `key` 使用 Playwright 键名，而不是 macOS 服务的 `cmd+shift+t` 风格词汇。
 - 取消信号会在分派前检查，但无法通过该信号中断已经运行的 Playwright 操作。
-- 单元测试覆盖延迟启动、页面复用、操作、释放、分派前取消和稳定错误码；真实浏览器端到端套件留待后续实现。
+- 单元测试覆盖延迟启动、实时有头/无头切换、页面复用、指针移动和拖拽、释放、分派前取消和稳定错误码。

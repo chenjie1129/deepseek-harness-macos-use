@@ -12,12 +12,15 @@ import type { GuiAction, GuiActionKind, GuiActionLogEntry } from './types.ts'
 export const SYSTEM_PROMPT = 'You are a GUI grounding model. You are given a screenshot and a task. '
   + 'Respond with exactly one JSON object describing the single next action to take toward completing the '
   + 'task — no prose, no markdown fences, just the JSON object. Its shape is:\n'
-  + '{"kind": "click"|"double_click"|"right_click"|"type"|"key"|"scroll"|"wait"|"done", '
-  + '"x"?: number, "y"?: number, "text"?: string, "combo"?: string, '
+  + '{"kind": "click"|"double_click"|"right_click"|"move"|"drag"|"type"|"key"|"scroll"|"open_app"|"focus_window"|"wait"|"done", '
+  + '"x"?: number, "y"?: number, "toX"?: number, "toY"?: number, "text"?: string, "combo"?: string, '
+  + '"app"?: string, "windowTitle"?: string, '
   + '"direction"?: "up"|"down"|"left"|"right", "amount"?: number, "ms"?: number, '
   + '"summary"?: string, "reason"?: string}\n'
-  + '"x"/"y" are pixel coordinates in the screenshot for click/double_click/right_click. '
+  + '"x"/"y" are pixel coordinates in the screenshot for click/double_click/right_click/move and the drag start; '
+  + '"toX"/"toY" are the drag destination. '
   + '"text" is literal text to type. "combo" is a key or modifier combo like "return" or "cmd+shift+t". '
+  + '"app" names an application for open_app/focus_window; "windowTitle" narrows focus_window. '
   + '"direction"/"amount" are for scroll. "ms" is a pause duration for wait. '
   + 'Choose "done" with a "summary" only once the task is fully accomplished.'
 
@@ -41,7 +44,8 @@ export function buildUserPrompt(task: string, history: readonly GuiActionLogEntr
 }
 
 const ACTION_KINDS: ReadonlySet<GuiActionKind> = new Set([
-  'click', 'double_click', 'right_click', 'type', 'key', 'scroll', 'wait', 'done',
+  'click', 'double_click', 'right_click', 'move', 'drag', 'type', 'key', 'scroll',
+  'open_app', 'focus_window', 'wait', 'done',
 ])
 
 /** Extract the first balanced `{...}` object from `content`, tolerating surrounding prose or code fences. */
@@ -90,17 +94,25 @@ export function parseGuiAction(content: string): GuiAction {
   const action: GuiAction = { kind: kind as GuiActionKind }
   if (isFiniteNumber(raw.x)) action.x = raw.x
   if (isFiniteNumber(raw.y)) action.y = raw.y
+  if (isFiniteNumber(raw.toX)) action.toX = raw.toX
+  if (isFiniteNumber(raw.toY)) action.toY = raw.toY
   if (typeof raw.text === 'string') action.text = raw.text
   if (typeof raw.combo === 'string') action.combo = raw.combo
+  if (typeof raw.app === 'string') action.app = raw.app
+  if (typeof raw.windowTitle === 'string') action.windowTitle = raw.windowTitle
   if (raw.direction === 'up' || raw.direction === 'down' || raw.direction === 'left' || raw.direction === 'right') action.direction = raw.direction
   if (isFiniteNumber(raw.amount)) action.amount = raw.amount
   if (isFiniteNumber(raw.ms)) action.ms = raw.ms
   if (typeof raw.summary === 'string') action.summary = raw.summary
   if (typeof raw.reason === 'string') action.reason = raw.reason
 
-  const requiresXY = action.kind === 'click' || action.kind === 'double_click' || action.kind === 'right_click'
+  const requiresXY = action.kind === 'click' || action.kind === 'double_click'
+    || action.kind === 'right_click' || action.kind === 'move' || action.kind === 'drag'
   if (requiresXY && (action.x === undefined || action.y === undefined)) {
     throw new GuiModelError(`GUI model "${action.kind}" action is missing x/y: ${json}`, 'GUI_MODEL_MALFORMED_RESPONSE')
+  }
+  if (action.kind === 'drag' && (action.toX === undefined || action.toY === undefined)) {
+    throw new GuiModelError('GUI model "drag" action is missing toX/toY', 'GUI_MODEL_MALFORMED_RESPONSE')
   }
   if (action.kind === 'type' && action.text === undefined) {
     throw new GuiModelError(`GUI model "type" action is missing text: ${json}`, 'GUI_MODEL_MALFORMED_RESPONSE')
@@ -110,6 +122,9 @@ export function parseGuiAction(content: string): GuiAction {
   }
   if (action.kind === 'scroll' && action.direction === undefined) {
     throw new GuiModelError('GUI model "scroll" action is missing direction', 'GUI_MODEL_MALFORMED_RESPONSE')
+  }
+  if ((action.kind === 'open_app' || action.kind === 'focus_window') && action.app === undefined) {
+    throw new GuiModelError(`GUI model "${action.kind}" action is missing app`, 'GUI_MODEL_MALFORMED_RESPONSE')
   }
   return action
 }

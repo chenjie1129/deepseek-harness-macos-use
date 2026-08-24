@@ -8,6 +8,13 @@ import {
   escapeAppleScriptString,
 } from '../src/applescript.ts'
 import { MacosUseError } from '../src/types.ts'
+import {
+  buildDragPointerScript,
+  buildListAppsScript,
+  buildListWindowsScript,
+  buildMovePointerScript,
+  buildWindowElementsScript,
+} from '../src/native.ts'
 
 describe('escapeAppleScriptString', () => {
   it('escapes backslashes before quotes', () => {
@@ -82,5 +89,34 @@ describe('buildScrollScript', () => {
 describe('buildFrontmostAppScript', () => {
   it('builds the frontmost-process query', () => {
     expect(buildFrontmostAppScript()).toBe('tell application "System Events" to get name of first process whose frontmost is true')
+  })
+})
+
+describe('P0 native scripts', () => {
+  it('uses AppKit/CoreGraphics discovery instead of screen-coordinate guesses', () => {
+    expect(buildListAppsScript()).toContain('NSWorkspace.sharedWorkspace.runningApplications')
+    expect(buildListWindowsScript()).toContain('CGWindowListCopyWindowInfo')
+  })
+
+  it('builds pointer motion and bounded drag events', () => {
+    expect(buildMovePointerScript(10, 20)).toContain('CGWarpMouseCursorPosition')
+    const drag = buildDragPointerScript(1, 2, 30, 40, 300)
+    expect(drag).toContain('kCGEventLeftMouseDown')
+    expect(drag).toContain('kCGEventLeftMouseDragged')
+    expect(drag).toContain('kCGEventLeftMouseUp')
+  })
+
+  it('bounds Accessibility traversal and redacts secure text values', () => {
+    const script = buildWindowElementsScript({
+      id: 1,
+      app: 'Notes',
+      pid: 2,
+      title: 'Draft',
+      bounds: { x: 0, y: 0, width: 800, height: 600 },
+      onScreen: true,
+    }, 250)
+    expect(script).toContain('output.length >= 250')
+    expect(script).toContain("'[redacted]'")
+    expect(script).toContain('expectedTitle = "Draft"')
   })
 })

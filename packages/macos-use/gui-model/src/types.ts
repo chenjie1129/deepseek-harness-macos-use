@@ -17,19 +17,35 @@ export class GuiModelError extends Error {
 }
 
 /** One action kind the model may choose. */
-export type GuiActionKind = 'click' | 'double_click' | 'right_click' | 'type' | 'key' | 'scroll' | 'wait' | 'done'
+export type GuiActionKind =
+  | 'click'
+  | 'double_click'
+  | 'right_click'
+  | 'move'
+  | 'drag'
+  | 'type'
+  | 'key'
+  | 'scroll'
+  | 'open_app'
+  | 'focus_window'
+  | 'wait'
+  | 'done'
 
 /**
  * One structured next action returned by {@link GuiModelService.nextAction}. Field presence depends on `kind`:
- * `click`/`double_click`/`right_click` need `x`/`y`; `type` needs `text`; `key` needs `combo`; `scroll` needs
- * `direction`; `wait` needs `ms`; `done` needs `summary`.
+ * point actions need `x`/`y`; `drag` also needs `toX`/`toY`; `type` needs `text`; `key` needs `combo`;
+ * `open_app`/`focus_window` need `app`; `scroll` needs `direction`; `wait` needs `ms`; `done` needs `summary`.
  */
 export interface GuiAction {
   kind: GuiActionKind
   x?: number
   y?: number
+  toX?: number
+  toY?: number
   text?: string
   combo?: string
+  app?: string
+  windowTitle?: string
   direction?: 'up' | 'down' | 'left' | 'right'
   amount?: number
   ms?: number

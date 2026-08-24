@@ -16,9 +16,11 @@ import type {
   BrowserScreenshotResult,
   ClickAtRequest,
   ClickSelectorRequest,
+  DragAtRequest,
   ExtractTextRequest,
   FillSelectorRequest,
   KeyPressRequest,
+  MoveAtRequest,
   NavigateRequest,
   TypeTextRequest,
 } from './types.ts'
@@ -29,9 +31,11 @@ export type {
   BrowserUseErrorCode,
   ClickAtRequest,
   ClickSelectorRequest,
+  DragAtRequest,
   ExtractTextRequest,
   FillSelectorRequest,
   KeyPressRequest,
+  MoveAtRequest,
   NavigateRequest,
   TypeTextRequest,
 } from './types.ts'
@@ -62,7 +66,7 @@ export const Config: z<Config> = z.object({
 export class BrowserUseService extends Service {
   static Config = Config
 
-  private readonly headless: boolean
+  private headless: boolean
   private browser: Browser | undefined
   private page: Page | undefined
 
@@ -75,6 +79,22 @@ export class BrowserUseService extends Service {
       this.page = undefined
       this.browser = undefined
     }, 'browser-use teardown')
+  }
+
+  /**
+   * Apply the visually managed launch mode. An existing browser is retired;
+   * the next action launches a fresh instance with the new value.
+   * @param headless - whether the next Chromium instance has visible chrome.
+   */
+  configureHeadless(headless: boolean): void {
+    if (this.headless === headless) return
+    this.headless = headless
+    const page = this.page
+    const browser = this.browser
+    this.page = undefined
+    this.browser = undefined
+    void page?.context().close().catch(() => {})
+    void browser?.close().catch(() => {})
   }
 
   /**
@@ -132,6 +152,34 @@ export class BrowserUseService extends Service {
         : page.mouse.click(request.x, request.y),
       signal,
     )
+  }
+
+  /**
+   * Move the pointer within the viewport without clicking.
+   * @param request - destination point in viewport pixels.
+   * @param signal - rejects before dispatch when already aborted.
+   */
+  async moveAt(request: MoveAtRequest, signal?: AbortSignal): Promise<void> {
+    const page = await this.ensurePage()
+    await this.runAction(() => page.mouse.move(request.x, request.y), signal)
+  }
+
+  /**
+   * Drag between two viewport coordinates with the primary mouse button.
+   * @param request - start and destination points in viewport pixels.
+   * @param signal - rejects before dispatch when already aborted.
+   */
+  async dragAt(request: DragAtRequest, signal?: AbortSignal): Promise<void> {
+    const page = await this.ensurePage()
+    await this.runAction(async () => {
+      await page.mouse.move(request.x, request.y)
+      await page.mouse.down()
+      try {
+        await page.mouse.move(request.toX, request.toY, { steps: 12 })
+      } finally {
+        await page.mouse.up()
+      }
+    }, signal)
   }
 
   /**
