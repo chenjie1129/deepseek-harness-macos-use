@@ -33,7 +33,12 @@ describe('runGuiTask', () => {
     const guiModel = fakeGuiModel([{ kind: 'done', summary: 'All set.' }])
     const executor = fakeExecutor()
     const result = await runGuiTask(guiModel, executor, { task: 'do the thing', maxSteps: 5 })
-    expect(result).toEqual({ completed: true, summary: 'All set.', steps: [{ action: { kind: 'done', summary: 'All set.' } }] })
+    expect(result).toEqual({
+      completed: true,
+      summary: 'All set.',
+      steps: [{ action: { kind: 'done', summary: 'All set.' } }],
+      stepScreenshotsPngBase64: [],
+    })
     expect(executor.performed).toEqual([])
   })
 
@@ -86,6 +91,27 @@ describe('runGuiTask', () => {
     expect(result.completed).toBe(false)
     expect(result.summary).toBe('Stopped after 2 steps without reaching "done".')
     expect(result.steps).toHaveLength(2)
+  })
+
+  it('retains the screenshot that grounded each logged step only when requested', async () => {
+    let capture = 0
+    const executor = fakeExecutor({
+      screenshot: async () => {
+        capture += 1
+        return { pngBase64: `capture-${String(capture)}` }
+      },
+    })
+    const guiModel = fakeGuiModel([
+      { kind: 'click', x: 1, y: 2 },
+      { kind: 'done', summary: 'done' },
+    ])
+
+    const retained = await runGuiTask(guiModel, executor, {
+      task: 't', maxSteps: 5, retainStepScreenshots: true,
+    })
+
+    expect(retained.stepScreenshotsPngBase64).toEqual(['capture-1', 'capture-2'])
+    expect(retained.stepScreenshotsPngBase64).toHaveLength(retained.steps.length)
   })
 
   it('stops immediately when the signal is already aborted', async () => {

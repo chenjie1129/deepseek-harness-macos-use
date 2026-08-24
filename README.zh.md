@@ -13,6 +13,8 @@
 | [`@deepseek-ai/dsh-gui-model`](packages/macos-use/gui-model) | `ctx.guiModel` | 调用兼容 OpenAI 的视觉端点，把截图转换成经过校验的 GUI 动作 |
 | [`@deepseek-ai/dsh-tool-macos-use`](packages/macos-use/tool-macos-use) | 面向模型的工具 | 桌面／浏览器基础工具，以及有步骤上限的 `computer_use_task`／`browser_use_task` 循环 |
 
+插件配置页面新增了 **显示每步截图** 开关。它默认开启：当某一步存在截图时，图片会被保存，并与该步的用户输出一起显示。关闭后不会保存或展示这些每步图片，但不会影响 GUI 模型内部捕获屏幕，也不会移除最终截图引用。
+
 ## 兼容性
 
 源码与集成补丁已在 DeepSeek Harness `0.1.0-rc.8` 发布基线提交 [`141eb6f`](https://github.com/deepseek-ai/deepseek-harness/commit/141eb6fef83422698aef7a981029e843e8161534) 上验证。各包清单有意保留 Harness 的 `workspace:^` 依赖，因为这些包需要组合进 Harness 工作区。
@@ -46,4 +48,4 @@ corepack pnpm exec playwright install chromium
 
 ## 当前限制
 
-在兼容基线上，聚焦测试、完整 Harness 构建、lint、文档、仓库卫生和类型检查均已通过。真实视觉提供方兼容性以及桌面／浏览器端到端测试，仍需要部署凭据和操作系统权限。
+在兼容基线上，聚焦功能测试、完整 GUI 测试套件、生产构建、契约 lint、全部 28 项文档门禁、空白检查和定向 TypeScript 构建均已通过。组装后的 Web 回放也成功构建；仍有 3 个与本插件变更无关的既有回放预期失败。真实视觉提供方兼容性以及桌面／浏览器端到端测试，仍需要部署凭据和操作系统权限。

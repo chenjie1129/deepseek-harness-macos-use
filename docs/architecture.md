@@ -21,7 +21,7 @@ The implementation adds a four-package `macos-use` family. A dedicated GUI-model
 
 ## Security and durability
 
-macOS Accessibility and Screen Recording permissions remain host-controlled. Arbitrary AppleScript and GUI actions run through the ordinary tool execution and deployment policy surface; this package family does not create a persistent permission grant. Screenshot bytes are stored through `ctx.attachments`, while the driving model receives text references because its primary adapter rejects image tool-result content. GUI-model requests and intermediate decisions remain outside the driving Session log; the final task result retains the completion state, summary, action/outcome list, and final screenshot reference.
+macOS Accessibility and Screen Recording permissions remain host-controlled. Arbitrary AppleScript and GUI actions run through the ordinary tool execution and deployment policy surface; this package family does not create a persistent permission grant. Screenshot bytes are stored through `ctx.attachments`, while the driving model receives text references because its primary adapter rejects image tool-result content. GUI-model requests and intermediate decisions remain outside the driving Session log. A default-on presentation setting can retain each step's grounding screenshot as authorized UI-only result content, while the final task result still retains the completion state, summary, action/outcome list, and final screenshot reference.
 
 ## Alternatives considered
 
@@ -35,4 +35,4 @@ Focused suites cover AppleScript construction, macOS service behavior, GUI respo
 
 ## Consequences
 
-Products can compose desktop execution, browser execution, GUI grounding, and model-facing tools independently while keeping the driving model text-only. The separation adds explicit configuration and installation requirements: Playwright Chromium must be present, the host must have operating-system permissions, and a compatible vision endpoint must be configured. Intermediate GUI steps are observable in the final result but are not independently durable Session events.
+Products can compose desktop execution, browser execution, GUI grounding, and model-facing tools independently while keeping the driving model text-only. The separation adds explicit configuration and installation requirements: Playwright Chromium must be present, the host must have operating-system permissions, and a compatible vision endpoint must be configured. Intermediate GUI steps are observable in the final result, optionally with their screenshots, but are not independently durable Session events.

@@ -1,6 +1,6 @@
 diff --git a/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.i18n.yaml b/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.i18n.yaml
 new file mode 100644
-index 0000000000000000000000000000000000000000..01761bfd73b59e9d67a43c81bc6bbbb8264b8dc4
+index 0000000000000000000000000000000000000000..814e62387cfdc87b456ba7e9832c57ab15809501
 --- /dev/null
 +++ b/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.i18n.yaml
 @@ -0,0 +1,6 @@
@@ -8,11 +8,11 @@ index 0000000000000000000000000000000000000000..01761bfd73b59e9d67a43c81bc6bbbb8
 +# side as of the last confirmed-consistent state. Both languages carry equal authority;
 +# after editing either side, bring the other along and re-record with:
 +#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-21-macos-gui-use.md
-+2026-08-21-macos-gui-use.md: 652e025cf5c2710364889879345ebe06b75ef9c7
-+2026-08-21-macos-gui-use.zh.md: 2a111da083db7efd3253d260345bb465ce0d4f19
++2026-08-21-macos-gui-use.md: bbd1229130eae5ce098d394d2cd821c3b94c1279
++2026-08-21-macos-gui-use.zh.md: 31aa5463ca3dcdfc507c0a15ed2b8c92cea94df9
 diff --git a/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.md b/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..652e025cf5c2710364889879345ebe06b75ef9c7
+index 0000000000000000000000000000000000000000..bbd1229130eae5ce098d394d2cd821c3b94c1279
 --- /dev/null
 +++ b/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.md
 @@ -0,0 +1,38 @@
@@ -28,7 +28,7 @@ index 0000000000000000000000000000000000000000..652e025cf5c2710364889879345ebe06
 +
 +## Decision
 +
-+The implementation adds a four-package `macos-use` family. A dedicated GUI-model service sends screenshots to a configurable OpenAI-compatible vision endpoint, so GUI grounding does not require the driving model to accept image inputs. The endpoint, model, output cap, and credential reference are live plugin settings.
++The implementation adds a four-package `macos-use` family. A dedicated GUI-model service sends screenshots to a configurable OpenAI-compatible vision endpoint, so GUI grounding does not require the driving model to accept image inputs. The endpoint, model, output cap, credential reference, and default-on per-step screenshot presentation preference are live plugin settings.
 +
 +## Capability split
 +
@@ -39,7 +39,7 @@ index 0000000000000000000000000000000000000000..652e025cf5c2710364889879345ebe06
 +
 +## Security and durability
 +
-+macOS Accessibility and Screen Recording permissions remain host-controlled. Arbitrary AppleScript and GUI actions run through the ordinary tool execution and deployment policy surface; this package family does not create a persistent permission grant. Screenshot bytes are stored through `ctx.attachments`, while the driving model receives text references because its primary adapter rejects image tool-result content. GUI-model requests and intermediate decisions remain outside the driving Session log; the final task result retains the completion state, summary, action/outcome list, and final screenshot reference.
++macOS Accessibility and Screen Recording permissions remain host-controlled. Arbitrary AppleScript and GUI actions run through the ordinary tool execution and deployment policy surface; this package family does not create a persistent permission grant. Screenshot bytes are stored through `ctx.attachments`, while the driving model receives text references because its primary adapter rejects image tool-result content. GUI-model requests and intermediate decisions remain outside the driving Session log. When the default-on setting is enabled, the final task result retains each step's grounding screenshot as UI-only presentation metadata alongside the completion state, summary, action/outcome list, and final screenshot reference; disabling it omits those per-step attachments.
 +
 +## Alternatives considered
 +
@@ -49,14 +49,14 @@ index 0000000000000000000000000000000000000000..652e025cf5c2710364889879345ebe06
 +
 +## Verification
 +
-+Focused suites cover AppleScript construction, macOS service behavior, GUI response parsing and requests, browser lifecycle and actions, settings-card registration, and bounded task-loop execution. The packages pass repository build, hygiene, generated-catalog, bilingual-documentation, and pre-push typecheck gates. Live provider credentials, macOS permission grants, and a real GUI end-to-end suite remain deployment checks.
++Focused suites cover AppleScript construction, macOS service behavior, GUI response parsing and requests, browser lifecycle and actions, the settings switch, the model/UI result split, UI-only attachment authorization and export, and bounded task-loop execution. The packages pass repository build, hygiene, generated-catalog, bilingual-documentation, and pre-push typecheck gates. Live provider credentials, macOS permission grants, and a real GUI end-to-end suite remain deployment checks.
 +
 +## Consequences
 +
-+Products can compose desktop execution, browser execution, GUI grounding, and model-facing tools independently while keeping the driving model text-only. The separation adds explicit configuration and installation requirements: Playwright Chromium must be present, the host must have operating-system permissions, and a compatible vision endpoint must be configured. Intermediate GUI steps are observable in the final result but are not independently durable Session events.
++Products can compose desktop execution, browser execution, GUI grounding, and model-facing tools independently while keeping the driving model text-only. The separation adds explicit configuration and installation requirements: Playwright Chromium must be present, the host must have operating-system permissions, and a compatible vision endpoint must be configured. Intermediate GUI steps and their enabled screenshots are observable together in the final result but are not independently streamed Session events.
 diff --git a/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.zh.md b/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.zh.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..2a111da083db7efd3253d260345bb465ce0d4f19
+index 0000000000000000000000000000000000000000..31aa5463ca3dcdfc507c0a15ed2b8c92cea94df9
 --- /dev/null
 +++ b/.agents/notes/implemented/feature/2026-08-21-macos-gui-use.zh.md
 @@ -0,0 +1,38 @@
@@ -72,7 +72,7 @@ index 0000000000000000000000000000000000000000..2a111da083db7efd3253d260345bb465
 +
 +## 决策
 +
-+实现新增由四个包组成的 `macos-use` 家族。专用 GUI 模型服务把截图发送到可配置的 OpenAI 兼容视觉端点，因此 GUI 定位不要求驱动模型接受图片输入。端点、模型、输出上限和凭据引用都是可实时更新的插件设置。
++实现新增由四个包组成的 `macos-use` 家族。专用 GUI 模型服务把截图发送到可配置的 OpenAI 兼容视觉端点，因此 GUI 定位不要求驱动模型接受图片输入。端点、模型、输出上限、凭据引用和默认开启的每步截图展示偏好都是可实时更新的插件设置。
 +
 +## 能力拆分
 +
@@ -83,7 +83,7 @@ index 0000000000000000000000000000000000000000..2a111da083db7efd3253d260345bb465
 +
 +## 安全与持久性
 +
-+macOS“辅助功能”和“屏幕录制”权限仍由宿主控制。任意 AppleScript 和 GUI 操作通过常规工具执行与部署策略界面运行；这组包不会创建持久权限授权。截图字节通过 `ctx.attachments` 保存，而驱动模型只接收文本引用，因为其主要适配器拒绝图片工具结果内容。GUI 模型请求与中间决策位于驱动 Session 日志之外；最终任务结果会保留完成状态、摘要、动作与结果列表以及最终截图引用。
++macOS“辅助功能”和“屏幕录制”权限仍由宿主控制。任意 AppleScript 和 GUI 操作通过常规工具执行与部署策略界面运行；这组包不会创建持久权限授权。截图字节通过 `ctx.attachments` 保存，而驱动模型只接收文本引用，因为其主要适配器拒绝图片工具结果内容。GUI 模型请求与中间决策位于驱动 Session 日志之外。默认开启的设置启用时，最终任务结果会把每一步的决策截图作为仅 UI 展示元数据，与完成状态、摘要、动作与结果列表和最终截图引用一起保留；关闭后会省略这些每步附件。
 +
 +## 考虑过的替代方案
 +
@@ -93,11 +93,11 @@ index 0000000000000000000000000000000000000000..2a111da083db7efd3253d260345bb465
 +
 +## 验证
 +
-+聚焦测试覆盖 AppleScript 构造、macOS 服务行为、GUI 响应解析与请求、浏览器生命周期与操作、设置卡片注册，以及有边界的任务循环执行。这些包通过仓库构建、hygiene、生成目录、双语文档和推送前类型检查门禁。实时提供方凭据、macOS 权限授予与真实 GUI 端到端套件仍属于部署检查。
++聚焦测试覆盖 AppleScript 构造、macOS 服务行为、GUI 响应解析与请求、浏览器生命周期与操作、设置开关、模型与 UI 结果拆分、仅 UI 附件授权与导出，以及有边界的任务循环执行。这些包通过仓库构建、hygiene、生成目录、双语文档和推送前类型检查门禁。实时提供方凭据、macOS 权限授予与真实 GUI 端到端套件仍属于部署检查。
 +
 +## 结果
 +
-+产品可以独立组合桌面执行、浏览器执行、GUI 定位和面向模型的工具，同时让驱动模型保持仅文本。这样的拆分增加了明确的配置与安装要求：必须存在 Playwright Chromium，宿主必须拥有操作系统权限，并且必须配置兼容的视觉端点。中间 GUI 步骤可在最终结果中观察，但不是独立持久的 Session 事件。
++产品可以独立组合桌面执行、浏览器执行、GUI 定位和面向模型的工具，同时让驱动模型保持仅文本。这样的拆分增加了明确的配置与安装要求：必须存在 Playwright Chromium，宿主必须拥有操作系统权限，并且必须配置兼容的视觉端点。中间 GUI 步骤与已启用的截图会在最终结果中一起呈现，但不会作为独立 Session 事件流式输出。
 diff --git a/THIRD_PARTY_NOTICES.md b/THIRD_PARTY_NOTICES.md
 index 295eb1868fbb6c16f4296775254f3a3c67e1bde9..38bd82c3315ce11fa6f16039f17ac63e531d1469 100644
 --- a/THIRD_PARTY_NOTICES.md
@@ -485,7 +485,7 @@ index b6b0aba72729f9b9b752347ab00cd76a45c248d9..00bfb9a03f7095edd740ad8c32afcf4e
  | `ctx.directoryPicker` | `seam` | `directory-picker` | `directory-picker-native`, `directory-picker-browse` | `apiproxy` | - | 带判别标记的交互能力：原生后端在 Host 显示设备上打开一个操作系统选择器，浏览后端为应用内浏览器提供列表与创建原语；双端后端通过其浏览器侧填充 ui-workspace 目录流程的 slot（不通过协议发布）。 |
  | `ctx.webServer` | `core` | `webserver` | - | `connection`, `modules`, `hmr` | - | 普通的 node:http 载体：具名路由注册表、索引转换 tap，以及静态 dist 回退；Web 传输插件注册自己的路由。 |
 diff --git a/docs/config-catalog.i18n.yaml b/docs/config-catalog.i18n.yaml
-index d9fa142513dde4b398f0ad19609dcf41014d6db7..7412cb21b04847bb7a121f7a0cace4dfdd134486 100644
+index d9fa142513dde4b398f0ad19609dcf41014d6db7..6dded37ed0ee83d40bf2f8491d00f500c866d360 100644
 --- a/docs/config-catalog.i18n.yaml
 +++ b/docs/config-catalog.i18n.yaml
 @@ -2,5 +2,5 @@
@@ -494,10 +494,10 @@ index d9fa142513dde4b398f0ad19609dcf41014d6db7..7412cb21b04847bb7a121f7a0cace4df
  #   pnpm run verify-translation-pairing --write docs/config-catalog.md
 -config-catalog.md: 867ddd5ad8351a5cd25af92727466960c55c649a
 -config-catalog.zh.md: 66fe15ee31018f3df95e62e69fe539cdd7570add
-+config-catalog.md: d3a97b235298045bcd1ef43831c162571ce3f4a2
-+config-catalog.zh.md: 040b1cb50756648cd17e2f1392e9e852c5f4ad1f
++config-catalog.md: 286c8f8d8619585917d933a648053cfac75a94f4
++config-catalog.zh.md: b511571a150d84c403c046b1b23b8709f1df4d12
 diff --git a/docs/config-catalog.md b/docs/config-catalog.md
-index 867ddd5ad8351a5cd25af92727466960c55c649a..d3a97b235298045bcd1ef43831c162571ce3f4a2 100644
+index 867ddd5ad8351a5cd25af92727466960c55c649a..286c8f8d8619585917d933a648053cfac75a94f4 100644
 --- a/docs/config-catalog.md
 +++ b/docs/config-catalog.md
 @@ -389,6 +389,20 @@ Depends on: [`LocalConfig`](#deepseek-aidsh-bash-local)
@@ -573,7 +573,7 @@ index 867ddd5ad8351a5cd25af92727466960c55c649a..d3a97b235298045bcd1ef43831c16257
  <a id="deepseek-aidsh-mcp-client"></a>
  
  ## `@deepseek-ai/dsh-mcp-client`
-@@ -2636,6 +2688,22 @@ export interface Config {
+@@ -2636,6 +2688,24 @@ export interface Config {
  
  Source: [`packages/lsp/tool-lsp/src/index.ts:58`](../packages/lsp/tool-lsp/src/index.ts)
  
@@ -588,16 +588,18 @@ index 867ddd5ad8351a5cd25af92727466960c55c649a..d3a97b235298045bcd1ef43831c16257
 +export interface Config {
 +  /** Default `max_steps` for `computer_use_task` / `browser_use_task` when the model omits it. Defaults to 20. */
 +  defaultMaxSteps?: number
++  /** Save and show the screenshot that grounded each task step. Defaults to true. */
++  showStepScreenshots?: boolean
 +}
 +```
 +
-+Source: [`packages/macos-use/tool-macos-use/src/index.ts:25`](../packages/macos-use/tool-macos-use/src/index.ts)
++Source: [`packages/macos-use/tool-macos-use/src/index.ts:27`](../packages/macos-use/tool-macos-use/src/index.ts)
 +
  <a id="deepseek-aidsh-tool-pwsh"></a>
  
  ## `@deepseek-ai/dsh-tool-pwsh`
 diff --git a/docs/config-catalog.zh.md b/docs/config-catalog.zh.md
-index 66fe15ee31018f3df95e62e69fe539cdd7570add..040b1cb50756648cd17e2f1392e9e852c5f4ad1f 100644
+index 66fe15ee31018f3df95e62e69fe539cdd7570add..b511571a150d84c403c046b1b23b8709f1df4d12 100644
 --- a/docs/config-catalog.zh.md
 +++ b/docs/config-catalog.zh.md
 @@ -391,6 +391,20 @@ export type Config = LocalConfig
@@ -673,7 +675,7 @@ index 66fe15ee31018f3df95e62e69fe539cdd7570add..040b1cb50756648cd17e2f1392e9e852
  <a id="deepseek-aidsh-mcp-client"></a>
  
  ## `@deepseek-ai/dsh-mcp-client`
-@@ -2638,6 +2690,22 @@ export interface Config {
+@@ -2638,6 +2690,24 @@ export interface Config {
  
  来源：[`packages/lsp/tool-lsp/src/index.ts:58`](../packages/lsp/tool-lsp/src/index.ts)
  
@@ -688,10 +690,12 @@ index 66fe15ee31018f3df95e62e69fe539cdd7570add..040b1cb50756648cd17e2f1392e9e852
 +export interface Config {
 +  /** Default `max_steps` for `computer_use_task` / `browser_use_task` when the model omits it. Defaults to 20. */
 +  defaultMaxSteps?: number
++  /** Save and show the screenshot that grounded each task step. Defaults to true. */
++  showStepScreenshots?: boolean
 +}
 +```
 +
-+来源：[`packages/macos-use/tool-macos-use/src/index.ts:25`](../packages/macos-use/tool-macos-use/src/index.ts)
++来源：[`packages/macos-use/tool-macos-use/src/index.ts:27`](../packages/macos-use/tool-macos-use/src/index.ts)
 +
  <a id="deepseek-aidsh-tool-pwsh"></a>
  
@@ -1852,6 +1856,147 @@ index 0000000000000000000000000000000000000000..c0cdc20383c1f98eb2c2cb70e79af858
 +    </PluginCard>
 +  )
 +}
+diff --git a/packages/client/ui-settings-plugins/src/client/card-form.ts b/packages/client/ui-settings-plugins/src/client/card-form.ts
+index 255450bdb9fc1acefca7916e29fff812d9aa02f6..336fab2f6393c5e8c0e2b91f5b79d711f51ade4c 100644
+--- a/packages/client/ui-settings-plugins/src/client/card-form.ts
++++ b/packages/client/ui-settings-plugins/src/client/card-form.ts
+@@ -145,6 +145,25 @@ export function textField(field: string): CardFieldSpec {
+   }
+ }
+ 
++/**
++ * A boolean field rendered as the exact `true` / `false` draft used by switch controls.
++ * @param field - field name inside the namespace section.
++ * @returns the field's conversion spec.
++ */
++export function booleanField(field: string): CardFieldSpec {
++  return {
++    field,
++    format: value => typeof value === 'boolean' ? String(value) : '',
++    parse: (text) => {
++      const trimmed = text.trim()
++      if (trimmed === '') return { kind: 'clear' }
++      if (trimmed === 'true') return { kind: 'set', value: true }
++      if (trimmed === 'false') return { kind: 'set', value: false }
++      return undefined
++    },
++  }
++}
++
+ /**
+  * Stages one card's edits over one settings namespace and writes them on save.
+  *
+diff --git a/packages/client/ui-settings-plugins/src/client/fields.module.css b/packages/client/ui-settings-plugins/src/client/fields.module.css
+index 261dcb0fe98104ffb86b5e30f6c557d9005db495..b7d915d662893d703d4e890a3d68f68e8bce67f8 100644
+--- a/packages/client/ui-settings-plugins/src/client/fields.module.css
++++ b/packages/client/ui-settings-plugins/src/client/fields.module.css
+@@ -98,6 +98,48 @@
+   border-color: var(--dsw-alias-label-error);
+ }
+ 
++.switch {
++  position: relative;
++  flex: 0 0 auto;
++  width: 34px;
++  height: 20px;
++  padding: 2px;
++  border: 1px solid var(--dsw-alias-border-l2);
++  border-radius: 999px;
++  background: var(--dsw-alias-bg-layer-3);
++  cursor: pointer;
++  transition: background 120ms ease, border-color 120ms ease;
++}
++
++.switch[aria-checked='true'] {
++  border-color: var(--dsw-alias-brand-primary);
++  background: var(--dsw-alias-brand-primary);
++}
++
++.switch:focus-visible {
++  outline: 2px solid var(--dsw-alias-brand-primary);
++  outline-offset: 2px;
++}
++
++.switch:disabled {
++  opacity: 0.5;
++  cursor: default;
++}
++
++.switchThumb {
++  display: block;
++  width: 14px;
++  height: 14px;
++  border-radius: 50%;
++  background: var(--dsw-alias-label-primary);
++  transition: transform 120ms ease, background 120ms ease;
++}
++
++.switch[aria-checked='true'] .switchThumb {
++  transform: translateX(14px);
++  background: var(--dsw-alias-bg-layer-1);
++}
++
+ .invalid {
+   margin: 0;
+   font-size: 12px;
+diff --git a/packages/client/ui-settings-plugins/src/client/fields.tsx b/packages/client/ui-settings-plugins/src/client/fields.tsx
+index a30998ddada71a9e758e4cd2c604d302cb33d5ae..e77bc6e7d715f84a43a19544a1b66fbbc4825aa4 100644
+--- a/packages/client/ui-settings-plugins/src/client/fields.tsx
++++ b/packages/client/ui-settings-plugins/src/client/fields.tsx
+@@ -87,6 +87,53 @@ export function ValueField(props: FieldProps & {
+   )
+ }
+ 
++/**
++ * A staged boolean control with the same override/reset semantics as a value field.
++ * @param props - the field copy, effective state, and staging actions.
++ * @returns the labelled switch control.
++ */
++export function SwitchField(props: Omit<FieldProps, 'text' | 'invalid' | 'invalidLabel'> & {
++  /** Effective staged state. */
++  checked: boolean
++}) {
++  const labelId = `${props.id}-label`
++  return (
++    <div className={css.field}>
++      <div className={css.head}>
++        <span id={labelId} className={css.label}>{props.label}</span>
++        {props.overridden
++          ? (
++            <span className={css.badges}>
++              <span className={css.badge}>{props.overriddenLabel}</span>
++              <button
++                type="button"
++                className={css.reset}
++                disabled={props.disabled}
++                onClick={props.onReset}
++              >
++                {props.resetLabel}
++              </button>
++            </span>
++          )
++          : null}
++        <button
++          id={props.id}
++          type="button"
++          className={css.switch}
++          role="switch"
++          aria-checked={props.checked}
++          aria-labelledby={labelId}
++          disabled={props.disabled}
++          onClick={() => { props.onEdit(String(!props.checked)) }}
++        >
++          <span className={css.switchThumb} aria-hidden="true" />
++        </button>
++      </div>
++      <p className={css.hint}>{props.hint}</p>
++    </div>
++  )
++}
++
+ /**
+  * A write-only credential control. The value never rides a response, so the
+  * control reports only whether one is configured and starts blank; a blank
 diff --git a/packages/client/ui-settings-plugins/src/client/gui-model-card-controller.ts b/packages/client/ui-settings-plugins/src/client/gui-model-card-controller.ts
 new file mode 100644
 index 0000000000000000000000000000000000000000..5da7a762f9b2ad56d2a09fbb337d459007a9f195
@@ -2041,7 +2186,7 @@ index 0000000000000000000000000000000000000000..5da7a762f9b2ad56d2a09fbb337d4590
 +  return declared !== undefined && declared.length > 0 ? declared : DEFAULT_API_KEY_REF
 +}
 diff --git a/packages/client/ui-settings-plugins/src/client/index.ts b/packages/client/ui-settings-plugins/src/client/index.ts
-index 184511ead114a868edeafaf8a21ebd9a8abb5e64..cf3b4b390463c93ed6b501ef2115155ca3d23688 100644
+index 184511ead114a868edeafaf8a21ebd9a8abb5e64..6ad6a628b5fc80046b4751cbd9101bc8ad232b39 100644
 --- a/packages/client/ui-settings-plugins/src/client/index.ts
 +++ b/packages/client/ui-settings-plugins/src/client/index.ts
 @@ -4,7 +4,7 @@
@@ -2049,15 +2194,16 @@ index 184511ead114a868edeafaf8a21ebd9a8abb5e64..cf3b4b390463c93ed6b501ef2115155c
   * The section declares `settings.plugins.tab`; its own `configurable` tab then
   * declares `settings.plugin.item` and renders whatever cards were registered
 - * into it. The three cards this package ships are the host-plane sections the
-+ * into it. The four cards this package ships are the host-plane sections the
++ * into it. The five cards this package ships are the host-plane sections the
   * deployment already exposes; each binds its namespace through the client
   * settings scope, which keeps them unaware of one another and of other tabs.
   */
-@@ -23,12 +23,14 @@ import type {} from '@deepseek-ai/dsh-api-remotes/client'
+@@ -23,12 +23,16 @@ import type {} from '@deepseek-ai/dsh-api-remotes/client'
  import { AgentLoopCard } from './AgentLoopCard.tsx'
  import { BashCard } from './BashCard.tsx'
  import { ConfigurablePluginsTab } from './ConfigurablePluginsTab.tsx'
 +import { GuiModelCard } from './GuiModelCard.tsx'
++import { MacosUseCard } from './MacosUseCard.tsx'
  import { PluginsSettingsSection } from './PluginsSettingsSection.tsx'
  import type { PluginsSettingsSectionInjected, PluginsSettingsTabEntry } from './PluginsSettingsSection.tsx'
  import { WebSearchCard } from './WebSearchCard.tsx'
@@ -2065,22 +2211,25 @@ index 184511ead114a868edeafaf8a21ebd9a8abb5e64..cf3b4b390463c93ed6b501ef2115155c
  import { SHELL_NS, BashCardController } from './bash-card-controller.ts'
  import { ConfigurablePluginsTabController } from './tab-store.ts'
 +import { GUI_MODEL_NS, GuiModelCardController } from './gui-model-card-controller.ts'
++import { MacosUseCardController, TOOL_MACOS_USE_NS } from './macos-use-card-controller.ts'
  import { WEB_SEARCH_NS, WebSearchCardController } from './web-search-card-controller.ts'
  import { en, zh } from './locales.ts'
  
-@@ -43,6 +45,7 @@ export type {
+@@ -43,6 +47,8 @@ export type {
  } from './card-form.ts'
  export type { AgentLoopCardFace, AgentLoopCardState } from './agent-loop-card-controller.ts'
  export type { BashCardFace, BashCardState } from './bash-card-controller.ts'
 +export type { GuiModelCardFace, GuiModelCardState } from './gui-model-card-controller.ts'
++export type { MacosUseCardFace, MacosUseCardState } from './macos-use-card-controller.ts'
  export type { WebSearchCardFace, WebSearchCardState } from './web-search-card-controller.ts'
  
  /** Dictionary namespace owned by this plugin. */
-@@ -63,12 +66,16 @@ export function apply(ctx: ClientContext): void {
+@@ -63,12 +69,17 @@ export function apply(ctx: ClientContext): void {
    const bash = new BashCardController(ctx.settingsScope.bind({ namespace: SHELL_NS }))
    const agentLoop = new AgentLoopCardController(ctx.settingsScope.bind({ namespace: AGENT_LOOP_NS }))
    const webSearch = new WebSearchCardController(ctx.settingsScope.bind({ namespace: WEB_SEARCH_NS }), api)
 +  const guiModel = new GuiModelCardController(ctx.settingsScope.bind({ namespace: GUI_MODEL_NS }), api)
++  const macosUse = new MacosUseCardController(ctx.settingsScope.bind({ namespace: TOOL_MACOS_USE_NS }))
  
    // The credential a card reports is not part of any settings section, so its
    // scope publishes nothing when one is written. This is the only signal that
@@ -2094,16 +2243,16 @@ index 184511ead114a868edeafaf8a21ebd9a8abb5e64..cf3b4b390463c93ed6b501ef2115155c
      'ui-settings-plugins: credential invalidations',
    )
  
-@@ -132,7 +139,7 @@ export function apply(ctx: ClientContext): void {
+@@ -132,7 +143,7 @@ export function apply(ctx: ClientContext): void {
    }, PluginsSettingsSection))
  
    // The existing configuration page is one ordinary tab. It keeps ownership
 -  // of the card slot and the three shipped card contributions below.
-+  // of the card slot and the four shipped card contributions below.
++  // of the card slot and the five shipped card contributions below.
    ctx.slots.inject('settings.plugins.tab', () => ctx.slots.register({
      name: 'settings.plugins.tab',
      id: 'configurable',
-@@ -162,5 +169,11 @@ export function apply(ctx: ClientContext): void {
+@@ -162,5 +173,17 @@ export function apply(ctx: ClientContext): void {
        locale: NS,
        inject: () => webSearch.inject(),
      }, WebSearchCard)
@@ -2113,13 +2262,19 @@ index 184511ead114a868edeafaf8a21ebd9a8abb5e64..cf3b4b390463c93ed6b501ef2115155c
 +      locale: NS,
 +      inject: () => guiModel.inject(),
 +    }, GuiModelCard)
++    yield ctx.slots.register({
++      name: 'settings.plugin.item',
++      key: TOOL_MACOS_USE_NS,
++      locale: NS,
++      inject: () => macosUse.inject(),
++    }, MacosUseCard)
    })
  }
 diff --git a/packages/client/ui-settings-plugins/src/client/locales.ts b/packages/client/ui-settings-plugins/src/client/locales.ts
-index 1478e39997be01dcaedf56b828536ce01d4bb4d5..b70317546b672785ef054e173d8f57a2ee9926a7 100644
+index 1478e39997be01dcaedf56b828536ce01d4bb4d5..8f286319bc704d30fc8216755e3622aa3f539519 100644
 --- a/packages/client/ui-settings-plugins/src/client/locales.ts
 +++ b/packages/client/ui-settings-plugins/src/client/locales.ts
-@@ -11,6 +11,10 @@ export type PluginsSettingsLocaleKey =
+@@ -11,6 +11,12 @@ export type PluginsSettingsLocaleKey =
    | 'webSearchTitle' | 'webSearchDescription'
    | 'webSearchApiKey' | 'webSearchApiKeyHint' | 'webSearchApiKeySet' | 'webSearchApiKeyUnset'
    | 'webSearchBaseUrl' | 'webSearchBaseUrlHint' | 'webSearchMaxUses' | 'webSearchMaxUsesHint'
@@ -2127,10 +2282,12 @@ index 1478e39997be01dcaedf56b828536ce01d4bb4d5..b70317546b672785ef054e173d8f57a2
 +  | 'guiModelApiKey' | 'guiModelApiKeyHint' | 'guiModelApiKeySet' | 'guiModelApiKeyUnset'
 +  | 'guiModelBaseUrl' | 'guiModelBaseUrlHint' | 'guiModelModel' | 'guiModelModelHint'
 +  | 'guiModelMaxOutputTokens' | 'guiModelMaxOutputTokensHint'
++  | 'macosUseTitle' | 'macosUseDescription'
++  | 'macosUseShowStepScreenshots' | 'macosUseShowStepScreenshotsHint'
  
  /** English copy. */
  export const en: Record<PluginsSettingsLocaleKey, string> = {
-@@ -51,6 +55,18 @@ export const en: Record<PluginsSettingsLocaleKey, string> = {
+@@ -51,6 +57,22 @@ export const en: Record<PluginsSettingsLocaleKey, string> = {
    webSearchBaseUrlHint: 'Leave blank to use the provider default.',
    webSearchMaxUses: 'Max searches per request',
    webSearchMaxUsesHint: 'How many times one request may search before it must answer.',
@@ -2146,10 +2303,14 @@ index 1478e39997be01dcaedf56b828536ce01d4bb4d5..b70317546b672785ef054e173d8f57a2
 +  guiModelModelHint: 'The vision-capable model name sent with each request.',
 +  guiModelMaxOutputTokens: 'Max response tokens',
 +  guiModelMaxOutputTokensHint: 'Upper bound on the response length for one action decision.',
++  macosUseTitle: 'GUI tasks',
++  macosUseDescription: 'How computer_use_task and browser_use_task present their results.',
++  macosUseShowStepScreenshots: 'Show step screenshots',
++  macosUseShowStepScreenshotsHint: 'On by default. Saves and shows the screenshot used for each step; turning it off keeps those captures out of task output.',
  }
  
  /** Simplified Chinese copy. */
-@@ -92,4 +108,16 @@ export const zh: Record<PluginsSettingsLocaleKey, string> = {
+@@ -92,4 +114,20 @@ export const zh: Record<PluginsSettingsLocaleKey, string> = {
    webSearchBaseUrlHint: '留空则使用提供方默认地址。',
    webSearchMaxUses: '单次请求最多搜索次数',
    webSearchMaxUsesHint: '一次请求在必须作答前最多可以搜索多少次。',
@@ -2165,9 +2326,13 @@ index 1478e39997be01dcaedf56b828536ce01d4bb4d5..b70317546b672785ef054e173d8f57a2
 +  guiModelModelHint: '每次请求携带的视觉模型名称。',
 +  guiModelMaxOutputTokens: '最大响应 token 数',
 +  guiModelMaxOutputTokensHint: '单次动作决策响应长度的上限。',
++  macosUseTitle: 'GUI 任务',
++  macosUseDescription: '控制 computer_use_task 和 browser_use_task 如何展示结果。',
++  macosUseShowStepScreenshots: '显示每步截图',
++  macosUseShowStepScreenshotsHint: '默认开启。保存并展示每一步使用的截图；关闭后，这些截图不会出现在任务输出中。',
  }
 diff --git a/packages/client/ui-settings-plugins/tests/apply.client.spec.ts b/packages/client/ui-settings-plugins/tests/apply.client.spec.ts
-index 23e46e15a5ac9c885b494aa819dd83b6db303f16..afe321a44ca59c4e2bef47d40f31a71a76cf4646 100644
+index 23e46e15a5ac9c885b494aa819dd83b6db303f16..561053e363412f99b37f845ea076564497c26bd5 100644
 --- a/packages/client/ui-settings-plugins/tests/apply.client.spec.ts
 +++ b/packages/client/ui-settings-plugins/tests/apply.client.spec.ts
 @@ -126,13 +126,13 @@ describe('ui-settings-plugins apply', () => {
@@ -2175,7 +2340,7 @@ index 23e46e15a5ac9c885b494aa819dd83b6db303f16..afe321a44ca59c4e2bef47d40f31a71a
  
      expect(slots.entries('settings.plugin.item').map(entry => entry.options.key))
 -      .toEqual(['shell', 'agent-loop', 'web-search-deepseek'])
-+      .toEqual(['shell', 'agent-loop', 'web-search-deepseek', 'gui-model'])
++      .toEqual(['shell', 'agent-loop', 'web-search-deepseek', 'gui-model', 'tool-macos-use'])
    })
  
    it('dispatches the served namespaces its cards claim, and no others', async () => {
@@ -2200,22 +2365,392 @@ index 23e46e15a5ac9c885b494aa819dd83b6db303f16..afe321a44ca59c4e2bef47d40f31a71a
      const fiber = ctx.plugin({ inject: [...inject], apply })
      await fiber.await()
 -    expect(slots.entries('settings.plugin.item')).toHaveLength(3)
-+    expect(slots.entries('settings.plugin.item')).toHaveLength(4)
++    expect(slots.entries('settings.plugin.item')).toHaveLength(5)
  
      await fiber.dispose()
  
+diff --git a/packages/client/ui-settings-plugins/tests/fields.client.spec.tsx b/packages/client/ui-settings-plugins/tests/fields.client.spec.tsx
+index f9370106e08ad8ef9760a0ca6d3d2992a868d915..47e165140da98bac17f96fc86ffe566f76e9c9ac 100644
+--- a/packages/client/ui-settings-plugins/tests/fields.client.spec.tsx
++++ b/packages/client/ui-settings-plugins/tests/fields.client.spec.tsx
+@@ -6,7 +6,7 @@
+ 
+ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+ import { afterEach, describe, expect, it, vi } from 'vitest'
+-import { SecretField, ValueField } from '../src/client/fields.tsx'
++import { SecretField, SwitchField, ValueField } from '../src/client/fields.tsx'
+ 
+ afterEach(cleanup)
+ 
+@@ -154,3 +154,49 @@ describe('SecretField', () => {
+     expect(screen.getByLabelText('API key')).toHaveProperty('disabled', true)
+   })
+ })
++
++describe('SwitchField', () => {
++  it('exposes switch semantics and stages the opposite boolean value', () => {
++    const onEdit = vi.fn()
++    render(
++      <SwitchField
++        id="screenshots"
++        label="Show step screenshots"
++        hint="Show each task step with its screenshot."
++        overriddenLabel="Overridden"
++        resetLabel="Reset to default"
++        disabled={false}
++        overridden={false}
++        checked
++        onEdit={onEdit}
++        onReset={vi.fn()}
++      />,
++    )
++
++    const control = screen.getByRole('switch', { name: 'Show step screenshots' })
++    expect(control.getAttribute('aria-checked')).toBe('true')
++    fireEvent.click(control)
++    expect(onEdit).toHaveBeenCalledWith('false')
++  })
++
++  it('offers reset for an override and disables both controls when read-only', () => {
++    const onReset = vi.fn()
++    render(
++      <SwitchField
++        id="screenshots"
++        label="Show step screenshots"
++        hint="Show each task step with its screenshot."
++        overriddenLabel="Overridden"
++        resetLabel="Reset to default"
++        disabled
++        overridden
++        checked={false}
++        onEdit={vi.fn()}
++        onReset={onReset}
++      />,
++    )
++
++    expect(screen.getByRole('switch')).toHaveProperty('disabled', true)
++    expect(screen.getByRole('button', { name: 'Reset to default' })).toHaveProperty('disabled', true)
++  })
++})
+diff --git a/packages/client/ui-settings-plugins/tests/stores.client.spec.ts b/packages/client/ui-settings-plugins/tests/stores.client.spec.ts
+index 396678698bd4b97e8c5ba5cae6ca601b0ee3e420..dd9b3999af3a16577b5166b083ff3da28e0b606a 100644
+--- a/packages/client/ui-settings-plugins/tests/stores.client.spec.ts
++++ b/packages/client/ui-settings-plugins/tests/stores.client.spec.ts
+@@ -13,6 +13,7 @@ import {
+ } from '@deepseek-ai/dsh-client-ui-settings/src/client/settings-mirror.ts'
+ import { ConfigurablePluginsTabController } from '../src/client/tab-store.ts'
+ import { WebSearchCardController, type WebSearchSettings } from '../src/client/web-search-card-controller.ts'
++import { MacosUseCardController, type MacosUseSettings } from '../src/client/macos-use-card-controller.ts'
+ 
+ /** Make the stub behave like a Host that accepts every write. */
+ function acceptWrites<T>(host: StubSettingsScope<T>): void {
+@@ -383,6 +384,34 @@ describe('AgentLoopCardController', () => {
+   })
+ })
+ 
++describe('MacosUseCardController', () => {
++  it('stages and saves the default-on screenshot switch as a boolean', async () => {
++    const host = stubSettingsScope<MacosUseSettings>()
++    acceptWrites(host)
++    const controller = new MacosUseCardController(host.scope)
++    host.publish({
++      status: 'ready',
++      writable: true,
++      value: { showStepScreenshots: true },
++      base: { showStepScreenshots: true },
++      user: {},
++    })
++    const face = controller.inject()
++
++    expect(face.hooks.macosUseCard.getSnapshot().showStepScreenshots)
++      .toEqual({ text: 'true', overridden: false, invalid: false })
++
++    face.edit('showStepScreenshots', 'false')
++    face.save()
++    await vi.waitFor(() => { expect(host.set).toHaveBeenCalledWith('showStepScreenshots', false) })
++
++    expect(face.hooks.macosUseCard.getSnapshot()).toMatchObject({
++      dirty: false,
++      showStepScreenshots: { text: 'false', overridden: true, invalid: false },
++    })
++  })
++})
++
+ describe('WebSearchCardController', () => {
+   it('reads the credential state for the reference the tab names', async () => {
+     const host = stubSettingsScope<WebSearchSettings>()
+diff --git a/packages/client/ui-tool/src/client/contract/slots.ts b/packages/client/ui-tool/src/client/contract/slots.ts
+index a6cdd1fa2dc5b62c394c1a41a7fea6f7a0d002e7..7bf2183fdc07a28fb0ff4fd63257c4ea05d90ce3 100644
+--- a/packages/client/ui-tool/src/client/contract/slots.ts
++++ b/packages/client/ui-tool/src/client/contract/slots.ts
+@@ -2,7 +2,7 @@
+ import type { HostDescriptionSource } from '@deepseek-ai/dsh-client-connection/client'
+ import type { InjectFace, PropsLocale, PropsRenderSlots, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+ import type { ToolCallBlock } from '@deepseek-ai/dsh-client-runtime/client'
+-import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
++import type { RenderMessageImages } from '@deepseek-ai/dsh-client-ui-conversation/client'
+ import type {} from '@deepseek-ai/dsh-client-locale/client'
+ 
+ declare module '@deepseek-ai/dsh-client-ui-slots' {
+@@ -41,6 +41,8 @@ export interface ToolCallOwnerProps {
+   openFile: (path: string) => void
+   /** Inspect this call in the trajectory view when available. */
+   inspect?: (() => void) | undefined
++  /** Render durable image references through the session-authorized gallery. */
++  renderMessageImages?: RenderMessageImages | undefined
+ }
+ 
+ /** Full props of a registered atomic Tool view. */
+diff --git a/packages/client/ui-tool/src/client/tool/ToolCallTree.tsx b/packages/client/ui-tool/src/client/tool/ToolCallTree.tsx
+index 3ed5fb9216e009f7471c78d25e0f489267f3ea05..8a8b8d05f6532e44b7cd4cf80f4f6c70ca7db027 100644
+--- a/packages/client/ui-tool/src/client/tool/ToolCallTree.tsx
++++ b/packages/client/ui-tool/src/client/tool/ToolCallTree.tsx
+@@ -12,8 +12,8 @@ function callName(node: ToolCallBlock): string {
+ 
+ /** One atomic call dispatched through the Tool-owned keyed slot. */
+ const ToolCall = memo(function ToolCall({
+-  renderSlot, callId, toolName, block, openFile, selected, cwd, home, inspectCall, t, children,
+-}: Pick<ToolTreeProps, 'renderSlot' | 'openFile' | 'cwd' | 'inspectCall' | 't'> & {
++  renderSlot, renderMessageImages, callId, toolName, block, openFile, selected, cwd, home, inspectCall, t, children,
++}: Pick<ToolTreeProps, 'renderSlot' | 'renderMessageImages' | 'openFile' | 'cwd' | 'inspectCall' | 't'> & {
+   callId: string
+   toolName: string
+   block: ToolCallBlock
+@@ -29,7 +29,8 @@ const ToolCall = memo(function ToolCall({
+     cwd,
+     home,
+     inspect: () => { inspectCall(callId) },
+-  }), [callId, toolName, block, openFile, cwd, home, inspectCall])
++    renderMessageImages,
++  }), [callId, toolName, block, openFile, cwd, home, inspectCall, renderMessageImages])
+   return (
+     <div
+       className={css.callRow}
+@@ -47,14 +48,15 @@ const ToolCall = memo(function ToolCall({
+ })
+ 
+ const ToolCallBranch = memo(function ToolCallBranch({
+-  renderSlot, block, selectedCallId, cwd, home, openFile, inspectCall, t,
+-}: Pick<ToolTreeProps, 'renderSlot' | 'selectedCallId' | 'cwd' | 'openFile' | 'inspectCall' | 't'> & {
++  renderSlot, renderMessageImages, block, selectedCallId, cwd, home, openFile, inspectCall, t,
++}: Pick<ToolTreeProps, 'renderSlot' | 'renderMessageImages' | 'selectedCallId' | 'cwd' | 'openFile' | 'inspectCall' | 't'> & {
+   block: ToolCallBlock
+   home?: string | undefined
+ }) {
+   return (
+     <ToolCall
+       renderSlot={renderSlot}
++      renderMessageImages={renderMessageImages}
+       callId={block.callId}
+       toolName={callName(block)}
+       block={block}
+@@ -71,6 +73,7 @@ const ToolCallBranch = memo(function ToolCallBranch({
+             <ToolCallBranch
+               key={child.callId}
+               renderSlot={renderSlot}
++              renderMessageImages={renderMessageImages}
+               block={child}
+               selectedCallId={selectedCallId}
+               cwd={cwd}
+@@ -93,13 +96,14 @@ const ToolCallBranch = memo(function ToolCallBranch({
+  * @returns the Tool call tree.
+  */
+ export function ToolCallTree({
+-  renderSlot, node, selectedCallId, cwd, openFile, inspectCall, useHostDescription, t,
++  renderSlot, renderMessageImages, node, selectedCallId, cwd, openFile, inspectCall, useHostDescription, t,
+ }: ToolTreeProps) {
+   const home = useHostDescription(description => description?.home)
+   const block = node.data.root
+   return (
+     <ToolCallBranch
+       renderSlot={renderSlot}
++      renderMessageImages={renderMessageImages}
+       block={block}
+       selectedCallId={selectedCallId}
+       cwd={cwd}
+diff --git a/packages/client/ui-tool/src/client/tool/toolviews/GenericToolCard.tsx b/packages/client/ui-tool/src/client/tool/toolviews/GenericToolCard.tsx
+index 99fb68b9afe93afa5e9252f8747c5746e6a85413..6689dd1435993063ac41aab8ad41a4abb1be970e 100644
+--- a/packages/client/ui-tool/src/client/tool/toolviews/GenericToolCard.tsx
++++ b/packages/client/ui-tool/src/client/tool/toolviews/GenericToolCard.tsx
+@@ -4,7 +4,7 @@
+ // unregistered tool name lands here); registrants may also compose it as a
+ // base, feeding the same owner payload through.
+ 
+-import type { ReactNode } from 'react'
++import { Fragment, type ReactNode } from 'react'
+ import {
+   IconApiOutline14, IconBrowseOutline16, IconCodeOutline16, IconEditOutline16, IconSearchOutline16, IconSparkle16,
+ } from '@deepseek-ai/dsh-client-ui-primitives'
+@@ -16,6 +16,7 @@ import { terminalCardModel, terminalFailed } from '../models/terminal-card-model
+ import { webCardModel } from '../models/web-card-model.ts'
+ import { toolRowModel, type ToolRowVariant } from '../models/tool-call-model.ts'
+ import { ToolRow } from '../components/ToolRow.tsx'
++import css from './GenericToolCard.module.css'
+ 
+ /** Variant leading icons (figma table); all glyphs render at 14 inside the 16px leading box. */
+ const VARIANT_ICONS: Record<ToolRowVariant, ReactNode> = {
+@@ -33,13 +34,18 @@ export interface GenericToolCardProps extends ToolCallOwnerProps {
+   t: ToolTreeProps['t']
+ }
+ 
+-export function GenericToolCard({ toolName, block, cwd, home, openFile, inspect, t }: GenericToolCardProps) {
++export function GenericToolCard({
++  toolName, block, cwd, home, openFile, inspect, renderMessageImages, t,
++}: GenericToolCardProps) {
+   const model = toolRowModel(toolName, block, cwd, home)
+   const terminal = terminalCardModel(block, cwd)
+   const read = readCardModel(block, cwd, home)
+   const diff = diffCardModel(block)
+   const search = searchCardModel(block)
+   const web = webCardModel(block)
++  const presentation = 'kind' in block && block.resultView?.card === 'generic'
++    ? block.resultView.content
++    : undefined
+   // A failing exit status is the terminal card's own error signal (the call
+   // itself settles isError:false), surfaced as the row's red state dot.
+   const state = model.state === 'ok' && terminal !== null && terminalFailed(terminal)
+@@ -47,31 +53,48 @@ export function GenericToolCard({ toolName, block, cwd, home, openFile, inspect,
+     : model.state
+   const singleFile = model.filePath !== undefined
+   return (
+-    <ToolRow
+-      t={t}
+-      variant={model.variant}
+-      toolName={toolName}
+-      icon={VARIANT_ICONS[model.variant]}
+-      title={model.title}
+-      // A terminal presenter's description is the contract's above-card text, so
+-      // it outranks the args-derived summary here exactly as it does in BashRow;
+-      // a search result view's replacement title outranks it the same way.
+-      summary={terminal?.description ?? search?.title ?? model.summary}
+-      // Single-file tools never expose an args body — the path link is the only
+-      // args interaction. A card is not an args body: a read/write/edit row is
+-      // single-file AND carries a card, so the card expands under the path link.
+-      body={singleFile ? null : model.body}
+-      output={model.output}
+-      errorSummary={model.errorSummary}
+-      terminal={terminal}
+-      diff={diff}
+-      read={read}
+-      search={search}
+-      web={web}
+-      state={state}
+-      filePath={model.filePath}
+-      onOpenFile={singleFile ? openFile : undefined}
+-      inspect={inspect}
+-    />
++    <>
++      <ToolRow
++        t={t}
++        variant={model.variant}
++        toolName={toolName}
++        icon={VARIANT_ICONS[model.variant]}
++        title={model.title}
++        // A terminal presenter's description is the contract's above-card text, so
++        // it outranks the args-derived summary here exactly as it does in BashRow;
++        // a search result view's replacement title outranks it the same way.
++        summary={terminal?.description ?? search?.title ?? model.summary}
++        // Single-file tools never expose an args body — the path link is the only
++        // args interaction. A card is not an args body: a read/write/edit row is
++        // single-file AND carries a card, so the card expands under the path link.
++        body={singleFile ? null : model.body}
++        output={presentation === undefined ? model.output : null}
++        errorSummary={model.errorSummary}
++        terminal={terminal}
++        diff={diff}
++        read={read}
++        search={search}
++        web={web}
++        state={state}
++        filePath={model.filePath}
++        onOpenFile={singleFile ? openFile : undefined}
++        inspect={inspect}
++      />
++      {presentation !== undefined && presentation.length > 0
++        ? (
++          <div className={css.presentation} data-tool-result-presentation>
++            {presentation.map((item, index) => item.type === 'text'
++              ? <p key={index} className={css.text}>{item.text}</p>
++              : item.type === 'image' && renderMessageImages !== undefined
++                ? (
++                  <Fragment key={index}>
++                    {renderMessageImages({ images: [{ attachment: item.attachment }], align: 'start' })}
++                  </Fragment>
++                )
++                : <pre key={index} className={css.unknown}>{JSON.stringify(item, null, 2)}</pre>)}
++          </div>
++        )
++        : null}
++    </>
+   )
+ }
+diff --git a/packages/client/ui-tool/tests/tool-row.client.spec.tsx b/packages/client/ui-tool/tests/tool-row.client.spec.tsx
+index 2d1b289b9d178a88d3e55098a215112f061dc348..897c27ac9c0c269f02389043a99fa36773d00ba0 100644
+--- a/packages/client/ui-tool/tests/tool-row.client.spec.tsx
++++ b/packages/client/ui-tool/tests/tool-row.client.spec.tsx
+@@ -465,4 +465,37 @@ describe('GenericToolCard', () => {
+     fireEvent.click(bashView.getByText('List files'))
+     expect(bash.openFile).not.toHaveBeenCalled()
+   })
++
++  it('renders a generic result view\'s text and images instead of the raw model output', () => {
++    const renderMessageImages = vi.fn((owner: Parameters<NonNullable<GenericToolCardProps['renderMessageImages']>>[0]) => (
++      <div data-testid="result-images">{String(owner.images[0]?.attachment.attachmentId)}</div>
++    ))
++    const screenshot = {
++      attachmentId: 'step-1', mediaType: 'image/png', bytes: 4, width: 2, height: 2,
++    } as never
++    const block = result({
++      call: { name: 'computer_use_task', argsRaw: '{"task":"open settings"}' },
++      content: [{ type: 'text', text: 'model-only output' }],
++      resultView: {
++        card: 'generic',
++        content: [
++          { type: 'text', text: 'Step 1: clicked Settings' },
++          { type: 'image', attachment: screenshot },
++        ],
++      },
++    })
++
++    const view = render(
++      <GenericToolCard
++        {...props('computer_use_task', block)}
++        renderMessageImages={renderMessageImages}
++      />,
++    )
++
++    expect(view.getByText('Step 1: clicked Settings')).toBeTruthy()
++    expect(view.getByTestId('result-images').textContent).toBe('step-1')
++    expect(renderMessageImages).toHaveBeenCalledWith({ images: [{ attachment: screenshot }], align: 'start' })
++    fireEvent.click(view.getByRole('button', { name: /Tool call/ }))
++    expect(view.queryByText('model-only output')).toBeNull()
++  })
+ })
 diff --git a/packages/extensions/cordis-client-runner/src/client/slot-catalog.ts b/packages/extensions/cordis-client-runner/src/client/slot-catalog.ts
-index 90e7434f3c050dab8009f905b663453da48295d3..a17b610a7b859d9a4bb7c2d59fc1cc403e261076 100644
+index 90e7434f3c050dab8009f905b663453da48295d3..f8faa2bc906a934c00b0809777bca43c93b22d20 100644
 --- a/packages/extensions/cordis-client-runner/src/client/slot-catalog.ts
 +++ b/packages/extensions/cordis-client-runner/src/client/slot-catalog.ts
-@@ -1390,6 +1390,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
+@@ -1390,6 +1390,8 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
        'client-ui-settings-plugins BashCard',
        'client-ui-settings-plugins AgentLoopCard',
        'client-ui-settings-plugins WebSearchCard',
 +      'client-ui-settings-plugins GuiModelCard',
++      'client-ui-settings-plugins MacosUseCard',
      ],
      replaceRisk: 'none',
      example: 'return {\n  inject: [\'slots\'],\n  apply(ctx) {\n    ctx.slots.inject(\'settings.plugin.item\', () => ctx.slots.register(\n      { name: \'settings.plugin.item\', key: \'<one key the owner dispatches>\' },\n      () => React.createElement(\'div\', null, \'hello\'),\n    ))\n  },\n}',
+@@ -1773,9 +1775,10 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
+       },
+     ],
+     ownerProps: [
+-      '/** Standard owner currency supplied to every atomic Tool view. */\nexport interface ToolCallOwnerProps {\n  /** Tool call identity, stable across running and settled forms. */\n  callId: string\n  /** Wire Tool name and keyed dispatch value. */\n  toolName: string\n  /** Frozen running call or settled result node. */\n  block: ToolCallBlock\n  /** Session workspace root for relative summaries. */\n  cwd?: string | undefined\n  /** Host account home; POSIX home-rooted summaries display as `~`. */\n  home?: string | undefined\n  /** Open a Tool argument path through the Host. */\n  openFile: (path: string) => void\n  /** Inspect this call in the trajectory view when available. */\n  inspect?: (() => void) | undefined\n}',
++      '/** Standard owner currency supplied to every atomic Tool view. */\nexport interface ToolCallOwnerProps {\n  /** Tool call identity, stable across running and settled forms. */\n  callId: string\n  /** Wire Tool name and keyed dispatch value. */\n  toolName: string\n  /** Frozen running call or settled result node. */\n  block: ToolCallBlock\n  /** Session workspace root for relative summaries. */\n  cwd?: string | undefined\n  /** Host account home; POSIX home-rooted summaries display as `~`. */\n  home?: string | undefined\n  /** Open a Tool argument path through the Host. */\n  openFile: (path: string) => void\n  /** Inspect this call in the trajectory view when available. */\n  inspect?: (() => void) | undefined\n  /** Render durable image references through the session-authorized gallery. */\n  renderMessageImages?: RenderMessageImages | undefined\n}',
+     ],
+     ownerPropsReferences: [
++      'RenderMessageImages',
+       'Wire',
+     ],
+     standardProps: [
 diff --git a/packages/extensions/tool-cordis/src/api-catalog.ts b/packages/extensions/tool-cordis/src/api-catalog.ts
 index 449925fc61b20ff8f88499d76e8c4041a67ec66e..7c8676300b59cf26e69ac0dfc60278da4854d5ff 100644
 --- a/packages/extensions/tool-cordis/src/api-catalog.ts
@@ -2489,8 +3024,146 @@ index 449925fc61b20ff8f88499d76e8c4041a67ec66e..7c8676300b59cf26e69ac0dfc60278da
    {
      name: 'SearchFileMatches',
      declaration: 'export interface SearchFileMatches {\n    path: string;\n    matches: SearchLineMatch[];\n}',
+diff --git a/packages/host/apiproxy/src/api-proxy.ts b/packages/host/apiproxy/src/api-proxy.ts
+index ccb2d6d20c27554a6ca46e4ea1f4a15c1d093469..01fb6b4353108d7217d0d6f3a49ebd4c2888f151 100644
+--- a/packages/host/apiproxy/src/api-proxy.ts
++++ b/packages/host/apiproxy/src/api-proxy.ts
+@@ -155,16 +155,19 @@ function imageBlockIn(content: unknown, match: (ref: ImageAttachmentRef) => bool
+   return undefined
+ }
+ 
+-/** Search every durable event carrier that can own model-visible content. */
++/** Search every durable event carrier that can own model-visible or UI-only image content. */
+ function imageInEvent(event: SessionEvent, match: (ref: ImageAttachmentRef) => boolean): ImageAttachmentRef | undefined {
+   const data = event.data as {
+     content?: unknown
++    meta?: { content?: unknown }
+     message?: { content?: unknown }
+     inserted?: Array<{ content?: unknown }>
+     chunk?: { type?: unknown; block?: unknown }
+   }
+   const direct = imageBlockIn(data.content, match)
+   if (direct !== undefined) return direct
++  const presentation = imageBlockIn(data.meta?.content, match)
++  if (presentation !== undefined) return presentation
+   if (data.message !== undefined) {
+     const wrapped = imageBlockIn(data.message.content, match)
+     if (wrapped !== undefined) return wrapped
+diff --git a/packages/host/apiproxy/src/session-export.ts b/packages/host/apiproxy/src/session-export.ts
+index 72b40a016db37a9448f327a1f8ac12ba6d0e2771..6af96a83e60dfaf4a910be9cafc1046c89760d0e 100644
+--- a/packages/host/apiproxy/src/session-export.ts
++++ b/packages/host/apiproxy/src/session-export.ts
+@@ -134,8 +134,8 @@ function collectImageRefs(content: unknown, refs: Map<string, ImageAttachmentRef
+ 
+ /**
+  * Collect every image reference one session event carries, across the same
+- * carriers the live attachment route scans (direct content, message content,
+- * inserted messages, and completed assistant chunk blocks).
++ * carriers the live attachment route scans (direct content, UI presentation
++ * metadata, message content, inserted messages, and completed assistant chunk blocks).
+  * @param event - one parsed JSONL event object.
+  * @param refs - the dedupe map being filled (keyed by attachment id).
+  */
+@@ -144,11 +144,13 @@ function collectEventImageRefs(event: unknown, refs: Map<string, ImageAttachment
+   if (typeof data !== 'object' || data === null) return
+   const carrier = data as {
+     content?: unknown
++    meta?: { content?: unknown }
+     message?: { content?: unknown }
+     inserted?: Array<{ content?: unknown }>
+     chunk?: { type?: unknown; block?: unknown }
+   }
+   collectImageRefs(carrier.content, refs)
++  collectImageRefs(carrier.meta?.content, refs)
+   if (carrier.message !== undefined) collectImageRefs(carrier.message.content, refs)
+   if (carrier.inserted !== undefined) {
+     for (const message of carrier.inserted) collectImageRefs(message.content, refs)
+diff --git a/packages/host/apiproxy/tests/api-proxy-models.spec.ts b/packages/host/apiproxy/tests/api-proxy-models.spec.ts
+index d353ad0e62bcaf3d63a40c44da1fe5d7e8914ef0..df3ee18975a8e83e6da5862e6194be66d6fa6e09 100644
+--- a/packages/host/apiproxy/tests/api-proxy-models.spec.ts
++++ b/packages/host/apiproxy/tests/api-proxy-models.spec.ts
+@@ -16,6 +16,7 @@ import type {
+   LlmResolvedModelInfo, StreamChunk,
+   UserMessage,
+ } from '@deepseek-ai/dsh-llm'
++import { CallId, createToolResultMessage } from '@deepseek-ai/dsh-llm'
+ import SessionStore from '@deepseek-ai/dsh-session'
+ import type { SessionId } from '@deepseek-ai/dsh-session'
+ import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
+@@ -247,7 +248,8 @@ describe('Web session model selection', () => {
+     const ref = {
+       attachmentId: 'att-authorized', mediaType: 'image/png' as const, bytes: 2, width: 1, height: 1,
+     }
+-    const readImage = vi.fn(() => Promise.resolve({ ref, data: Uint8Array.of(1, 2) }))
++    const presentationRef = { ...ref, attachmentId: 'att-presentation' }
++    const readImage = vi.fn((requested: typeof ref) => Promise.resolve({ ref: requested, data: Uint8Array.of(1, 2) }))
+     ctx.provide('attachments', { readImage } as never)
+     const api = createApiProxy(ctx, {
+       defaultModelSelection: () => ({ provider: 'deepseek-official', model: 'deepseek-chat' }),
+@@ -261,11 +263,27 @@ describe('Web session model selection', () => {
+         content: [{ type: 'image', attachment: ref }],
+       }],
+     } as never)
++    agent.session.append('tool/result', {
++      turn: 1,
++      step: 1,
++      message: createToolResultMessage({
++        callId: CallId('gui-task'),
++        content: [{ type: 'text', text: 'text-only model result' }],
++        isError: false,
++      }),
++      meta: { content: [{ type: 'image', attachment: presentationRef }] },
++    }, { surfaceOp: 'append' })
+ 
+     const allowed = await api.sessions.attachment(request({
+       sessionId, attachmentId: 'att-authorized' as never,
+     }))
+     expect(allowed.result).toMatchObject({ ok: true, value: { attachment: ref, data: 'AQI=' } })
++    const presentationAllowed = await api.sessions.attachment(request({
++      sessionId, attachmentId: 'att-presentation' as never,
++    }))
++    expect(presentationAllowed.result).toMatchObject({
++      ok: true, value: { attachment: presentationRef, data: 'AQI=' },
++    })
+     const denied = await api.sessions.attachment(request({
+       sessionId, attachmentId: 'att-other' as never,
+     }))
+@@ -273,7 +291,7 @@ describe('Web session model selection', () => {
+       ok: false,
+       error: { code: 'attachment-error', details: { reason: 'ATTACHMENT_NOT_REFERENCED' } },
+     })
+-    expect(readImage).toHaveBeenCalledOnce()
++    expect(readImage).toHaveBeenCalledTimes(2)
+     await ctx.fiber.dispose()
+   })
+   it('groups successful providers and leaves an unlisted current selection out of the catalog', async () => {
+diff --git a/packages/host/apiproxy/tests/session-export.spec.ts b/packages/host/apiproxy/tests/session-export.spec.ts
+index 5b5fcaa216ca348ae037a290ec77e63286d24ee5..7a16b11bc895d55128340dc3c10fde7e6b02c4a0 100644
+--- a/packages/host/apiproxy/tests/session-export.spec.ts
++++ b/packages/host/apiproxy/tests/session-export.spec.ts
+@@ -633,6 +633,20 @@ describe('session.export download endpoint', () => {
+     expect(Object.keys(files).sort()).toEqual(['media/nested-1.webp', 'session.jsonl'])
+   })
+ 
++  it('collects UI-only media referenced from tool presentation metadata', async () => {
++    const presented = '{"type":"tool/result","seq":2,"time":2000,"data":{"meta":{"content":[{"type":"image","attachment":{"attachmentId":"presented-1","mediaType":"image/png","bytes":4,"width":2,"height":2}}]}}}'
++    const root = artifact('session-root', undefined, [
++      '{"type":"session","version":0,"id":"session-root","createdAt":1000}',
++      presented,
++    ].join('\n') + '\n')
++    const api = await buildApi({ 'session-root': root })
++    const response = await toFetchHandler(api).fetch(
++      new Request('http://host/api/session.export?sessionId=session-root'),
++    )
++    const files = unzipSync(await responseBytes(response))
++    expect(Object.keys(files).sort()).toEqual(['media/presented-1.png', 'session.jsonl'])
++  })
++
+   it('scans the wrapped, inserted, and chunk carriers plus non-object content items', async () => {
+     const block = (id: string, mediaType: string) =>
+       `{"type":"image","attachment":{"attachmentId":"${id}","mediaType":"${mediaType}","bytes":4,"width":2,"height":2}}`
 diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
-index 02e1555769ddd43f8b439a1ffee0699238922b38..cc67db62bfb0b8b20fc80a7911c2985245a98aa0 100644
+index 02e1555769ddd43f8b439a1ffee0699238922b38..fe23c6bcffb2ea3f2d55306c43962e25ebd08045 100644
 --- a/pnpm-lock.yaml
 +++ b/pnpm-lock.yaml
 @@ -153,6 +153,9 @@ importers:
@@ -2533,7 +3206,7 @@ index 02e1555769ddd43f8b439a1ffee0699238922b38..cc67db62bfb0b8b20fc80a7911c29852
        '@deepseek-ai/dsh-tool-pwsh':
          specifier: workspace:^
          version: link:../../packages/shell/tool-pwsh
-@@ -5729,6 +5741,88 @@ importers:
+@@ -5729,6 +5741,94 @@ importers:
          specifier: workspace:^
          version: link:../../core/tools
  
@@ -2593,6 +3266,9 @@ index 02e1555769ddd43f8b439a1ffee0699238922b38..cc67db62bfb0b8b20fc80a7911c29852
 +
 +  packages/macos-use/tool-macos-use:
 +    dependencies:
++      '@deepseek-ai/dsh-system-prompt':
++        specifier: workspace:^
++        version: link:../../core/system-prompt
 +      '@deepseek-ai/schemastery':
 +        specifier: link:../../../vendor/schemastery
 +        version: link:../../../vendor/schemastery
@@ -2615,6 +3291,9 @@ index 02e1555769ddd43f8b439a1ffee0699238922b38..cc67db62bfb0b8b20fc80a7911c29852
 +      '@deepseek-ai/dsh-macos-use':
 +        specifier: workspace:^
 +        version: link:../macos-use
++      '@deepseek-ai/dsh-settings':
++        specifier: workspace:^
++        version: link:../../settings/settings
 +      '@deepseek-ai/dsh-tools':
 +        specifier: workspace:^
 +        version: link:../../core/tools
@@ -2828,3 +3507,140 @@ index 601c74c247e522f7e07cf643d8cb93f513974861..111a21c69dd0034e0c7e148fe223c6f1
      { "path": "./packages/spill/spill" },
      { "path": "./packages/spill/spill-local" },
      { "path": "./packages/spill/spill-policy" },
+diff --git a/packages/client/ui-settings-plugins/src/client/MacosUseCard.tsx b/packages/client/ui-settings-plugins/src/client/MacosUseCard.tsx
+new file mode 100644
+index 0000000000000000000000000000000000000000..a3e760d0188d053bbf9be14364b1854e9f10e8fe
+--- /dev/null
++++ b/packages/client/ui-settings-plugins/src/client/MacosUseCard.tsx
+@@ -0,0 +1,46 @@
++/** GUI task presentation settings. */
++
++import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
++import { SwitchField } from './fields.tsx'
++import type { MacosUseCardFace } from './macos-use-card-controller.ts'
++import { PluginCard } from './PluginCard.tsx'
++import type {} from './slot-contract.ts'
++
++/** Props the renderer binds for the GUI task card. */
++export type MacosUseCardProps =
++  PropsRuntime<'settings.plugin.item'>
++  & PropsLocale<'settings.plugins'>
++  & InjectFace<MacosUseCardFace>
++
++/**
++ * Render the GUI task presentation card.
++ * @param props - locale copy, the card snapshot, and its form actions.
++ * @returns the card.
++ */
++export function MacosUseCard(props: MacosUseCardProps) {
++  const { t } = props
++  const state = props.useMacosUseCard(snapshot => snapshot)
++  return (
++    <PluginCard
++      t={t}
++      titleKey="macosUseTitle"
++      descriptionKey="macosUseDescription"
++      state={state}
++      onSave={props.save}
++      onDiscard={props.discard}
++    >
++      <SwitchField
++        id="plugin-config-macos-use-step-screenshots"
++        label={t('macosUseShowStepScreenshots')}
++        hint={t('macosUseShowStepScreenshotsHint')}
++        overriddenLabel={t('overridden')}
++        resetLabel={t('reset')}
++        disabled={!state.writable}
++        overridden={state.showStepScreenshots.overridden}
++        checked={state.showStepScreenshots.text === 'true'}
++        onEdit={(text) => { props.edit('showStepScreenshots', text) }}
++        onReset={() => { props.resetField('showStepScreenshots') }}
++      />
++    </PluginCard>
++  )
++}
+diff --git a/packages/client/ui-settings-plugins/src/client/macos-use-card-controller.ts b/packages/client/ui-settings-plugins/src/client/macos-use-card-controller.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..0517c929d5640d2ef08ce955019f53b2e05295ef
+--- /dev/null
++++ b/packages/client/ui-settings-plugins/src/client/macos-use-card-controller.ts
+@@ -0,0 +1,51 @@
++/** The macOS/browser task card's staged form over the `tool-macos-use` settings namespace. */
++
++import type { SettingsScope, SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
++import { booleanField, CardForm, type CardActions, type CardFieldState, type CardShell } from './card-form.ts'
++
++/** Namespace of the GUI task tools' user-owned presentation settings. */
++export const TOOL_MACOS_USE_NS = 'tool-macos-use'
++
++/** User-owned presentation settings for GUI task output. */
++export interface MacosUseSettings {
++  /** Whether each task step keeps and displays its grounding screenshot. */
++  showStepScreenshots?: boolean
++}
++
++/** What the GUI task card renders. */
++export interface MacosUseCardState extends CardShell {
++  /** Per-step screenshot presentation preference. */
++  showStepScreenshots: CardFieldState
++}
++
++/** The registration-side face the GUI task card's slot entry injects. */
++export interface MacosUseCardFace extends CardActions {
++  hooks: {
++    /** Card snapshot bound by the renderer as useMacosUseCard. */
++    macosUseCard: SnapshotStore<MacosUseCardState>
++  }
++}
++
++/** Bridges the `tool-macos-use` scope onto the card's staged form. */
++export class MacosUseCardController {
++  private readonly form: CardForm<MacosUseSettings>
++  private readonly store: SnapshotStore<MacosUseCardState>
++
++  /** @param scope - the bound settings scope for the `tool-macos-use` namespace. */
++  constructor(scope: SettingsScope<MacosUseSettings>) {
++    this.form = new CardForm(scope, [booleanField('showStepScreenshots')])
++    this.store = this.form.bind(() => this.projection())
++  }
++
++  private projection(): MacosUseCardState {
++    return { ...this.form.shell(), showStepScreenshots: this.form.field('showStepScreenshots') }
++  }
++
++  /**
++   * Build the face the card's slot registration injects.
++   * @returns the card's snapshot and its form actions.
++   */
++  inject(): MacosUseCardFace {
++    return { hooks: { macosUseCard: this.store }, ...this.form.actions() }
++  }
++}
+diff --git a/packages/client/ui-tool/src/client/tool/toolviews/GenericToolCard.module.css b/packages/client/ui-tool/src/client/tool/toolviews/GenericToolCard.module.css
+new file mode 100644
+index 0000000000000000000000000000000000000000..5368e3f3f18cc8fdcd8724306acf2431e1ea13a3
+--- /dev/null
++++ b/packages/client/ui-tool/src/client/tool/toolviews/GenericToolCard.module.css
+@@ -0,0 +1,22 @@
++/* UI-facing rich result content that replaces a generic tool row's raw output. */
++
++.presentation {
++  display: flex;
++  flex-direction: column;
++  gap: 10px;
++  margin: 8px 0 12px 24px;
++}
++
++.text,
++.unknown {
++  margin: 0;
++  white-space: pre-wrap;
++  overflow-wrap: anywhere;
++  font-size: 13px;
++  line-height: 1.55;
++  color: var(--dsw-alias-label-secondary);
++}
++
++.unknown {
++  font-family: var(--dsw-font-mono);
++}

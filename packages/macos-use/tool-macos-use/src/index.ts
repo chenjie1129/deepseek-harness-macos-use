@@ -10,7 +10,9 @@ import { Buffer } from 'node:buffer'
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { defineTool } from '@deepseek-ai/dsh-tools'
+import type { JsonValue, ToolResult, ToolResultView } from '@deepseek-ai/dsh-tools'
 import type { ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
+import { installSettingsSection, settingsNamespace } from '@deepseek-ai/dsh-settings'
 import type {} from '@deepseek-ai/dsh-macos-use'
 import type { GuiAction } from '@deepseek-ai/dsh-gui-model'
 import type {} from '@deepseek-ai/dsh-browser-use'
@@ -25,12 +27,27 @@ export const inject = ['tools', 'macosUse', 'guiModel', 'browserUse', 'attachmen
 export interface Config {
   /** Default `max_steps` for `computer_use_task` / `browser_use_task` when the model omits it. Defaults to 20. */
   defaultMaxSteps?: number
+  /** Save and show the screenshot that grounded each task step. Defaults to true. */
+  showStepScreenshots?: boolean
 }
 
 const TOOL_MACOS_USE_DEFAULT_MAX_STEPS = 20
+const TOOL_MACOS_USE_DEFAULT_SHOW_STEP_SCREENSHOTS = true
 
 export const Config: z<Config> = z.object({
-  defaultMaxSteps: z.number().step(1).min(1),
+  defaultMaxSteps: z.number().step(1).min(1).default(TOOL_MACOS_USE_DEFAULT_MAX_STEPS),
+  showStepScreenshots: z.boolean().default(TOOL_MACOS_USE_DEFAULT_SHOW_STEP_SCREENSHOTS),
+})
+
+/** Live settings namespace for user-owned task presentation preferences. */
+export const TOOL_MACOS_USE_SETTINGS_NAMESPACE = settingsNamespace('tool-macos-use')
+
+interface TaskPresentationSettings {
+  showStepScreenshots?: boolean
+}
+
+const TaskPresentationSettings: z<TaskPresentationSettings> = z.object({
+  showStepScreenshots: z.boolean().default(TOOL_MACOS_USE_DEFAULT_SHOW_STEP_SCREENSHOTS),
 })
 
 const IMAGE_REF_SCHEMA = {
@@ -55,6 +72,7 @@ const STEP_LOG_SCHEMA = {
     properties: {
       action: { type: 'string', required: true },
       outcome: { type: 'string' },
+      screenshot: IMAGE_REF_SCHEMA,
     },
   },
 } as const
@@ -79,6 +97,7 @@ function renderStepLog(steps: readonly TaskStepLog[]): string {
 interface EncodedStep {
   action: string
   outcome?: string
+  screenshot?: ImageAttachmentRef
 }
 
 function decodeSteps(steps: readonly EncodedStep[]): TaskStepLog[] {
@@ -88,10 +107,11 @@ function decodeSteps(steps: readonly EncodedStep[]): TaskStepLog[] {
   }))
 }
 
-function encodeSteps(steps: readonly TaskStepLog[]): EncodedStep[] {
-  return steps.map(step => ({
+function encodeSteps(steps: readonly TaskStepLog[], screenshots: readonly ImageAttachmentRef[]): EncodedStep[] {
+  return steps.map((step, index) => ({
     action: JSON.stringify(step.action),
     ...step.outcome !== undefined ? { outcome: step.outcome } : {},
+    ...screenshots[index] !== undefined ? { screenshot: screenshots[index] } : {},
   }))
 }
 
@@ -102,6 +122,24 @@ interface TaskResultValue {
   finalScreenshot: ImageAttachmentRef
 }
 
+function taskResultValue(value: {
+  completed: boolean
+  summary: string
+  steps: readonly { action: string; outcome?: string; screenshot?: unknown }[]
+  finalScreenshot?: unknown
+}): TaskResultValue {
+  return {
+    completed: value.completed,
+    summary: value.summary,
+    steps: value.steps.map(step => ({
+      action: step.action,
+      ...step.outcome === undefined ? {} : { outcome: step.outcome },
+      ...step.screenshot === undefined ? {} : { screenshot: step.screenshot as ImageAttachmentRef },
+    })),
+    finalScreenshot: value.finalScreenshot as ImageAttachmentRef,
+  }
+}
+
 function renderTaskResult(value: TaskResultValue) {
   const status = value.completed ? 'Completed' : 'Stopped'
   const log = renderStepLog(decodeSteps(value.steps))
@@ -109,8 +147,76 @@ function renderTaskResult(value: TaskResultValue) {
   return [{ type: 'text' as const, text: `${status}: ${value.summary}\n\n${log}\n\n${screenshot}` }]
 }
 
+function taskPresentationContent(value: TaskResultValue) {
+  const status = value.completed ? 'Completed' : 'Stopped'
+  const content: Array<
+    | { type: 'text'; text: string }
+    | { type: 'image'; attachment: ImageAttachmentRef }
+  > = [{ type: 'text', text: `${status}: ${value.summary}` }]
+  for (const [index, step] of value.steps.entries()) {
+    const outcome = step.outcome === undefined ? '' : ` -> ${step.outcome}`
+    content.push({ type: 'text', text: `Step ${String(index + 1)}: ${step.action}${outcome}` })
+    if (step.screenshot !== undefined) content.push({ type: 'image', attachment: step.screenshot })
+  }
+  content.push({ type: 'text', text: describeScreenshot(value.finalScreenshot) })
+  return content
+}
+
+function taskPresentationMeta(value: TaskResultValue): JsonValue {
+  return { content: taskPresentationContent(value) } as unknown as JsonValue
+}
+
+function taskPresentationContentFromMeta(meta: JsonValue | undefined): ReturnType<typeof taskPresentationContent> | undefined {
+  if (typeof meta !== 'object' || meta === null || Array.isArray(meta)) return undefined
+  const candidate = (meta as { content?: unknown }).content
+  if (!Array.isArray(candidate)) return undefined
+  const content: ReturnType<typeof taskPresentationContent> = []
+  for (const item of candidate) {
+    if (typeof item !== 'object' || item === null || Array.isArray(item)) return undefined
+    const block = item as { type?: unknown; text?: unknown; attachment?: unknown }
+    if (block.type === 'text' && typeof block.text === 'string') {
+      content.push({ type: 'text', text: block.text })
+      continue
+    }
+    if (block.type !== 'image' || typeof block.attachment !== 'object'
+      || block.attachment === null || Array.isArray(block.attachment)) return undefined
+    const ref = block.attachment as Record<string, unknown>
+    if (typeof ref.attachmentId !== 'string' || typeof ref.mediaType !== 'string'
+      || typeof ref.bytes !== 'number' || typeof ref.width !== 'number' || typeof ref.height !== 'number'
+      || (ref.name !== undefined && typeof ref.name !== 'string')) return undefined
+    content.push({ type: 'image', attachment: ref as unknown as ImageAttachmentRef })
+  }
+  return content
+}
+
+function presentTaskResult(result: ToolResult): ToolResultView | undefined {
+  if (result.isError) return undefined
+  const content = taskPresentationContentFromMeta(result.meta)
+  return content === undefined ? undefined : { card: 'generic', content }
+}
+
+async function saveStepScreenshots(
+  ctx: Context,
+  pngImages: readonly string[],
+  namePrefix: string,
+): Promise<ImageAttachmentRef[]> {
+  return Promise.all(pngImages.map(async (pngBase64, index) => ctx.attachments.saveImage({
+    data: Buffer.from(pngBase64, 'base64'),
+    mediaType: 'image/png',
+    name: `${namePrefix}-step-${String(index + 1)}.png`,
+  })))
+}
+
 export function apply(ctx: Context, config: Config = {}): void {
   const defaultMaxSteps = config.defaultMaxSteps ?? TOOL_MACOS_USE_DEFAULT_MAX_STEPS
+  const taskPresentationEntry: TaskPresentationSettings = {
+    showStepScreenshots: config.showStepScreenshots ?? TOOL_MACOS_USE_DEFAULT_SHOW_STEP_SCREENSHOTS,
+  }
+  let currentTaskPresentation = () => taskPresentationEntry
+  installSettingsSection(ctx, TOOL_MACOS_USE_SETTINGS_NAMESPACE, TaskPresentationSettings, taskPresentationEntry, {
+    setSource: (source) => { currentTaskPresentation = source },
+    onChange: () => {},
+  })
 
   ctx.tools.register(defineTool({
     name: 'computer_screenshot',
@@ -235,29 +341,34 @@ export function apply(ctx: Context, config: Config = {}): void {
           completed: { type: 'boolean', required: true },
           summary: { type: 'string', required: true },
           steps: STEP_LOG_SCHEMA,
-          finalScreenshot: IMAGE_REF_SCHEMA,
+          finalScreenshot: { ...IMAGE_REF_SCHEMA, required: true },
         },
       },
-      render: (_args, value) => renderTaskResult({
-        ...value,
-        finalScreenshot: value.finalScreenshot as unknown as ImageAttachmentRef,
-      }),
+      render: (_args, value) => renderTaskResult(taskResultValue(value)),
+      presentationMeta: (_args, value) => taskPresentationMeta(taskResultValue(value)),
     },
     async execute(args, exec) {
+      const showStepScreenshots = currentTaskPresentation().showStepScreenshots
+        ?? TOOL_MACOS_USE_DEFAULT_SHOW_STEP_SCREENSHOTS
       const result = await runGuiTask(ctx.guiModel, macosTaskExecutor(ctx), {
         task: args.task,
         maxSteps: args.max_steps ?? defaultMaxSteps,
+        retainStepScreenshots: showStepScreenshots,
         signal: exec.signal,
       })
+      const stepScreenshots = showStepScreenshots
+        ? await saveStepScreenshots(ctx, result.stepScreenshotsPngBase64, 'computer-use-task')
+        : []
       const { pngBase64 } = await ctx.macosUse.screenshot(exec.signal)
       const finalScreenshot = await ctx.attachments.saveImage({ data: Buffer.from(pngBase64, 'base64'), mediaType: 'image/png', name: 'computer-use-task-result.png' })
       return {
         completed: result.completed,
         summary: result.summary,
-        steps: encodeSteps(result.steps),
+        steps: encodeSteps(result.steps, stepScreenshots),
         finalScreenshot,
       }
     },
+    presentResult: (_args, result) => presentTaskResult(result),
   }))
 
   ctx.tools.register(defineTool({
@@ -361,29 +472,34 @@ export function apply(ctx: Context, config: Config = {}): void {
           completed: { type: 'boolean', required: true },
           summary: { type: 'string', required: true },
           steps: STEP_LOG_SCHEMA,
-          finalScreenshot: IMAGE_REF_SCHEMA,
+          finalScreenshot: { ...IMAGE_REF_SCHEMA, required: true },
         },
       },
-      render: (_args, value) => renderTaskResult({
-        ...value,
-        finalScreenshot: value.finalScreenshot as unknown as ImageAttachmentRef,
-      }),
+      render: (_args, value) => renderTaskResult(taskResultValue(value)),
+      presentationMeta: (_args, value) => taskPresentationMeta(taskResultValue(value)),
     },
     async execute(args, exec) {
       if (args.url !== undefined) await ctx.browserUse.navigate({ url: args.url }, exec.signal)
+      const showStepScreenshots = currentTaskPresentation().showStepScreenshots
+        ?? TOOL_MACOS_USE_DEFAULT_SHOW_STEP_SCREENSHOTS
       const result = await runGuiTask(ctx.guiModel, browserTaskExecutor(ctx), {
         task: args.task,
         maxSteps: args.max_steps ?? defaultMaxSteps,
+        retainStepScreenshots: showStepScreenshots,
         signal: exec.signal,
       })
+      const stepScreenshots = showStepScreenshots
+        ? await saveStepScreenshots(ctx, result.stepScreenshotsPngBase64, 'browser-use-task')
+        : []
       const { pngBase64 } = await ctx.browserUse.screenshot(exec.signal)
       const finalScreenshot = await ctx.attachments.saveImage({ data: Buffer.from(pngBase64, 'base64'), mediaType: 'image/png', name: 'browser-use-task-result.png' })
       return {
         completed: result.completed,
         summary: result.summary,
-        steps: encodeSteps(result.steps),
+        steps: encodeSteps(result.steps, stepScreenshots),
         finalScreenshot,
       }
     },
+    presentResult: (_args, result) => presentTaskResult(result),
   }))
 }

@@ -15,6 +15,8 @@
 
 `gui-model` 在常规插件配置界面提供可实时更新的 `apiKeyEnv`、`baseURL`、`model` 与 `maxOutputTokens` 设置。请将 `baseURL` 指向 OpenAI 兼容的视觉 chat-completions 端点，并优先通过 `apiKeyEnv` 使用凭据引用，而不是写入明文密钥。
 
+同一配置界面还提供 `tool-macos-use.showStepScreenshots`。它默认开启，会在每个 `computer_use_task` 或 `browser_use_task` 步骤结果旁显示该步使用的截图；关闭后不会保存或显示这些每步截图。
+
 ## 已知限制与后续工作
 
 - 这组包已有聚焦的单元测试，并参与仓库构建与文档门禁，但尚无无需密钥的组装 GUI 快照，也没有真实桌面或浏览器端到端测试套件。

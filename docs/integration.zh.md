@@ -8,7 +8,7 @@
 
 ## 补丁接入的内容
 
-补丁会把四个包注册到 CLI／运行时闭包和 TypeScript 项目引用中，把 GUI 模型设置命名空间暴露给 Web 客户端，加入 GUI Model 设置卡片，注册面向模型的工具与 Cordis 目录，更新锁文件和第三方声明，并加入同步的子系统、工具及配置文档。
+补丁会把四个包注册到 CLI／运行时闭包和 TypeScript 项目引用中，把 GUI 模型与 GUI 任务展示设置命名空间暴露给 Web 客户端，加入 GUI Model 与 GUI Tasks 设置卡片，在通用任务结果中渲染经过授权的仅 UI 每步图片，并将这些图片随 Session 导出；同时注册面向模型的工具与 Cordis 目录，更新锁文件和第三方声明，并加入同步的子系统、工具及配置文档。
 
 补丁不会重复包含包源码。请在应用补丁前或之后，把 `packages/macos-use` 复制到 Harness 工作区。
 
@@ -28,7 +28,7 @@ config:
 
 ## 桌面与浏览器设置
 
-`macos-use` 可设置 `commandTimeoutMs`，`browser-use` 可设置 `headless`，`tool-macos-use` 可设置 `defaultMaxSteps`。具体默认行为见各包 README。
+`macos-use` 可设置 `commandTimeoutMs`，`browser-use` 可设置 `headless`，`tool-macos-use` 可设置 `defaultMaxSteps`，并提供实时 `showStepScreenshots` 开关。该开关默认为 `true`；开启时，每个存在的任务步骤截图都会被保存并随该步输出显示。关闭后会省略每步图片，但保留最终截图引用。具体默认行为见各包 README。
 
 请在集成后的 Harness 工作区安装 Chromium：
 
@@ -40,8 +40,8 @@ corepack pnpm exec playwright install chromium
 
 ## 安全边界
 
-插件可以执行任意 AppleScript，并控制桌面和浏览器界面。应继续通过 Harness 的部署策略和审批界面限制这些工具。插件本身不会授予或持久化操作系统权限。GUI 模型截图与中间决策不会成为独立持久化 Session 事件；最终任务结果会保留动作／结果摘要和附件引用。
+插件可以执行任意 AppleScript，并控制桌面和浏览器界面。应继续通过 Harness 的部署策略和审批界面限制这些工具。插件本身不会授予或持久化操作系统权限。GUI 模型截图与中间决策不会成为独立持久化 Session 事件。启用的每步图片会作为最终工具结果中的、经过授权的仅 UI 展示附件保存，并随 Session 导出；驱动模型仍然只接收文本。
 
 ## 已完成的验证
 
-在支持的基线上，50 个聚焦测试以及完整 Harness lint、生产构建、仓库卫生检查、28 项文档检查、空白检查和推送前 TypeScript 检查均通过。真实视觉提供方和真实 GUI 端到端测试未执行，因为它们需要凭据和 macOS 权限。
+在支持的基线上，聚焦功能测试、包含 3,965 个通过用例的 GUI 套件、生产构建、契约 lint、28 项文档检查、空白检查和定向 TypeScript 构建均通过。组装后的 Web 回放成功构建；运行结果为 79 个通过、1 个跳过和 3 个无关的既有失败（官方 Logo 快照、Node 22 开发加载器以及现有 plan-review golden）。真实视觉提供方和真实 GUI 端到端测试未执行，因为它们需要凭据和 macOS 权限。

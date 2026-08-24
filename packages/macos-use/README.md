@@ -15,6 +15,8 @@ English | [中文](README.zh.md)
 
 `gui-model` exposes live `apiKeyEnv`, `baseURL`, `model`, and `maxOutputTokens` settings on the ordinary plugin-configuration surface. Point `baseURL` at an OpenAI-compatible vision chat-completions endpoint and prefer a credential reference through `apiKeyEnv` over a literal key.
 
+The same configuration surface exposes `tool-macos-use.showStepScreenshots`. It defaults on and shows the screenshot used for each `computer_use_task` or `browser_use_task` step beside that step's result; turn it off to avoid saving and displaying those per-step captures.
+
 ## Known Limitations and Deferred Work
 
 - This package group has focused unit coverage and participates in the repository build and documentation gates, but it does not yet have a keyless assembled GUI snapshot or a real desktop/browser end-to-end suite.

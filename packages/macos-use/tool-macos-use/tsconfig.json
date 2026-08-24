@@ -12,6 +12,8 @@
     { "path": "../../../vendor/schemastery" },
     { "path": "../../attachment/attachment" },
     { "path": "../../core/tools" },
+    { "path": "../../settings/settings" },
+    { "path": "../../core/system-prompt" },
     { "path": "../browser-use" },
     { "path": "../gui-model" },
     { "path": "../macos-use" },

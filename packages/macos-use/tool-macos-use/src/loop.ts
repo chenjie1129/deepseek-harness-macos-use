@@ -30,6 +30,8 @@ export interface RunTaskResult {
   /** The model's `done` summary, or a stop reason when the loop ran out of steps. */
   summary: string
   steps: readonly TaskStepLog[]
+  /** PNG captures that grounded each step, aligned with `steps`; empty when retention is disabled. */
+  stepScreenshotsPngBase64: readonly string[]
 }
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
@@ -55,9 +57,13 @@ const MAX_WAIT_MS = 5000
 export async function runGuiTask(
   guiModel: GuiModelService,
   executor: TaskExecutor,
-  options: { task: string; maxSteps: number; signal?: AbortSignal },
+  options: { task: string; maxSteps: number; retainStepScreenshots?: boolean; signal?: AbortSignal },
 ): Promise<RunTaskResult> {
   const steps: TaskStepLog[] = []
+  const stepScreenshotsPngBase64: string[] = []
+  const retainStepScreenshot = (pngBase64: string) => {
+    if (options.retainStepScreenshots === true) stepScreenshotsPngBase64.push(pngBase64)
+  }
   for (let step = 0; step < options.maxSteps; step += 1) {
     options.signal?.throwIfAborted()
     const { pngBase64 } = await executor.screenshot(options.signal)
@@ -69,11 +75,13 @@ export async function runGuiTask(
 
     if (action.kind === 'done') {
       steps.push({ action })
-      return { completed: true, summary: action.summary ?? 'Task completed.', steps }
+      retainStepScreenshot(pngBase64)
+      return { completed: true, summary: action.summary ?? 'Task completed.', steps, stepScreenshotsPngBase64 }
     }
     if (action.kind === 'wait') {
       await sleep(Math.min(action.ms ?? 500, MAX_WAIT_MS), options.signal)
       steps.push({ action, outcome: 'waited' })
+      retainStepScreenshot(pngBase64)
       continue
     }
     try {
@@ -82,6 +90,12 @@ export async function runGuiTask(
     } catch (error) {
       steps.push({ action, outcome: `error: ${String(error)}` })
     }
+    retainStepScreenshot(pngBase64)
   }
-  return { completed: false, summary: `Stopped after ${options.maxSteps} steps without reaching "done".`, steps }
+  return {
+    completed: false,
+    summary: `Stopped after ${options.maxSteps} steps without reaching "done".`,
+    steps,
+    stepScreenshotsPngBase64,
+  }
 }
