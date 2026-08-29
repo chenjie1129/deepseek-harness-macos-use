@@ -4,11 +4,11 @@ English | [中文](integration.zh.md)
 
 ## Supported base
 
-The supplied patch targets DeepSeek Harness commit `141eb6fef83422698aef7a981029e843e8161534` (`0.1.0-rc.8`). Run `git apply --check` before applying it. Newer Harness revisions may require a manual rebase because settings cards, package references, generated catalogs, and the lockfile can change.
+The supplied [`deepseek-harness-v0.1.2-alpha.1.patch`](../integration/deepseek-harness-v0.1.2-alpha.1.patch) targets DeepSeek Harness commit `cd5ef8148158c3a752a658978873241fdf8e2bbc` (`0.1.2-alpha.1`). Run `git apply --check` before applying it. Another Harness revision requires a compatibility check because client slots, attachment references, package closure, project references, and the lockfile can change.
 
 ## What the patch wires
 
-The patch registers the four packages in the CLI/runtime closure and TypeScript project references, exposes the GUI-model and GUI-agent settings namespaces to the web client, adds the GUI Model and GUI Agent configuration cards, renders authorized UI-only step images in generic task results, exports those images with the Session, registers the model-facing tool and Cordis catalogs, updates the lockfile and third-party notice, and adds synchronized subsystem/tool/configuration documentation.
+The patch registers the four packages in the CLI/runtime closure and TypeScript project references, lets the tool package load its browser client, authorizes UI-only result images referenced from `tool/result.data.meta.content`, exports those images with the Session, updates the lockfile and third-party notice, and adds a synchronized Agent Note for the attachment decision. The client package registers the GUI Model and GUI Agent configuration cards in `settings.plugin.item` and the two task renderers in `tool.call.toolview`.
 
 The package source itself is not duplicated in the patch. Copy `packages/macos-use` into the Harness checkout before or after applying it.
 
@@ -53,4 +53,4 @@ The plugin can execute arbitrary AppleScript and control desktop/browser interfa
 
 ## Verification performed
 
-On the supported base, 121 focused P0 tests, the GUI suite with 3,968 passing tests and one skip, the production build, 28 documentation gates, whitespace checks, and targeted TypeScript builds passed. Native JXA/AppKit/CoreGraphics/System Events scripts also compiled successfully. A clean-profile browser inspection ran `computer_use_task` against a deterministic local vision response and a real macOS screenshot. The local GUI endpoint verified that it received PNG image input; with the default-on switch, Harness rendered the image inline in Step 1 at a 2000×1125 natural size and then completed the task. The same inspection verified every P0 control in the visual GUI Model and GUI Agent cards. The assembled web replay built successfully; its run reported 79 passed files, one skipped, and three unrelated pre-existing failures (the official-logo snapshot, Node 22 development loader, and an existing plan-review golden). A live third-party provider and action-taking desktop/browser end-to-end run were not performed.
+On the supported base, 59 plugin tests and 98 focused plugin-plus-Harness attachment tests pass. The GUI suite passes 3,822 tests with one skip, and the production web build passes. Native JXA/AppKit/CoreGraphics/System Events scripts compile successfully. A clean-profile browser inspection ran `computer_use_task` through deterministic local driving and vision endpoints and the real macOS screenshot service. The task completed, its saved `computer-use-task-step-1.png` loaded through the session attachment route, and Harness rendered it inline in Step 1 with no browser warning or error. The same inspection verified the default-on switch and every P0 control in the visual GUI Model and GUI Agent cards. A live third-party provider run was not performed.

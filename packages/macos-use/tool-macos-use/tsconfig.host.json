@@ -1,0 +1,27 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib/types",
+    "tsBuildInfoFile": "lib/tsconfig.host.tsbuildinfo"
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/client/**"
+  ],
+  "references": [
+    { "path": "../../../vendor/cordis" },
+    { "path": "../../../vendor/schemastery" },
+    { "path": "../../attachment/attachment" },
+    { "path": "../../core/tools" },
+    { "path": "../../interaction/user-approval" },
+    { "path": "../../settings/settings" },
+    { "path": "../../core/system-prompt" },
+    { "path": "../browser-use" },
+    { "path": "../gui-model" },
+    { "path": "../macos-use" },
+    { "path": "../../runtime-diagnostics/invariants" }
+  ]
+}

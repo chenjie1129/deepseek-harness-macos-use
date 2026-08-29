@@ -1,32 +1,45 @@
-# macos-use
+---
+description: "macOS-use 包组：面向计算机操作智能体的本地桌面、浏览器、GUI 模型与模型工具包。"
+kind: "package-group"
+---
+
+# macos-use/ — macOS 与浏览器计算机操作
 
 [English](README.md) | 中文
 
-“Mac OS Use Agent Tools”是一组能力接缝包，让智能体通过 macOS API、GUI 自动化和真实受控浏览器直接操作本地计算机，而不再只依赖文件系统和 shell。
+## 概述
 
-| 包 | `ctx` 键 | 角色 |
+该包组让智能体操作本地 Mac 和真实 Chromium 页面、检查 macOS 辅助功能状态，并把截图定位委托给 OpenAI 兼容视觉模型。`macos-use` 负责原生桌面控制，`browser-use` 负责托管浏览器，`gui-model` 负责视觉决策，`tool-macos-use` 则把这些能力提供给智能体。所有可调整的智能体设置都显示在插件配置页面中，包括默认开启的每步截图开关与紧急停止。包边界不会绕过 macOS 权限、应用策略或用户确认。
+
+## 目录
+
+- [包](#packages)
+- [相关文档](#related-documentation)
+- [开发备注](#dev-note)
+
+-----
+
+<a id="packages"></a>
+## 包
+
+请根据所需行为选择对应的包；工具包会组合全部三种能力 seam。
+
+| 包 | `ctx` 键 | 作用 |
 |---|---|---|
-| [`macos-use`](macos-use/README.md) | `macosUse` | 截图、System Events GUI 自动化、应用启动与 AppleScript |
-| [`gui-model`](gui-model/README.md) | `guiModel` | 调用已配置的 OpenAI 兼容视觉端点，根据截图选择下一步 GUI 动作 |
-| [`browser-use`](browser-use/README.md) | `browserUse` | 运行 Playwright 驱动的 Chromium 标签页，支持选择器与坐标操作 |
-| [`tool-macos-use`](tool-macos-use/README.md) | — | 注册面向模型的基础工具以及 `computer_use_task` / `browser_use_task` 循环 |
+| [`macos-use`](macos-use/README.zh.md) | `macosUse` | 捕获屏幕并控制策略允许的 macOS 应用与窗口 |
+| [`gui-model`](gui-model/README.zh.md) | `guiModel` | 根据截图与任务选择一个经过校验的 GUI 动作 |
+| [`browser-use`](browser-use/README.zh.md) | `browserUse` | 通过选择器或坐标操作驱动一个 Playwright Chromium 页面 |
+| [`tool-macos-use`](tool-macos-use/README.zh.md) | — | 注册基础工具、自主任务循环、可视化设置与截图展示 |
 
-## 可视化配置
+<a id="related-documentation"></a>
+## 相关文档
 
-所有可调整的 GUI 智能体设置都位于常规的**插件配置**页面。GUI 模型卡片管理凭据、兼容 OpenAI 的端点、模型名称与响应预算；macOS Use 卡片管理任务及命令超时、步骤与无障碍元素预算、Chromium 无头模式、应用允许/拒绝列表、确认开关、单任务锁、截图展示与排除列表，以及立即中止控制。修改会实时生效，无需编辑 YAML 或重启。
+- [仓库架构](../../docs/architecture.zh.md) — 集成边界与当前 Harness 兼容性。
+- [工具运行时子系统](../../docs/subsystems/tools.zh.md) — 集成后生成的服务与工具运行时约定。
+- [工具包](tool-macos-use/README.zh.md) — 可视化配置、安全策略与面向模型的工具。
+- [GUI 模型包](gui-model/README.zh.md) — 独立的截图定位请求边界。
 
-每步截图开关默认开启，会在每个 `computer_use_task` 或 `browser_use_task` 步骤结果旁显示该步使用的截图；关闭后不会保存或显示这些截图。全屏截图在存储或交给视觉模型前，会遮盖截图排除列表中应用所属的窗口。
+<a id="dev-note"></a>
+## 开发备注
 
-当 Retina 或大尺寸浏览器截图超过当前附件限制时，插件会自动缩小用于存储的副本。GUI 操作仍由原始像素定位；只有持久展示副本会被规范化。
-
-## P0 可靠性与安全
-
-桌面接缝可枚举应用和窗口、捕获精确窗口、扁平化前台窗口的无障碍树、聚焦指定窗口，并执行移动、点击、拖拽、输入、按键和滚动。语义快照会签发不透明元素令牌；坐标工具可使用令牌而非原始坐标，并在更新快照或窗口几何变化后拒绝旧令牌。
-
-桌面动作执行实时应用策略：拒绝列表始终优先，非空允许列表只允许其成员。任意 AppleScript、拖拽、破坏性按键组合和破坏性自主任务可要求用户明确确认。默认同一时间只运行一个自主 GUI 任务，每个任务都有总超时，可视化紧急停止会立即中止活动任务。
-
-## 已知限制与后续工作
-
-- 自主任务循环仍需配置视觉模型；基础与语义工具不需要视觉模型。
-- 桌面自动化需要为宿主进程授予“辅助功能”权限，截图需要在“系统设置”中授予“屏幕录制”权限。
-- 浏览器自动化要求另行安装 Playwright Chromium：`pnpm exec playwright install chromium`。
+无。

@@ -1,0 +1,441 @@
+.card {
+  /* Inputs and text output can scroll inside this elevated surface. */
+  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
+  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+  list-style: none;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-3);
+}
+
+.card[data-open] {
+  border-color: var(--dsw-alias-label-dimmed);
+  background: var(--dsw-alias-bg-layer-2);
+}
+
+.cardHeader {
+  width: 100%;
+  appearance: none;
+  border: 0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cardHeader:focus-visible,
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.dangerButton:focus-visible,
+.switch:focus-visible,
+.stepImageLink:focus-visible {
+  outline: 2px solid var(--dsw-alias-brand-primary);
+  outline-offset: 2px;
+}
+
+.cardHeading {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardTitle {
+  color: var(--dsw-alias-label-primary);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cardDescription,
+.hint,
+.imageState {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.cardDescription {
+  font-size: 13px;
+}
+
+.pending,
+.badge,
+.badgeMuted {
+  flex: none;
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 11px;
+  line-height: 17px;
+  white-space: nowrap;
+}
+
+.pending,
+.badge {
+  color: var(--dsw-alias-label-secondary);
+  background: var(--dsw-alias-bg-module-platform);
+}
+
+.badgeMuted {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.chevron {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 18px;
+  transition: transform 160ms ease;
+}
+
+.card[data-open] .chevron {
+  transform: rotate(180deg);
+}
+
+.cardBody {
+  margin: 0 16px;
+  padding-bottom: 8px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+}
+
+.readOnly,
+.hint,
+.error,
+.imageState {
+  margin: 8px 0 0;
+}
+
+.readOnly {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+}
+
+.groupTitle {
+  margin: 18px 0 2px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0;
+}
+
+.field + .field {
+  border-top: 1px solid var(--dsw-alias-border-l2);
+}
+
+.fieldHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fieldLabel {
+  flex: 1;
+  min-width: 0;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reset {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--dsw-alias-label-secondary);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.input,
+.inputInvalid,
+.textarea {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  padding: 0 12px;
+  background: var(--dsw-alias-bg-layer-3);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+}
+
+.input,
+.inputInvalid {
+  height: 34px;
+}
+
+.textarea {
+  min-height: 84px;
+  padding-block: 8px;
+  resize: vertical;
+}
+
+.inputInvalid {
+  border-color: var(--dsw-alias-label-error);
+}
+
+.input:focus-visible,
+.inputInvalid:focus-visible,
+.textarea:focus-visible {
+  outline: none;
+  border-color: var(--dsw-alias-brand-primary);
+}
+
+.switch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 20px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  padding: 2px;
+  background: var(--dsw-alias-bg-layer-3);
+  cursor: pointer;
+}
+
+.switch[aria-checked='true'] {
+  border-color: var(--dsw-alias-brand-primary);
+  background: var(--dsw-alias-brand-primary);
+}
+
+.switchThumb {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--dsw-alias-label-primary);
+  transition: transform 120ms ease;
+}
+
+.switch[aria-checked='true'] .switchThumb {
+  transform: translateX(14px);
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.error {
+  color: var(--dsw-alias-label-error);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 0 4px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+}
+
+.cardFooter .error {
+  flex: 1;
+  margin: 0;
+}
+
+.primaryButton,
+.secondaryButton,
+.dangerButton {
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 5px 14px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.primaryButton {
+  background: var(--dsw-alias-label-primary);
+  color: var(--dsw-alias-bg-layer-3);
+}
+
+.secondaryButton {
+  border-color: var(--dsw-alias-border-l2);
+  background: none;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.dangerButton {
+  border-color: var(--dsw-alias-label-error);
+  background: none;
+  color: var(--dsw-alias-label-error);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled,
+.dangerButton:disabled,
+.switch:disabled,
+.reset:disabled,
+.input:disabled,
+.inputInvalid:disabled,
+.textarea:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+.abortPanel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 16px;
+  align-items: center;
+  margin: 16px 0 8px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-label-error) 45%, transparent);
+  border-radius: 8px;
+}
+
+.abortPanel span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.abortPanel small {
+  color: var(--dsw-alias-label-tertiary);
+  line-height: 1.4;
+}
+
+.abortPanel .error {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.taskCard {
+  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
+  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-2);
+  overflow: hidden;
+}
+
+.taskHeader {
+  width: 100%;
+  border: 0;
+  padding: 9px 10px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stateDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--dsw-alias-brand-primary);
+}
+
+.taskCard[data-state='done'] .stateDot {
+  background: var(--dsw-alias-label-success, #34a853);
+}
+
+.taskCard[data-state='error'] .stateDot {
+  background: var(--dsw-alias-label-error);
+}
+
+.taskSummary {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--dsw-alias-label-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taskStatus {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+}
+
+.taskArgs,
+.rawOutput {
+  margin: 0;
+  padding: 10px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.taskOutput {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+}
+
+.stepText {
+  margin: 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.stepImageLink {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.stepImage {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(100%, 520px);
+  max-height: 360px;
+  object-fit: contain;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+@media (max-width: 520px) {
+  .cardHeader {
+    align-items: flex-start;
+  }
+
+  .pending {
+    display: none;
+  }
+
+  .cardFooter {
+    flex-wrap: wrap;
+  }
+
+  .abortPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .taskHeader {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .taskHeader strong {
+    display: none;
+  }
+}

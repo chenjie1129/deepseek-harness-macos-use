@@ -1,36 +1,93 @@
+---
+description: "OpenAI 兼容截图定位，供读者选择、配置或调试独立 GUI 视觉模型。"
+kind: "package-reference"
+---
+
 # @deepseek-ai/dsh-gui-model
 
 [English](README.md) | 中文
 
-GUI 定位视觉模型接缝（`ctx.guiModel`），它把截图、任务和历史步骤发送到 OpenAI 兼容的 chat-completions 端点，并返回一个经过校验的下一步动作。实时插件设置提供模型密钥或访问点，无需把驱动智能体模型与 GUI 视觉能力绑定。
+## 概述
 
-## API
+`dsh-gui-model` 把任务、历史动作与当前截图发送到 OpenAI 兼容 chat-completions 端点，并返回一个经过校验的 GUI 动作。部署可以借此使用独立于驱动智能体模型的视觉模型。需要 `dsh-tool-macos-use` 中的自主计算机和浏览器循环时，请选择此包；基础 GUI 工具不需要它。该包没有默认提供方或模型，也不会重试。
 
-`GuiModelService` 是默认导出，并注册为 `ctx.guiModel`：
+## 目录
 
-- `nextAction({ screenshotPngBase64, task, history? }, signal?)` -> `GuiAction`
+- [使用此包](#use-this-package)
+- [理解实现](#understand-the-implementation)
+- [延伸阅读](#further-exploration)
+- [模型体验](#model-experience)
+- [已知限制与后续工作](#known-limitations-and-deferred-work)
+- [开发备注](#dev-note)
 
-`GuiAction` 的结构为 `{ kind: 'click'|'double_click'|'right_click'|'move'|'drag'|'type'|'key'|'scroll'|'open_app'|'focus_window'|'wait'|'done', x?, y?, toX?, toY?, text?, combo?, app?, windowTitle?, direction?, amount?, ms?, summary?, reason? }`。服务会在返回前校验所选动作的必填字段。
+-----
 
-## 配置
+<a id="use-this-package"></a>
+## 使用此包
+
+请先使用明确的 OpenAI 兼容端点与视觉模型挂载此能力，再挂载任务工具包。
+
+### 何时选择
+
+当每个 GUI 步骤可以由 OpenAI 兼容视觉端点决定，并且该端点可独立于驱动模型配置时，请选择此包。如果没有兼容视觉端点，请勿使用自主任务循环，而应使用基础桌面或浏览器工具。
+
+### 最小配置
 
 ```yaml
-config:
-  apiKeyEnv: GUI_MODEL_API_KEY # optional credential reference
-  baseURL: https://api.example.com/v1 # required; /chat/completions is appended
-  model: some-vision-model # required
-  maxOutputTokens: 512 # optional
+- name: '@deepseek-ai/dsh-gui-model'
+  config:
+    apiKeyEnv: GUI_MODEL_API_KEY
+    baseURL: https://api.example.com/v1
+    model: some-vision-model
+    maxOutputTokens: 512
 ```
 
-四项配置都在插件配置的 GUI Model 卡片中可视化管理。API 密钥通过凭据接缝保存，不会出现在设置响应中。
+| 字段 | 默认值 | 含义 |
+|---|---|---|
+| `apiKeyEnv` | `GUI_MODEL_API_KEY` | 每次请求都会解析的凭据引用 |
+| `baseURL` | 必填 | 端点基址；该包会追加 `/chat/completions` |
+| `model` | 必填 | 支持视觉的模型名称 |
+| `maxOutputTokens` | `512` | 一个动作对象的响应 token 上限 |
 
+生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-gui-model)是所有可接受字段的完整来源。全部四项配置都可在 GUI 模型卡片中可视化管理；密钥通过凭据 seam 保存，不会在设置响应中返回。
+
+-----
+
+<a id="understand-the-implementation"></a>
+## 理解实现
+
+<details>
+<summary>实现内部细节 — 点击展开</summary>
+
+每次 `nextAction` 调用都会解析当前设置、发送一个确定性的 chat-completions 请求、从回答中提取第一个括号配对完整的 JSON 对象，并校验所选动作的必填字段。结果是 `click`、`drag`、`type`、`key`、`open_app`、`focus_window`、`wait` 或 `done` 等 `GuiAction`。
+
+| 文件 | 作用 |
+|---|---|
+| [`src/index.ts`](src/index.ts) | 服务、实时设置、凭据查找与 HTTP 请求 |
+| [`src/parse.ts`](src/parse.ts) | 系统指令、用户提示词、JSON 提取与动作校验 |
+| [`src/types.ts`](src/types.ts) | 动作约定与稳定错误 |
+
+</details>
+
+-----
+
+<a id="further-exploration"></a>
+## 延伸阅读
+
+- [macOS-use 包映射](../README.zh.md) — 包含四个包的能力系列。
+- [工具包](../tool-macos-use/README.zh.md) — 使用此服务的自主循环。
+- [桌面能力包](../macos-use/README.zh.md) — 原生截图与桌面操作。
+
+-----
+
+<a id="model-experience"></a>
 ## 模型体验
 
 ### 独立 GUI 模型请求
 
 #### 模型看到的内容
 
-每次 `nextAction` 调用都会把下方稳定系统指令、任务、历史动作和当前 PNG 截图发送给已配置的视觉提供方。该请求位于驱动智能体 Session 日志之外。
+每次 `nextAction` 调用都会把下方稳定系统指令、任务、历史动作与当前 PNG 截图发送给已配置的视觉提供方。该请求位于驱动智能体会话日志之外。
 
 ##### GUI 定位系统指令
 
@@ -42,7 +99,7 @@ You are a GUI grounding model. You are given a screenshot and a task. Respond wi
 
 #### Token 影响
 
-每一步都是独立模型请求，输入会随任务与历史增长并包含 base64 截图；`maxOutputTokens` 限制响应长度。
+每个步骤都是独立模型请求，输入会随任务与历史增长并包含 base64 截图；`maxOutputTokens` 限制响应长度。
 
 #### KV 缓存影响
 
@@ -50,7 +107,19 @@ You are a GUI grounding model. You are given a screenshot and a task. Respond wi
 
 ## 已知限制与后续工作
 
+<a id="known-limitations-and-deferred-work"></a>
+
 - `baseURL` 和 `model` 没有默认值；配置错误会明确失败，而不会猜测提供方。
 - 瞬态请求失败没有重试或退避，会立即中止调用它的任务工具。
-- 解析器会恢复第一个配对完整的 JSON 对象并校验动作必填字段，但不会拒绝所有未知可选字段，也无法判断坐标在语义上是否合适。
-- 已有聚焦的请求和解析器测试，但实时提供方兼容性与真实 GUI 端到端套件仍需由部署验证。
+- 解析器会恢复第一个括号配对完整的 JSON 对象并校验动作必填字段，但不会拒绝所有未知可选字段，也无法判断坐标在语义上是否合适。
+- 已有聚焦的请求和解析器测试，但实时第三方提供方兼容性仍需由部署验证。
+
+<a id="dev-note"></a>
+### 开发备注
+
+<details>
+<summary>维护者工作上下文 — 点击展开</summary>
+
+确定性兼容性端到端测试使用本地 OpenAI 兼容响应服务器；它证明请求与循环集成，但不声称完成了第三方提供方端到端测试。
+
+</details>

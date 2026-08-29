@@ -1,0 +1,4 @@
+# Bilingual-pair consistency record: the git blob hash of each side as of the
+# last confirmed-consistent state. Update both languages before refreshing.
+tools.md: 497c78aa61df39c2e8d1fdba20ea1698a3298705
+tools.zh.md: 06ec0761764b781403984807f8d36cb71ea583ce

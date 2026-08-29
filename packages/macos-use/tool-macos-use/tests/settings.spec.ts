@@ -3,6 +3,7 @@
 import { Buffer } from 'node:buffer'
 import { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it, vi } from 'vitest'
+import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 import type { JsonValue } from '@deepseek-ai/dsh-tools'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
@@ -41,6 +42,7 @@ async function boot() {
     bytes: input.data.byteLength,
     width: 2,
     height: 2,
+    originalDimensions: { width: 2880, height: 1800 },
     ...input.name === undefined ? {} : { name: input.name },
   }))
   ctx.provide('attachments', {
@@ -82,6 +84,24 @@ async function runComputerTask(ctx: Context) {
 }
 
 describe('tool-macos-use task presentation settings', () => {
+  it('accepts normalized attachment metadata from the current Harness runtime', async () => {
+    const { ctx } = await boot()
+    const result = await ctx.tools.execute({
+      callId: ToolCallId('computer-use-output-contract'),
+      name: 'computer_use_task',
+      arguments: { task: 'open settings' },
+      signal: new AbortController().signal,
+    })
+
+    expect(result.isError).toBe(false)
+    if (result.isError) throw new Error(result.error.message)
+    expect(result.value).toMatchObject({
+      finalScreenshot: { originalDimensions: { width: 2880, height: 1800 } },
+      steps: [{ screenshot: { originalDimensions: { width: 2880, height: 1800 } } }],
+    })
+    await ctx.fiber.dispose()
+  })
+
   it('shows step screenshots by default, then stops saving and presenting them after the live switch turns off', async () => {
     const { ctx, saveImage } = await boot()
 

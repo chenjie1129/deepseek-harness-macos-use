@@ -23,20 +23,20 @@ Retina and other oversized captures are downscaled only for durable display stor
 
 ## Compatibility
 
-The source and integration patch were validated against DeepSeek Harness release `0.1.0-rc.8`, base commit [`141eb6f`](https://github.com/deepseek-ai/deepseek-harness/commit/141eb6fef83422698aef7a981029e843e8161534). The package manifests intentionally retain Harness `workspace:^` dependencies because these packages are designed to be composed inside that workspace.
+The source and current integration patch are validated against DeepSeek Harness release `0.1.2-alpha.1`, base commit [`cd5ef81`](https://github.com/deepseek-ai/deepseek-harness/commit/cd5ef8148158c3a752a658978873241fdf8e2bbc). The package manifests intentionally retain Harness `workspace:^` dependencies because these packages are designed to be composed inside that workspace.
 
 ## Integrate with Harness
 
 1. Check out the compatible Harness commit.
 2. Copy this repository's `packages/macos-use` directory into Harness at the same path.
-3. From the Harness root, check and apply [`integration/deepseek-harness-rc8.patch`](integration/deepseek-harness-rc8.patch).
+3. From the Harness root, check and apply [`integration/deepseek-harness-v0.1.2-alpha.1.patch`](integration/deepseek-harness-v0.1.2-alpha.1.patch).
 4. Install dependencies, build, and run the focused tests:
 
 ```bash
-git checkout 141eb6fef83422698aef7a981029e843e8161534
+git checkout cd5ef8148158c3a752a658978873241fdf8e2bbc
 cp -R /path/to/deepseek-harness-macos-use/packages/macos-use ./packages/
-git apply --check /path/to/deepseek-harness-macos-use/integration/deepseek-harness-rc8.patch
-git apply /path/to/deepseek-harness-macos-use/integration/deepseek-harness-rc8.patch
+git apply --check /path/to/deepseek-harness-macos-use/integration/deepseek-harness-v0.1.2-alpha.1.patch
+git apply /path/to/deepseek-harness-macos-use/integration/deepseek-harness-v0.1.2-alpha.1.patch
 corepack pnpm install --frozen-lockfile
 corepack pnpm run build
 corepack pnpm exec vitest run packages/macos-use/*/tests/*.spec.ts
@@ -54,4 +54,4 @@ See the [integration guide](docs/integration.md) and [architecture decision](doc
 
 ## Current limits
 
-Focused P0 suites passed 121 tests, the full GUI suite passed 3,968 tests with one skip, the production build passed, and all 28 documentation gates passed on the compatible base. A clean-profile UI smoke used the real macOS screenshot service and a deterministic local vision endpoint: the GUI model received a PNG and Harness displayed the resulting 2000×1125 image inline in Step 1. The same browser inspection confirmed all agent configuration on the visual Plugin Configuration page. The assembled web replay built successfully and passed 79 files with one skip; three pre-existing replay expectations remain unrelated to this plugin change. Live third-party provider compatibility and action-taking desktop/browser end-to-end tests still require deployment credentials and suitable operating-system permissions.
+The plugin suites pass 59 tests, and the focused plugin-plus-Harness attachment suites pass 98 tests. The complete GUI suite passes 3,822 tests with one skip, and the production web build passes on the compatible base. Deterministic web replay passes 310 tests across 91 files with 15 skips; its sole failing core HMR test reproduces unchanged on the pristine compatible base under Node 22.22.0. A clean-profile UI test used the real macOS screenshot service and deterministic local driving and vision endpoints: `computer_use_task` completed, and Harness displayed `computer-use-task-step-1.png` inline in Step 1 from its authorized attachment. The same browser inspection confirmed the default-on switch and every adjustable agent setting on the visual Plugin Configuration page. Live third-party provider compatibility still requires deployment credentials; the deterministic run proves the real task, screenshot, storage, authorization, and client-rendering path without claiming provider compatibility.

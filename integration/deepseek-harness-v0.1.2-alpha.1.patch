@@ -1,0 +1,3129 @@
+diff --git a/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.i18n.yaml b/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.i18n.yaml
+new file mode 100644
+index 0000000000000000000000000000000000000000..fc9e6c15aa037ff4ebda2f48e6fe5bfe6e4369e8
+--- /dev/null
++++ b/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.i18n.yaml
+@@ -0,0 +1,6 @@
++# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
++# side as of the last confirmed-consistent state. Both languages carry equal authority;
++# after editing either side, bring the other along and re-record with:
++#   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.md
++2026-08-29-tool-result-metadata-images.md: b33ba92e810a497029b73c2468f738989eb68000
++2026-08-29-tool-result-metadata-images.zh.md: 4818ece9d2b3bf4c2c2f579c2d2b606545b39dc1
+diff --git a/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.md b/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..b33ba92e810a497029b73c2468f738989eb68000
+--- /dev/null
++++ b/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.md
+@@ -0,0 +1,25 @@
++# Agent Note: Authorize images in tool result metadata
++
++Status: implemented
++
++English | [中文](2026-08-29-tool-result-metadata-images.zh.md)
++
++## Problem
++
++A tool can keep its model-facing result text-only while placing client presentation blocks in `tool/result.data.meta.content`. An image referenced only by those blocks was durable in the session log but unavailable through `session.attachment`, and a session-log export omitted its object. The client could therefore identify a GUI step screenshot without being able to load or export it.
++
++## Decision
++
++Session attachment authorization and session-log export scan `tool/result.data.meta.content` with the same image-block rules used for other event content carriers. The reference remains subject to session ownership and attachment-store verification; metadata does not grant access to an object that the session does not reference.
++
++The macOS task tools project retained step screenshots through `presentationMeta` while their model-facing result stays text-only. Their declared image-reference output accepts the attachment service's complete normalized reference, including optional `originalDimensions`, so schema validation and client presentation consume the same durable object.
++
++## Alternatives considered
++
++**Place screenshots in the model-facing result content.** Rejected because the driving model does not need pixels after the GUI model makes the action decision, and text-only model routes can reject image result blocks.
++
++**Issue a separate file path or bearer URL for each screenshot.** Rejected because paths and URLs bypass session-scoped authorization, content-addressed verification, and portable session export.
++
++## Consequences
++
++An authorized session reader can load and export images used only by a tool's client presentation. GUI step screenshots add attachment objects and metadata to durable history when enabled, but they do not add images to the driving model request. Any producer that places image blocks in `presentationMeta` must use the standard attachment-reference shape.
+diff --git a/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.zh.md b/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.zh.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..4818ece9d2b3bf4c2c2f579c2d2b606545b39dc1
+--- /dev/null
++++ b/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.zh.md
+@@ -0,0 +1,25 @@
++# Agent Note: 授权工具结果元数据中的图片
++
++Status: implemented
++
++[English](2026-08-29-tool-result-metadata-images.md) | 中文
++
++## 问题
++
++工具可以让面向模型的结果保持纯文本，同时把客户端展示块放入 `tool/result.data.meta.content`。只被这些块引用的图片虽然持久存在于会话日志中，却无法通过 `session.attachment` 获取，会话日志导出也会遗漏其对象。因此，客户端可以识别 GUI 步骤截图，却无法加载或导出它。
++
++## 决策
++
++会话附件授权与会话日志导出使用其他事件内容载体相同的图片块规则扫描 `tool/result.data.meta.content`。引用仍受会话所有权和附件存储校验约束；元数据不会授予对会话未引用对象的访问权。
++
++macOS 任务工具通过 `presentationMeta` 投影保留的步骤截图，同时让面向模型的结果保持纯文本。它们声明的图片引用输出接受附件服务的完整规范化引用，包括可选的 `originalDimensions`，因此 schema 校验与客户端展示消费同一个持久对象。
++
++## 考虑过的替代方案
++
++**把截图放入面向模型的结果内容。** 否决，因为 GUI 模型作出动作决定后，驱动模型不需要像素，而且纯文本模型线路可能拒绝图片结果块。
++
++**为每张截图提供独立文件路径或 bearer URL。** 否决，因为路径和 URL 会绕过会话范围授权、内容寻址校验与可移植会话导出。
++
++## 后果
++
++获得授权的会话读取方可以加载并导出只用于工具客户端展示的图片。启用时，GUI 步骤截图会向持久历史添加附件对象与元数据，但不会向驱动模型请求添加图片。任何把图片块放入 `presentationMeta` 的生产者都必须使用标准附件引用形状。
+diff --git a/THIRD_PARTY_NOTICES.md b/THIRD_PARTY_NOTICES.md
+index 616dcd19097a5137a50a3a00a1aa403c73a2f26a..cc79a89eaf7011cf4931d2f3ed78d400d93ff724 100644
+--- a/THIRD_PARTY_NOTICES.md
++++ b/THIRD_PARTY_NOTICES.md
+@@ -93,6 +93,7 @@ External packages that a workspace package resolves at runtime. The tier covers
+ | [`node-pty`](https://github.com/microsoft/node-pty) | MIT |
+ | [`open`](https://github.com/sindresorhus/open) | MIT |
+ | [`picomatch`](https://github.com/micromatch/picomatch) | MIT |
++| [`playwright`](https://github.com/microsoft/playwright) | Apache-2.0 |
+ | [`react`](https://github.com/facebook/react) | MIT |
+ | [`react-dom`](https://github.com/facebook/react) | MIT |
+ | [`readable-stream`](https://github.com/nodejs/readable-stream) | MIT |
+@@ -180,7 +181,6 @@ External packages **directly declared** only by repository tooling, test infrast
+ | [`mermaid`](https://github.com/mermaid-js/mermaid) | MIT |
+ | [`oxlint`](https://github.com/oxc-project/oxc) | MIT |
+ | [`oxlint-tsgolint`](https://github.com/oxc-project/tsgolint) | MIT |
+-| [`playwright`](https://github.com/microsoft/playwright) | Apache-2.0 |
+ | [`publint`](https://github.com/publint/publint) | MIT |
+ | [`smol-toml`](https://github.com/squirrelchat/smol-toml) | BSD-3-Clause |
+ | [`spdx-expression-parse`](https://github.com/jslicense/spdx-expression-parse.js) | MIT |
+diff --git a/apps/cli/package.json b/apps/cli/package.json
+index 8f82b8fdf77bf9ad0dc67c20e3b7ce51fca142e2..57d7faf962a3b012a9172f34238350d188bf4f6b 100644
+--- a/apps/cli/package.json
++++ b/apps/cli/package.json
+@@ -46,6 +46,9 @@
+     "@deepseek-ai/dsh-fs-local": "workspace:^",
+     "@deepseek-ai/dsh-headless": "workspace:^",
+     "@deepseek-ai/dsh-mcp-client": "workspace:^",
++    "@deepseek-ai/dsh-macos-use": "workspace:^",
++    "@deepseek-ai/dsh-browser-use": "workspace:^",
++    "@deepseek-ai/dsh-gui-model": "workspace:^",
+     "@deepseek-ai/dsh-home-paths": "workspace:^",
+     "@deepseek-ai/dsh-hooks-claude-code": "workspace:^",
+     "@deepseek-ai/dsh-hooks-codex": "workspace:^",
+@@ -81,6 +84,7 @@
+     "@deepseek-ai/dsh-tool-subagent": "workspace:^",
+     "@deepseek-ai/dsh-tool-subagent-control": "workspace:^",
+     "@deepseek-ai/dsh-tool-jobs": "workspace:^",
++    "@deepseek-ai/dsh-tool-macos-use": "workspace:^",
+     "@deepseek-ai/dsh-tool-todo": "workspace:^",
+     "@deepseek-ai/dsh-tool-web": "workspace:^",
+     "@deepseek-ai/dsh-tool-workflow": "workspace:^",
+diff --git a/docs/capability-seams.i18n.yaml b/docs/capability-seams.i18n.yaml
+index e004cf0452fca550863da40d67fd2c47a88b5bce..5d109636c122735a813b2f8e945d8d59d31ced30 100644
+--- a/docs/capability-seams.i18n.yaml
++++ b/docs/capability-seams.i18n.yaml
+@@ -2,5 +2,5 @@
+ # side as of the last confirmed-consistent state. Both languages carry equal authority;
+ # after editing either side, bring the other along and re-record with:
+ #   pnpm run verify-translation-pairing --write docs/capability-seams.md
+-capability-seams.md: 5c3ba40df35f40e211de2bf90037f998eeb5a15d
+-capability-seams.zh.md: 47402e1b6d9514a77e8fff6c4f0d0a8bbb34586d
++capability-seams.md: 5ad6c7890187857b0b92f59948a13d3724fbb146
++capability-seams.zh.md: 4ddd295e04428e0d73d377e88b987b62c4f0b51d
+diff --git a/docs/capability-seams.md b/docs/capability-seams.md
+index 5c3ba40df35f40e211de2bf90037f998eeb5a15d..5ad6c7890187857b0b92f59948a13d3724fbb146 100644
+--- a/docs/capability-seams.md
++++ b/docs/capability-seams.md
+@@ -7,6 +7,13 @@ A service can be a core spine service, a swappable capability seam, or a bundle/
+ 
+ ```mermaid
+ flowchart LR
++  pkg_browser_use["browser-use"]
++  svc_browserUse["ctx.browserUse<br/>Managed Chromium control seam"]
++  pkg_tool_macos_use["tool-macos-use"]
++  pkg_gui_model["gui-model"]
++  svc_guiModel["ctx.guiModel<br/>GUI screenshot-grounding seam"]
++  pkg_macos_use["macos-use"]
++  svc_macosUse["ctx.macosUse<br/>Native macOS control seam"]
+   pkg_attachment["attachment"]
+   svc_attachments["ctx.attachments<br/>Durable binary attachment storage"]
+   pkg_attachment_local["attachment-local"]
+@@ -234,6 +241,7 @@ flowchart LR
+   pkg_authorization --> svc_authorization
+   pkg_bash_local --> svc_shell
+   pkg_bash_sandbox --> svc_shell
++  pkg_browser_use --> svc_browserUse
+   pkg_client_modules --> svc_clientModules
+   pkg_code_runtime --> svc_codeRuntime
+   pkg_code_runtime_worker_thread --> svc_codeRuntime
+@@ -255,6 +263,7 @@ flowchart LR
+   pkg_fs_local --> svc_fs
+   pkg_fs_sandbox --> svc_fs
+   pkg_goal --> svc_goals
++  pkg_gui_model --> svc_guiModel
+   pkg_host_directory_picker --> svc_directoryPicker
+   pkg_host_directory_picker_browse --> svc_directoryPicker
+   pkg_host_directory_picker_native --> svc_directoryPicker
+@@ -269,6 +278,7 @@ flowchart LR
+   pkg_llm_replay --> svc_llm
+   pkg_lsp --> svc_lsp
+   pkg_lsp_stdio --> svc_lsp
++  pkg_macos_use --> svc_macosUse
+   pkg_message_feedback --> svc_messageFeedback
+   pkg_permission_presets --> svc_permissionPresets
+   pkg_plan_mode --> svc_planMode
+@@ -349,6 +359,7 @@ flowchart LR
+   svc_attachments --> pkg_llm_pi_ai
+   svc_attachments --> pkg_tool_fs
+   svc_authorization --> pkg_llm_pi_ai
++  svc_browserUse --> pkg_tool_macos_use
+   svc_clientModules --> pkg_client_hmr
+   svc_codeRuntime --> pkg_tools
+   svc_compaction --> pkg_compaction_basic
+@@ -363,6 +374,7 @@ flowchart LR
+   svc_e2b --> pkg_subprocess_e2b
+   svc_fileReferences --> pkg_api_session_controller
+   svc_fs --> pkg_tool_fs
++  svc_guiModel --> pkg_tool_macos_use
+   svc_invariants --> pkg_agent
+   svc_invariants --> pkg_agent_loop
+   svc_invariants --> pkg_scope
+@@ -374,6 +386,7 @@ flowchart LR
+   svc_llm --> pkg_agent_loop
+   svc_llm --> pkg_compaction_basic
+   svc_lsp --> pkg_tool_lsp
++  svc_macosUse --> pkg_tool_macos_use
+   svc_sandbox --> pkg_bash_sandbox
+   svc_sandbox --> pkg_terminal_bash
+   svc_sandboxPolicy --> pkg_bash_sandbox
+@@ -463,6 +476,9 @@ flowchart LR
+ 
+ | ctx key | Role | Owner | Implementations | Direct consumers | Companion plugins | Note |
+ | --- | --- | --- | --- | --- | --- | --- |
++| `ctx.browserUse` | `seam` | [`browser-use`](../packages/macos-use/browser-use) | [`browser-use`](../packages/macos-use/browser-use) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | One lazy Playwright browser page supplies selector and screenshot-coordinate actions; the model-facing consumer owns task policy and presentation. |
++| `ctx.guiModel` | `seam` | [`gui-model`](../packages/macos-use/gui-model) | [`gui-model`](../packages/macos-use/gui-model) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | The provider makes one OpenAI-compatible vision request per autonomous step and returns one validated action outside the driving Session model request. |
++| `ctx.macosUse` | `seam` | [`macos-use`](../packages/macos-use/macos-use) | [`macos-use`](../packages/macos-use/macos-use) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | One native provider owns screenshots, Accessibility state, window and application discovery, pointer and keyboard actions, and AppleScript under live application policy. |
+ | `ctx.attachments` | `seam` | [`attachment`](../packages/attachment/attachment) | [`attachment-local`](../packages/attachment/attachment-local) | [`api-session-controller`](../packages/api/session-controller), [`tool-fs`](../packages/fs/tool-fs), [`llm-pi-ai`](../packages/llm/llm-pi-ai), [`llm-deepseek`](../packages/llm/llm-deepseek) | - | The host commits accepted images before session events; provider adapters resolve authorized durable references into provider-native content. |
+ | `ctx.llm` | `seam` | [`llm`](../packages/llm/llm) | [`llm-deepseek`](../packages/llm/llm-deepseek), [`llm-pi-ai`](../packages/llm/llm-pi-ai), [`llm-replay`](../packages/test-support/llm-replay) | [`agent-loop`](../packages/core/agent-loop), [`compaction-basic`](../packages/compaction/compaction-basic) | - | Adapters register provider implementations; the loop and compaction call the provider-neutral stream service. |
+ | `ctx.deepseekLlmApiExtensions` | `seam` | [`deepseek-llm-api-extensions`](../packages/llm/deepseek-llm-api-extensions) | [`session-log-deepseek`](../packages/session/session-log-deepseek), [`plugin-package-inventory-deepseek`](../packages/llm/plugin-package-inventory-deepseek) | [`llm-deepseek`](../packages/llm/llm-deepseek) | - | Plugins prepare independent top-level fields; the official adapter merges them and commits their delivery state after HTTP acceptance. |
+diff --git a/docs/capability-seams.zh.md b/docs/capability-seams.zh.md
+index 47402e1b6d9514a77e8fff6c4f0d0a8bbb34586d..4ddd295e04428e0d73d377e88b987b62c4f0b51d 100644
+--- a/docs/capability-seams.zh.md
++++ b/docs/capability-seams.zh.md
+@@ -9,6 +9,13 @@
+ 
+ ```mermaid
+ flowchart LR
++  pkg_browser_use["browser-use"]
++  svc_browserUse["ctx.browserUse<br/>Managed Chromium control seam"]
++  pkg_tool_macos_use["tool-macos-use"]
++  pkg_gui_model["gui-model"]
++  svc_guiModel["ctx.guiModel<br/>GUI screenshot-grounding seam"]
++  pkg_macos_use["macos-use"]
++  svc_macosUse["ctx.macosUse<br/>Native macOS control seam"]
+   pkg_attachment["attachment"]
+   svc_attachments["ctx.attachments<br/>Durable binary attachment storage"]
+   pkg_attachment_local["attachment-local"]
+@@ -236,6 +243,7 @@ flowchart LR
+   pkg_authorization --> svc_authorization
+   pkg_bash_local --> svc_shell
+   pkg_bash_sandbox --> svc_shell
++  pkg_browser_use --> svc_browserUse
+   pkg_client_modules --> svc_clientModules
+   pkg_code_runtime --> svc_codeRuntime
+   pkg_code_runtime_worker_thread --> svc_codeRuntime
+@@ -257,6 +265,7 @@ flowchart LR
+   pkg_fs_local --> svc_fs
+   pkg_fs_sandbox --> svc_fs
+   pkg_goal --> svc_goals
++  pkg_gui_model --> svc_guiModel
+   pkg_host_directory_picker --> svc_directoryPicker
+   pkg_host_directory_picker_browse --> svc_directoryPicker
+   pkg_host_directory_picker_native --> svc_directoryPicker
+@@ -271,6 +280,7 @@ flowchart LR
+   pkg_llm_replay --> svc_llm
+   pkg_lsp --> svc_lsp
+   pkg_lsp_stdio --> svc_lsp
++  pkg_macos_use --> svc_macosUse
+   pkg_message_feedback --> svc_messageFeedback
+   pkg_permission_presets --> svc_permissionPresets
+   pkg_plan_mode --> svc_planMode
+@@ -351,6 +361,7 @@ flowchart LR
+   svc_attachments --> pkg_llm_pi_ai
+   svc_attachments --> pkg_tool_fs
+   svc_authorization --> pkg_llm_pi_ai
++  svc_browserUse --> pkg_tool_macos_use
+   svc_clientModules --> pkg_client_hmr
+   svc_codeRuntime --> pkg_tools
+   svc_compaction --> pkg_compaction_basic
+@@ -365,6 +376,7 @@ flowchart LR
+   svc_e2b --> pkg_subprocess_e2b
+   svc_fileReferences --> pkg_api_session_controller
+   svc_fs --> pkg_tool_fs
++  svc_guiModel --> pkg_tool_macos_use
+   svc_invariants --> pkg_agent
+   svc_invariants --> pkg_agent_loop
+   svc_invariants --> pkg_scope
+@@ -376,6 +388,7 @@ flowchart LR
+   svc_llm --> pkg_agent_loop
+   svc_llm --> pkg_compaction_basic
+   svc_lsp --> pkg_tool_lsp
++  svc_macosUse --> pkg_tool_macos_use
+   svc_sandbox --> pkg_bash_sandbox
+   svc_sandbox --> pkg_terminal_bash
+   svc_sandboxPolicy --> pkg_bash_sandbox
+@@ -465,6 +478,9 @@ flowchart LR
+ 
+ | ctx 键 | 角色 | 所属包 | 实现 | 直接消费方 | 配套插件 | 说明 |
+ | --- | --- | --- | --- | --- | --- | --- |
++| `ctx.browserUse` | `seam` | [`browser-use`](../packages/macos-use/browser-use) | [`browser-use`](../packages/macos-use/browser-use) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | 一个延迟启动的 Playwright 浏览器页面提供选择器与截图坐标操作；面向模型的消费方负责任务策略与展示。 |
++| `ctx.guiModel` | `seam` | [`gui-model`](../packages/macos-use/gui-model) | [`gui-model`](../packages/macos-use/gui-model) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | 提供方每个自主步骤发起一次 OpenAI 兼容视觉请求，并在驱动 Session 模型请求之外返回一个经过校验的动作。 |
++| `ctx.macosUse` | `seam` | [`macos-use`](../packages/macos-use/macos-use) | [`macos-use`](../packages/macos-use/macos-use) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | 一个原生提供方在实时应用策略下负责截图、辅助功能状态、窗口与应用发现、指针与键盘操作以及 AppleScript。 |
+ | `ctx.attachments` | `seam` | [`attachment`](../packages/attachment/attachment) | [`attachment-local`](../packages/attachment/attachment-local) | [`api-session-controller`](../packages/api/session-controller), [`tool-fs`](../packages/fs/tool-fs), [`llm-pi-ai`](../packages/llm/llm-pi-ai), [`llm-deepseek`](../packages/llm/llm-deepseek) | - | 宿主会在会话事件之前提交已接受的图片；提供方适配器将已授权的持久引用解析为提供方原生内容。 |
+ | `ctx.llm` | `seam` | [`llm`](../packages/llm/llm) | [`llm-deepseek`](../packages/llm/llm-deepseek), [`llm-pi-ai`](../packages/llm/llm-pi-ai), [`llm-replay`](../packages/test-support/llm-replay) | [`agent-loop`](../packages/core/agent-loop), [`compaction-basic`](../packages/compaction/compaction-basic) | - | 适配器注册提供方实现；agent loop（智能体循环）与压缩功能调用提供方无关的流服务。 |
+ | `ctx.deepseekLlmApiExtensions` | `seam` | [`deepseek-llm-api-extensions`](../packages/llm/deepseek-llm-api-extensions) | [`session-log-deepseek`](../packages/session/session-log-deepseek), [`plugin-package-inventory-deepseek`](../packages/llm/plugin-package-inventory-deepseek) | [`llm-deepseek`](../packages/llm/llm-deepseek) | - | 插件准备彼此独立的顶层字段；官方适配器会合并这些字段，并在 HTTP 接受后提交其交付状态。 |
+diff --git a/docs/config-catalog.i18n.yaml b/docs/config-catalog.i18n.yaml
+index 23fd30b2285c8ec25eebc0a42787f912bbdcb586..aac4b6a08958509d2f63dda8e8ea6932d9a6d46c 100644
+--- a/docs/config-catalog.i18n.yaml
++++ b/docs/config-catalog.i18n.yaml
+@@ -2,5 +2,5 @@
+ # side as of the last confirmed-consistent state. Both languages carry equal authority;
+ # after editing either side, bring the other along and re-record with:
+ #   pnpm run verify-translation-pairing --write docs/config-catalog.md
+-config-catalog.md: 7e4e4b626161fb8468da48d07dabe51b626c94d0
+-config-catalog.zh.md: 2e48ea06cb4179db78b946e55f289dd1d7bc71e1
++config-catalog.md: f3d6df8d89d02d2a46ad8a8c9aca2f4e3f194eca
++config-catalog.zh.md: 91d2b71077b33f8a34043c14b996c30644b82fe0
+diff --git a/docs/config-catalog.md b/docs/config-catalog.md
+index 7e4e4b626161fb8468da48d07dabe51b626c94d0..f3d6df8d89d02d2a46ad8a8c9aca2f4e3f194eca 100644
+--- a/docs/config-catalog.md
++++ b/docs/config-catalog.md
+@@ -404,6 +404,20 @@ Depends on: [`LocalConfig`](#deepseek-aidsh-bash-local)
+ 
+ Source: [`packages/shell/bash-sandbox/src/index.ts:35`](../packages/shell/bash-sandbox/src/index.ts)
+ 
++<a id="deepseek-aidsh-browser-use"></a>
++
++## `@deepseek-ai/dsh-browser-use`
++
++```ts config-catalog
++/** Config for the browser-use seam. */
++export interface Config {
++  /** Run Chromium headless. Defaults to true; set false to watch the browser drive itself. */
++  headless?: boolean
++}
++```
++
++Source: [`packages/macos-use/browser-use/src/index.ts:50`](../packages/macos-use/browser-use/src/index.ts)
++
+ <a id="deepseek-aidsh-client-connection"></a>
+ 
+ ## `@deepseek-ai/dsh-client-connection`
+@@ -789,6 +803,28 @@ export interface Config {
+ 
+ Source: [`packages/goal/goal/src/index.ts:116`](../packages/goal/goal/src/index.ts)
+ 
++<a id="deepseek-aidsh-gui-model"></a>
++
++## `@deepseek-ai/dsh-gui-model`
++
++```ts config-catalog
++/** Config for the GUI-grounding vision model seam. */
++export interface Config {
++  /** Literal API key; prefer {@link apiKeyEnv} so no secret enters configuration files. */
++  apiKey?: string
++  /** Credential reference resolved for each request; defaults to `GUI_MODEL_API_KEY`. */
++  apiKeyEnv?: string
++  /** Endpoint base; `/chat/completions` is appended. No default — every provider's base URL differs. */
++  baseURL: string
++  /** Vision-capable model name sent as the request's `model` field. */
++  model: string
++  /** `max_tokens` cap on the response. Defaults to 512 — one action's worth of JSON. */
++  maxOutputTokens?: number
++}
++```
++
++Source: [`packages/macos-use/gui-model/src/index.ts:38`](../packages/macos-use/gui-model/src/index.ts)
++
+ <a id="deepseek-aidsh-headless"></a>
+ 
+ ## `@deepseek-ai/dsh-headless`
+@@ -1436,6 +1472,22 @@ export interface LspLocalServerConfig {
+ 
+ Source: [`packages/lsp/lsp-stdio/src/index.ts:82`](../packages/lsp/lsp-stdio/src/index.ts)
+ 
++<a id="deepseek-aidsh-macos-use"></a>
++
++## `@deepseek-ai/dsh-macos-use`
++
++Requires: `subprocess`
++
++```ts config-catalog
++/** Config for the macOS desktop-control seam. */
++export interface Config {
++  /** Deadline in milliseconds for one `osascript`/`screencapture`/`open` invocation. Defaults to 15000. */
++  commandTimeoutMs?: number
++}
++```
++
++Source: [`packages/macos-use/macos-use/src/index.ts:86`](../packages/macos-use/macos-use/src/index.ts)
++
+ <a id="deepseek-aidsh-mcp-client"></a>
+ 
+ ## `@deepseek-ai/dsh-mcp-client`
+@@ -2826,6 +2878,46 @@ export interface Config {
+ 
+ Source: [`packages/lsp/tool-lsp/src/index.ts:58`](../packages/lsp/tool-lsp/src/index.ts)
+ 
++<a id="deepseek-aidsh-tool-macos-use"></a>
++
++## `@deepseek-ai/dsh-tool-macos-use`
++
++Requires: `tools` · `macosUse` · `guiModel` · `browserUse` · `attachments`
++
++```ts config-catalog
++/** All user-adjustable GUI-agent configuration. */
++export interface Config {
++  /** Default action budget for autonomous desktop and browser tasks. */
++  defaultMaxSteps?: number
++  /** Wall-clock deadline in milliseconds for one autonomous GUI task. */
++  taskTimeoutMs?: number
++  /** Deadline in milliseconds for one native macOS command. */
++  commandTimeoutMs?: number
++  /** Maximum Accessibility elements returned by one semantic snapshot. */
++  maxElementsPerSnapshot?: number
++  /** Store and render the screenshot that grounded each autonomous step. */
++  showStepScreenshots?: boolean
++  /** Launch the managed Chromium page without visible browser chrome. */
++  browserHeadless?: boolean
++  /** Comma/newline list restricting desktop control; empty permits every app not denied. */
++  allowedApps?: string
++  /** Comma/newline list of applications desktop actions must never control. */
++  deniedApps?: string
++  /** Comma/newline list whose windows are masked in full-screen captures and reject exact capture. */
++  excludedScreenshotApps?: string
++  /** Require one-shot confirmation before arbitrary AppleScript. */
++  confirmAppleScript?: boolean
++  /** Require one-shot confirmation before drag, destructive keys, or destructive task intent. */
++  confirmDestructiveActions?: boolean
++  /** Reject a new GUI tool while an autonomous GUI task is active. */
++  singleActiveTask?: boolean
++  /** Monotonic visual abort request; operational, not rendered as a value field. */
++  abortRevision?: number
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/settings.ts:31`](../packages/macos-use/tool-macos-use/src/settings.ts)
++
+ <a id="deepseek-aidsh-tool-pwsh"></a>
+ 
+ ## `@deepseek-ai/dsh-tool-pwsh`
+diff --git a/docs/config-catalog.zh.md b/docs/config-catalog.zh.md
+index 2e48ea06cb4179db78b946e55f289dd1d7bc71e1..91d2b71077b33f8a34043c14b996c30644b82fe0 100644
+--- a/docs/config-catalog.zh.md
++++ b/docs/config-catalog.zh.md
+@@ -406,6 +406,20 @@ export type Config = LocalConfig
+ 
+ 来源：[`packages/shell/bash-sandbox/src/index.ts:35`](../packages/shell/bash-sandbox/src/index.ts)
+ 
++<a id="deepseek-aidsh-browser-use"></a>
++
++## `@deepseek-ai/dsh-browser-use`
++
++```ts config-catalog
++/** Config for the browser-use seam. */
++export interface Config {
++  /** Run Chromium headless. Defaults to true; set false to watch the browser drive itself. */
++  headless?: boolean
++}
++```
++
++来源：[`packages/macos-use/browser-use/src/index.ts:50`](../packages/macos-use/browser-use/src/index.ts)
++
+ <a id="deepseek-aidsh-client-connection"></a>
+ 
+ ## `@deepseek-ai/dsh-client-connection`
+@@ -791,6 +805,28 @@ export interface Config {
+ 
+ 来源：[`packages/goal/goal/src/index.ts:116`](../packages/goal/goal/src/index.ts)
+ 
++<a id="deepseek-aidsh-gui-model"></a>
++
++## `@deepseek-ai/dsh-gui-model`
++
++```ts config-catalog
++/** Config for the GUI-grounding vision model seam. */
++export interface Config {
++  /** Literal API key; prefer {@link apiKeyEnv} so no secret enters configuration files. */
++  apiKey?: string
++  /** Credential reference resolved for each request; defaults to `GUI_MODEL_API_KEY`. */
++  apiKeyEnv?: string
++  /** Endpoint base; `/chat/completions` is appended. No default — every provider's base URL differs. */
++  baseURL: string
++  /** Vision-capable model name sent as the request's `model` field. */
++  model: string
++  /** `max_tokens` cap on the response. Defaults to 512 — one action's worth of JSON. */
++  maxOutputTokens?: number
++}
++```
++
++来源：[`packages/macos-use/gui-model/src/index.ts:38`](../packages/macos-use/gui-model/src/index.ts)
++
+ <a id="deepseek-aidsh-headless"></a>
+ 
+ ## `@deepseek-ai/dsh-headless`
+@@ -1438,6 +1474,22 @@ export interface LspLocalServerConfig {
+ 
+ 来源：[`packages/lsp/lsp-stdio/src/index.ts:82`](../packages/lsp/lsp-stdio/src/index.ts)
+ 
++<a id="deepseek-aidsh-macos-use"></a>
++
++## `@deepseek-ai/dsh-macos-use`
++
++需要：`subprocess`
++
++```ts config-catalog
++/** Config for the macOS desktop-control seam. */
++export interface Config {
++  /** Deadline in milliseconds for one `osascript`/`screencapture`/`open` invocation. Defaults to 15000. */
++  commandTimeoutMs?: number
++}
++```
++
++来源：[`packages/macos-use/macos-use/src/index.ts:86`](../packages/macos-use/macos-use/src/index.ts)
++
+ <a id="deepseek-aidsh-mcp-client"></a>
+ 
+ ## `@deepseek-ai/dsh-mcp-client`
+@@ -2828,6 +2880,46 @@ export interface Config {
+ 
+ 来源：[`packages/lsp/tool-lsp/src/index.ts:58`](../packages/lsp/tool-lsp/src/index.ts)
+ 
++<a id="deepseek-aidsh-tool-macos-use"></a>
++
++## `@deepseek-ai/dsh-tool-macos-use`
++
++需要：`tools` · `macosUse` · `guiModel` · `browserUse` · `attachments`
++
++```ts config-catalog
++/** All user-adjustable GUI-agent configuration. */
++export interface Config {
++  /** Default action budget for autonomous desktop and browser tasks. */
++  defaultMaxSteps?: number
++  /** Wall-clock deadline in milliseconds for one autonomous GUI task. */
++  taskTimeoutMs?: number
++  /** Deadline in milliseconds for one native macOS command. */
++  commandTimeoutMs?: number
++  /** Maximum Accessibility elements returned by one semantic snapshot. */
++  maxElementsPerSnapshot?: number
++  /** Store and render the screenshot that grounded each autonomous step. */
++  showStepScreenshots?: boolean
++  /** Launch the managed Chromium page without visible browser chrome. */
++  browserHeadless?: boolean
++  /** Comma/newline list restricting desktop control; empty permits every app not denied. */
++  allowedApps?: string
++  /** Comma/newline list of applications desktop actions must never control. */
++  deniedApps?: string
++  /** Comma/newline list whose windows are masked in full-screen captures and reject exact capture. */
++  excludedScreenshotApps?: string
++  /** Require one-shot confirmation before arbitrary AppleScript. */
++  confirmAppleScript?: boolean
++  /** Require one-shot confirmation before drag, destructive keys, or destructive task intent. */
++  confirmDestructiveActions?: boolean
++  /** Reject a new GUI tool while an autonomous GUI task is active. */
++  singleActiveTask?: boolean
++  /** Monotonic visual abort request; operational, not rendered as a value field. */
++  abortRevision?: number
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/settings.ts:31`](../packages/macos-use/tool-macos-use/src/settings.ts)
++
+ <a id="deepseek-aidsh-tool-pwsh"></a>
+ 
+ ## `@deepseek-ai/dsh-tool-pwsh`
+diff --git a/docs/event-producer-consumer.i18n.yaml b/docs/event-producer-consumer.i18n.yaml
+index 7883982b1b05aafa14cbaa87a0ab24c23dedc4e1..9901ee1c69c2186005c3b25dd0b6a295adb1cc2b 100644
+--- a/docs/event-producer-consumer.i18n.yaml
++++ b/docs/event-producer-consumer.i18n.yaml
+@@ -2,5 +2,5 @@
+ # side as of the last confirmed-consistent state. Both languages carry equal authority;
+ # after editing either side, bring the other along and re-record with:
+ #   pnpm run verify-translation-pairing --write docs/event-producer-consumer.md
+-event-producer-consumer.md: 8c3a8a3f0e19f50e5a3164e2f5f4ac0a4e1046eb
+-event-producer-consumer.zh.md: 65b8fba3dd5b9654ffbd037dded15abe85c5885c
++event-producer-consumer.md: ebb042ad3be702d3dee43ea152e648037511de90
++event-producer-consumer.zh.md: 1d52300ad3d2442dc9e596509918d9da0cbf0d23
+diff --git a/docs/event-producer-consumer.md b/docs/event-producer-consumer.md
+index 8c3a8a3f0e19f50e5a3164e2f5f4ac0a4e1046eb..ebb042ad3be702d3dee43ea152e648037511de90 100644
+--- a/docs/event-producer-consumer.md
++++ b/docs/event-producer-consumer.md
+@@ -61,7 +61,7 @@ This matrix shows which packages dispatch each harness-owned event and which pac
+ | `tools/change` | `emit` | [`packages/core/tools/src/index.ts:207`](../packages/core/tools/src/index.ts) | [`agent-presets`](../packages/preset/agent-presets) (`emit`), [`tools`](../packages/core/tools) (`emit`) | [`tool-subagent`](../packages/subagent/tool-subagent) |
+ | `tools/execute` | `waterfall` | [`packages/core/tools/src/index.ts:163`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`session-checkpoint-policy`](../packages/session/session-checkpoint-policy), `timeout-policy` |
+ | `tools/post-execute` | `waterfall` | [`packages/core/tools/src/index.ts:175`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`hooks-claude-code`](../packages/hooks/hooks-claude-code), [`hooks-codex`](../packages/hooks/hooks-codex), [`repeat-tool-reminder`](../packages/guard/repeat-tool-reminder), [`spill-policy`](../packages/spill/spill-policy), [`tool-fs-search`](../packages/fs/tool-fs-search) |
+-| `tools/pre-execute` | `waterfall` | [`packages/core/tools/src/index.ts:152`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`hooks-claude-code`](../packages/hooks/hooks-claude-code), [`hooks-codex`](../packages/hooks/hooks-codex), [`tool-jobs`](../packages/jobs/tool-jobs) |
++| `tools/pre-execute` | `waterfall` | [`packages/core/tools/src/index.ts:152`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`hooks-claude-code`](../packages/hooks/hooks-claude-code), [`hooks-codex`](../packages/hooks/hooks-codex), [`tool-jobs`](../packages/jobs/tool-jobs), [`tool-macos-use`](../packages/macos-use/tool-macos-use) |
+ | `tools/ptc-dispatch-log` | `waterfall` | [`packages/core/tools/src/index.ts:189`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`spill-policy`](../packages/spill/spill-policy) |
+ | `tools/result` | `emit` | [`packages/core/tools/src/index.ts:197`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`events.dispatch`) | [`agent-instructions`](../packages/context/agent-instructions), [`subagent-in-process-driver`](../packages/subagent/subagent-in-process-driver) |
+ | `user-questions/request` | `waterfall` | [`packages/interaction/user-questions/src/types.ts:85`](../packages/interaction/user-questions/src/types.ts) | [`user-questions`](../packages/interaction/user-questions) (`waterfall`) | `remotes` |
+diff --git a/docs/event-producer-consumer.zh.md b/docs/event-producer-consumer.zh.md
+index 65b8fba3dd5b9654ffbd037dded15abe85c5885c..1d52300ad3d2442dc9e596509918d9da0cbf0d23 100644
+--- a/docs/event-producer-consumer.zh.md
++++ b/docs/event-producer-consumer.zh.md
+@@ -63,7 +63,7 @@
+ | `tools/change` | `emit` | [`packages/core/tools/src/index.ts:207`](../packages/core/tools/src/index.ts) | [`agent-presets`](../packages/preset/agent-presets) (`emit`), [`tools`](../packages/core/tools) (`emit`) | [`tool-subagent`](../packages/subagent/tool-subagent) |
+ | `tools/execute` | `waterfall` | [`packages/core/tools/src/index.ts:163`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`session-checkpoint-policy`](../packages/session/session-checkpoint-policy), `timeout-policy` |
+ | `tools/post-execute` | `waterfall` | [`packages/core/tools/src/index.ts:175`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`hooks-claude-code`](../packages/hooks/hooks-claude-code), [`hooks-codex`](../packages/hooks/hooks-codex), [`repeat-tool-reminder`](../packages/guard/repeat-tool-reminder), [`spill-policy`](../packages/spill/spill-policy), [`tool-fs-search`](../packages/fs/tool-fs-search) |
+-| `tools/pre-execute` | `waterfall` | [`packages/core/tools/src/index.ts:152`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`hooks-claude-code`](../packages/hooks/hooks-claude-code), [`hooks-codex`](../packages/hooks/hooks-codex), [`tool-jobs`](../packages/jobs/tool-jobs) |
++| `tools/pre-execute` | `waterfall` | [`packages/core/tools/src/index.ts:152`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`hooks-claude-code`](../packages/hooks/hooks-claude-code), [`hooks-codex`](../packages/hooks/hooks-codex), [`tool-jobs`](../packages/jobs/tool-jobs), [`tool-macos-use`](../packages/macos-use/tool-macos-use) |
+ | `tools/ptc-dispatch-log` | `waterfall` | [`packages/core/tools/src/index.ts:189`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`spill-policy`](../packages/spill/spill-policy) |
+ | `tools/result` | `emit` | [`packages/core/tools/src/index.ts:197`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`events.dispatch`) | [`agent-instructions`](../packages/context/agent-instructions), [`subagent-in-process-driver`](../packages/subagent/subagent-in-process-driver) |
+ | `user-questions/request` | `waterfall` | [`packages/interaction/user-questions/src/types.ts:85`](../packages/interaction/user-questions/src/types.ts) | [`user-questions`](../packages/interaction/user-questions) (`waterfall`) | `remotes` |
+diff --git a/docs/subsystems/tools.i18n.yaml b/docs/subsystems/tools.i18n.yaml
+index d448297059c54a4368e868a518714ff7642b3a2c..3df6f747cdf305344f2af6f754e741d473a2ddd6 100644
+--- a/docs/subsystems/tools.i18n.yaml
++++ b/docs/subsystems/tools.i18n.yaml
+@@ -2,5 +2,5 @@
+ # side as of the last confirmed-consistent state. Both languages carry equal authority;
+ # after editing either side, bring the other along and re-record with:
+ #   pnpm run verify-translation-pairing --write docs/subsystems/tools.md
+-tools.md: 9939e8ab9fff9fa5bd23fd370e07f6296a608824
+-tools.zh.md: 52e812a35d6932a5ed00a86a3d3fe71460b26cd4
++tools.md: 6053dedce967c8c69e97e38438de03280f7ec375
++tools.zh.md: c3b89e9b906750ee6d94e8a31433d7b1e0b78029
+diff --git a/docs/subsystems/tools.md b/docs/subsystems/tools.md
+index 9939e8ab9fff9fa5bd23fd370e07f6296a608824..6053dedce967c8c69e97e38438de03280f7ec375 100644
+--- a/docs/subsystems/tools.md
++++ b/docs/subsystems/tools.md
+@@ -475,6 +475,240 @@ The full presentation field docs live in [`packages/core/tools/src/presentation.
+ 
+ Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnpm run verify-cordis-catalog` in doc-sync; regenerate with `pnpm run gen-cordis-catalog`) — the language sides differ only in locale-specific paired document paths. Signature blocks use a `ts cordis-catalog` fence and keep the original source JSDoc; dispatch modes are defined in the [primer](../cordis-primer.md#dispatch-modes), and the framework-inherited `ctx` API lives in [cordis-api/inherited.md](../cordis-api/inherited.md).
+ 
++<a id="ctxbrowseruse--browseruseservice"></a>
++
++### `ctx.browserUse` — `BrowserUseService`
++
++Browser-use service. Registered as `ctx.browserUse` (one instance per context). Requires Playwright's Chromium browser to be installed (`pnpm exec playwright install chromium`) — a missing browser surfaces as `BROWSER_USE_LAUNCH_FAILED` on first use, not at plugin load.
++
++```ts cordis-catalog
++/**
++ * Apply the visually managed launch mode. An existing browser is retired;
++ * the next action launches a fresh instance with the new value.
++ * @param headless - whether the next Chromium instance has visible chrome.
++ */
++configureHeadless(headless: boolean): void
++
++/**
++ * Navigate the active tab, launching the browser first if needed.
++ * @param request - absolute URL to load.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async navigate(request: NavigateRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Click the first element matching a CSS or Playwright text/role selector.
++ * @param request - selector identifying the element.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async clickSelector(request: ClickSelectorRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Fill the first matching input, replacing its current value.
++ * @param request - selector and literal replacement text.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async fillSelector(request: FillSelectorRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Read the first matching element, or the whole page body when the selector is omitted.
++ * @param request - optional selector.
++ * @param signal - rejects before dispatch when already aborted.
++ * @returns the element's inner text.
++ */
++async extractText(request: ExtractTextRequest = {}, signal?: AbortSignal): Promise<string>
++
++/**
++ * Click at absolute pixel coordinates within the current viewport.
++ * @param request - point and optional double-click flag.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async clickAt(request: ClickAtRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Move the pointer within the viewport without clicking.
++ * @param request - destination point in viewport pixels.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async moveAt(request: MoveAtRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Drag between two viewport coordinates with the primary mouse button.
++ * @param request - start and destination points in viewport pixels.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async dragAt(request: DragAtRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Type literal text into the currently focused element.
++ * @param request - text to type.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async type(request: TypeTextRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Press a key or modifier combo using Playwright's vocabulary.
++ * @param request - key or combo such as `"Enter"` or `"Control+A"`.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async key(request: KeyPressRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Capture the current viewport.
++ * @param signal - rejects before dispatch when already aborted.
++ * @returns base64-encoded PNG bytes.
++ */
++async screenshot(signal?: AbortSignal): Promise<BrowserScreenshotResult>
++```
++
++Source: [`packages/macos-use/browser-use/src/index.ts`](../../packages/macos-use/browser-use/src/index.ts)
++
++<a id="ctxguimodel--guimodelservice"></a>
++
++### `ctx.guiModel` — `GuiModelService`
++
++GUI-grounding vision model service. Registered as `ctx.guiModel` (one instance per context). Sends the screenshot as a `data:image/png;base64,...` `image_url` content part alongside the task and prior-step history, and parses the single JSON action object the model is instructed to answer with.
++
++```ts cordis-catalog
++/**
++ * Ask the model for the single next action toward `request.task`, given the current screenshot.
++ * @param request - screenshot, task, and prior-step history.
++ * @param signal - aborts the request.
++ * @returns the parsed, validated next action.
++ * @throws {GuiModelError} `GUI_MODEL_REQUEST_FAILED` on a non-2xx response or network failure, or
++ *   `GUI_MODEL_MALFORMED_RESPONSE` when the model's answer cannot be parsed into a valid action.
++ */
++async nextAction(request: NextActionRequest, signal?: AbortSignal): Promise<GuiAction>
++```
++
++Source: [`packages/macos-use/gui-model/src/index.ts`](../../packages/macos-use/gui-model/src/index.ts)
++
++<a id="ctxmacosuse--macosuseservice"></a>
++
++### `ctx.macosUse` — `MacosUseService`
++
++macOS desktop-control service. Registered as `ctx.macosUse` (one instance per context). Every action shells out through `ctx.subprocess` — never `node:child_process` directly — to `osascript`, `screencapture`, or `open`. GUI automation and screen capture require the host process to hold Accessibility and Screen Recording permission respectively in System Settings; macOS prompts for both on first use and denies silently (an empty capture, a script that compiles but has no visible effect) until granted.
++
++```ts cordis-catalog
++/**
++ * Apply the live, visually managed runtime policy used by every subsequent action.
++ * @param settings - complete policy projection from the tool plugin's visual section.
++ */
++configure(settings: MacosUseRuntimeSettings): void
++
++/**
++ * Capture the full screen.
++ * @param signal - aborts the capture.
++ * @returns the capture as base64-encoded PNG bytes.
++ */
++async screenshot(signal?: AbortSignal): Promise<ScreenshotResult>
++
++/**
++ * List running foreground-capable apps after applying the allow/deny policy.
++ * @param signal - aborts the native discovery request.
++ * @returns permitted applications with bundle and process metadata.
++ */
++async listApps(signal?: AbortSignal): Promise<readonly MacosApplication[]>
++
++/**
++ * List ordinary on-screen windows after applying the allow/deny policy.
++ * @param signal - aborts the native discovery request.
++ * @returns permitted layer-zero windows and their point-space bounds.
++ */
++async listWindows(signal?: AbortSignal): Promise<readonly MacosWindow[]>
++
++/**
++ * Capture one exact window by CoreGraphics window id or application/title selector.
++ * @param target - selector resolving one permitted, non-sensitive window.
++ * @param signal - aborts discovery or capture.
++ * @returns PNG bytes paired with the exact resolved window metadata.
++ */
++async screenshotWindow(target: WindowTarget, signal?: AbortSignal): Promise<ScreenshotResult & { window: MacosWindow }>
++
++/**
++ * Capture one exact window and flatten its Accessibility controls.
++ * @param request - window selector and optional element budget.
++ * @param signal - aborts capture or Accessibility enumeration.
++ * @returns exact window pixels, metadata, and bounded semantic elements.
++ */
++async windowState(request: WindowStateRequest, signal?: AbortSignal): Promise<WindowStateResult>
++
++/**
++ * Click, double-click, or right-click at absolute screen coordinates.
++ * @param request - target point, button, and held modifiers.
++ * @param signal - aborts the click.
++ */
++async click(request: ClickRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Move the pointer without clicking.
++ * @param request - absolute destination in macOS point space.
++ * @param signal - aborts the pointer action.
++ */
++async move(request: MoveRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Drag from one absolute screen coordinate to another.
++ * @param request - start, destination, and optional bounded duration.
++ * @param signal - aborts the pointer action.
++ */
++async drag(request: DragRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Type literal text via keystroke events into the currently focused element.
++ * @param request - the text to type.
++ * @param signal - aborts the keystrokes.
++ */
++async type(request: TypeTextRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Press a single key or modifier combo.
++ * @param request - a combo like `"return"`, `"cmd+shift+t"`, or `"a"`.
++ * @param signal - aborts the keystroke.
++ */
++async key(request: KeyPressRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Scroll by repeating an arrow/page key a bounded number of times — System Events exposes no scroll-wheel
++ * event, so this is an approximation, not a trackpad-accurate scroll delta.
++ * @param request - direction and step count.
++ * @param signal - aborts the scroll.
++ */
++async scroll(request: ScrollRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Launch or activate an application by name.
++ * @param request - the application name as `open -a` resolves it.
++ * @param signal - aborts the launch.
++ */
++async openApp(request: OpenAppRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Bring one exact window to the foreground.
++ * @param target - selector resolving one permitted window.
++ * @param signal - aborts discovery or focus.
++ * @returns metadata for the window the action targeted.
++ */
++async focusWindow(target: WindowTarget, signal?: AbortSignal): Promise<MacosWindow>
++
++/**
++ * Run caller-supplied AppleScript.
++ * @param request - complete AppleScript source, or its shorthand string form.
++ * @param signal - aborts the script.
++ * @returns the script's stdout, trimmed.
++ */
++async runAppleScript(request: RunAppleScriptRequest | string, signal?: AbortSignal): Promise<string>
++
++/**
++ * Resolve the frontmost application.
++ * @param signal - aborts the lookup.
++ * @returns the frontmost process's name.
++ */
++async frontmostApp(signal?: AbortSignal): Promise<string>
++```
++
++Source: [`packages/macos-use/macos-use/src/index.ts`](../../packages/macos-use/macos-use/src/index.ts)
++
+ <a id="ctxtools--toolruntime"></a>
+ 
+ ### `ctx.tools` — `ToolRuntime`
+diff --git a/docs/subsystems/tools.zh.md b/docs/subsystems/tools.zh.md
+index 52e812a35d6932a5ed00a86a3d3fe71460b26cd4..c3b89e9b906750ee6d94e8a31433d7b1e0b78029 100644
+--- a/docs/subsystems/tools.zh.md
++++ b/docs/subsystems/tools.zh.md
+@@ -475,6 +475,240 @@ type ObjectJsonSchema = JsonSchemaNode & { type: 'object' }
+ 
+ Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnpm run verify-cordis-catalog` in doc-sync; regenerate with `pnpm run gen-cordis-catalog`) — the language sides differ only in locale-specific paired document paths. Signature blocks use a `ts cordis-catalog` fence and keep the original source JSDoc; dispatch modes are defined in the [primer](../cordis-primer.zh.md#dispatch-modes), and the framework-inherited `ctx` API lives in [cordis-api/inherited.md](../cordis-api/inherited.md).
+ 
++<a id="ctxbrowseruse--browseruseservice"></a>
++
++### `ctx.browserUse` — `BrowserUseService`
++
++Browser-use service. Registered as `ctx.browserUse` (one instance per context). Requires Playwright's Chromium browser to be installed (`pnpm exec playwright install chromium`) — a missing browser surfaces as `BROWSER_USE_LAUNCH_FAILED` on first use, not at plugin load.
++
++```ts cordis-catalog
++/**
++ * Apply the visually managed launch mode. An existing browser is retired;
++ * the next action launches a fresh instance with the new value.
++ * @param headless - whether the next Chromium instance has visible chrome.
++ */
++configureHeadless(headless: boolean): void
++
++/**
++ * Navigate the active tab, launching the browser first if needed.
++ * @param request - absolute URL to load.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async navigate(request: NavigateRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Click the first element matching a CSS or Playwright text/role selector.
++ * @param request - selector identifying the element.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async clickSelector(request: ClickSelectorRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Fill the first matching input, replacing its current value.
++ * @param request - selector and literal replacement text.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async fillSelector(request: FillSelectorRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Read the first matching element, or the whole page body when the selector is omitted.
++ * @param request - optional selector.
++ * @param signal - rejects before dispatch when already aborted.
++ * @returns the element's inner text.
++ */
++async extractText(request: ExtractTextRequest = {}, signal?: AbortSignal): Promise<string>
++
++/**
++ * Click at absolute pixel coordinates within the current viewport.
++ * @param request - point and optional double-click flag.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async clickAt(request: ClickAtRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Move the pointer within the viewport without clicking.
++ * @param request - destination point in viewport pixels.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async moveAt(request: MoveAtRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Drag between two viewport coordinates with the primary mouse button.
++ * @param request - start and destination points in viewport pixels.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async dragAt(request: DragAtRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Type literal text into the currently focused element.
++ * @param request - text to type.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async type(request: TypeTextRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Press a key or modifier combo using Playwright's vocabulary.
++ * @param request - key or combo such as `"Enter"` or `"Control+A"`.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async key(request: KeyPressRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Capture the current viewport.
++ * @param signal - rejects before dispatch when already aborted.
++ * @returns base64-encoded PNG bytes.
++ */
++async screenshot(signal?: AbortSignal): Promise<BrowserScreenshotResult>
++```
++
++Source: [`packages/macos-use/browser-use/src/index.ts`](../../packages/macos-use/browser-use/src/index.ts)
++
++<a id="ctxguimodel--guimodelservice"></a>
++
++### `ctx.guiModel` — `GuiModelService`
++
++GUI-grounding vision model service. Registered as `ctx.guiModel` (one instance per context). Sends the screenshot as a `data:image/png;base64,...` `image_url` content part alongside the task and prior-step history, and parses the single JSON action object the model is instructed to answer with.
++
++```ts cordis-catalog
++/**
++ * Ask the model for the single next action toward `request.task`, given the current screenshot.
++ * @param request - screenshot, task, and prior-step history.
++ * @param signal - aborts the request.
++ * @returns the parsed, validated next action.
++ * @throws {GuiModelError} `GUI_MODEL_REQUEST_FAILED` on a non-2xx response or network failure, or
++ *   `GUI_MODEL_MALFORMED_RESPONSE` when the model's answer cannot be parsed into a valid action.
++ */
++async nextAction(request: NextActionRequest, signal?: AbortSignal): Promise<GuiAction>
++```
++
++Source: [`packages/macos-use/gui-model/src/index.ts`](../../packages/macos-use/gui-model/src/index.ts)
++
++<a id="ctxmacosuse--macosuseservice"></a>
++
++### `ctx.macosUse` — `MacosUseService`
++
++macOS desktop-control service. Registered as `ctx.macosUse` (one instance per context). Every action shells out through `ctx.subprocess` — never `node:child_process` directly — to `osascript`, `screencapture`, or `open`. GUI automation and screen capture require the host process to hold Accessibility and Screen Recording permission respectively in System Settings; macOS prompts for both on first use and denies silently (an empty capture, a script that compiles but has no visible effect) until granted.
++
++```ts cordis-catalog
++/**
++ * Apply the live, visually managed runtime policy used by every subsequent action.
++ * @param settings - complete policy projection from the tool plugin's visual section.
++ */
++configure(settings: MacosUseRuntimeSettings): void
++
++/**
++ * Capture the full screen.
++ * @param signal - aborts the capture.
++ * @returns the capture as base64-encoded PNG bytes.
++ */
++async screenshot(signal?: AbortSignal): Promise<ScreenshotResult>
++
++/**
++ * List running foreground-capable apps after applying the allow/deny policy.
++ * @param signal - aborts the native discovery request.
++ * @returns permitted applications with bundle and process metadata.
++ */
++async listApps(signal?: AbortSignal): Promise<readonly MacosApplication[]>
++
++/**
++ * List ordinary on-screen windows after applying the allow/deny policy.
++ * @param signal - aborts the native discovery request.
++ * @returns permitted layer-zero windows and their point-space bounds.
++ */
++async listWindows(signal?: AbortSignal): Promise<readonly MacosWindow[]>
++
++/**
++ * Capture one exact window by CoreGraphics window id or application/title selector.
++ * @param target - selector resolving one permitted, non-sensitive window.
++ * @param signal - aborts discovery or capture.
++ * @returns PNG bytes paired with the exact resolved window metadata.
++ */
++async screenshotWindow(target: WindowTarget, signal?: AbortSignal): Promise<ScreenshotResult & { window: MacosWindow }>
++
++/**
++ * Capture one exact window and flatten its Accessibility controls.
++ * @param request - window selector and optional element budget.
++ * @param signal - aborts capture or Accessibility enumeration.
++ * @returns exact window pixels, metadata, and bounded semantic elements.
++ */
++async windowState(request: WindowStateRequest, signal?: AbortSignal): Promise<WindowStateResult>
++
++/**
++ * Click, double-click, or right-click at absolute screen coordinates.
++ * @param request - target point, button, and held modifiers.
++ * @param signal - aborts the click.
++ */
++async click(request: ClickRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Move the pointer without clicking.
++ * @param request - absolute destination in macOS point space.
++ * @param signal - aborts the pointer action.
++ */
++async move(request: MoveRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Drag from one absolute screen coordinate to another.
++ * @param request - start, destination, and optional bounded duration.
++ * @param signal - aborts the pointer action.
++ */
++async drag(request: DragRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Type literal text via keystroke events into the currently focused element.
++ * @param request - the text to type.
++ * @param signal - aborts the keystrokes.
++ */
++async type(request: TypeTextRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Press a single key or modifier combo.
++ * @param request - a combo like `"return"`, `"cmd+shift+t"`, or `"a"`.
++ * @param signal - aborts the keystroke.
++ */
++async key(request: KeyPressRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Scroll by repeating an arrow/page key a bounded number of times — System Events exposes no scroll-wheel
++ * event, so this is an approximation, not a trackpad-accurate scroll delta.
++ * @param request - direction and step count.
++ * @param signal - aborts the scroll.
++ */
++async scroll(request: ScrollRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Launch or activate an application by name.
++ * @param request - the application name as `open -a` resolves it.
++ * @param signal - aborts the launch.
++ */
++async openApp(request: OpenAppRequest, signal?: AbortSignal): Promise<void>
++
++/**
++ * Bring one exact window to the foreground.
++ * @param target - selector resolving one permitted window.
++ * @param signal - aborts discovery or focus.
++ * @returns metadata for the window the action targeted.
++ */
++async focusWindow(target: WindowTarget, signal?: AbortSignal): Promise<MacosWindow>
++
++/**
++ * Run caller-supplied AppleScript.
++ * @param request - complete AppleScript source, or its shorthand string form.
++ * @param signal - aborts the script.
++ * @returns the script's stdout, trimmed.
++ */
++async runAppleScript(request: RunAppleScriptRequest | string, signal?: AbortSignal): Promise<string>
++
++/**
++ * Resolve the frontmost application.
++ * @param signal - aborts the lookup.
++ * @returns the frontmost process's name.
++ */
++async frontmostApp(signal?: AbortSignal): Promise<string>
++```
++
++Source: [`packages/macos-use/macos-use/src/index.ts`](../../packages/macos-use/macos-use/src/index.ts)
++
+ <a id="ctxtools--toolruntime"></a>
+ 
+ ### `ctx.tools` — `ToolRuntime`
+diff --git a/docs/tool-catalog.i18n.yaml b/docs/tool-catalog.i18n.yaml
+index 392f4488029f3fcdb4f03c85cef0af911522c738..7265804725d4a9de38ba7a2009b1fd6cd145a033 100644
+--- a/docs/tool-catalog.i18n.yaml
++++ b/docs/tool-catalog.i18n.yaml
+@@ -2,5 +2,5 @@
+ # side as of the last confirmed-consistent state. Both languages carry equal authority;
+ # after editing either side, bring the other along and re-record with:
+ #   pnpm run verify-translation-pairing --write docs/tool-catalog.md
+-tool-catalog.md: 91ff093e79cc05a2c08b5aa1130378440cd963f3
+-tool-catalog.zh.md: 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803
++tool-catalog.md: 1f310b861919e39dab2bce76e83bcc03d2d62126
++tool-catalog.zh.md: 634e149c59fd38d7474e8973fe246b643dd2f507
+diff --git a/docs/tool-catalog.md b/docs/tool-catalog.md
+index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03d2d62126 100644
+--- a/docs/tool-catalog.md
++++ b/docs/tool-catalog.md
+@@ -30,6 +30,7 @@ This table connects model-visible tool names to the plugin package and service s
+ | `@deepseek-ai/dsh-tool-goal` | `create_goal`, `get_goal`, `update_goal` | `ctx.tools`, `ctx.agents`, `ctx.goals`, `ctx.systemPrompt`, `a calling Agent in an authorized open turn` | `tool/call`, `goal/change for mutations`, `tool/result` | - | create, edit, pause, and resume require direct-human root authority; complete and blocked also accept the exact current goal round. The default blocked lower bound is three admitted rounds. |
+ | `@deepseek-ai/dsh-schedule` | `schedule_create`, `schedule_delete`, `schedule_list` | `ctx.tools`, `ctx.sessions`, `Session persistence`, `a future live root Agent` | `tool/call`, `schedule/change create or delete`, `tool/result` | - | Registered only inside live root Agent scopes created after the opt-in Schedule plugin loads. Version 1 accepts after_seconds, explicit absolute at, and bounded fixed-rate every_seconds, and discloses session-local delivery; management reads and mutations require the shared Session persistence barrier. |
+ | `@deepseek-ai/dsh-tool-lsp` | `lsp` | `ctx.tools`, `ctx.lsp`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | The lsp tool keeps provider selection and language-server subprocesses behind ctx.lsp, so its model-visible schema stays stable across providers. Requires a registered provider (e.g. `@deepseek-ai/dsh-lsp-stdio`) at runtime; without one, a query returns the structured `LSP_UNAVAILABLE` error rather than changing the schema. |
++| `@deepseek-ai/dsh-tool-macos-use` | `browser_click`, `browser_extract_text`, `browser_fill`, `browser_navigate`, `browser_screenshot`, `browser_use_task`, `computer_abort`, `computer_click`, `computer_drag`, `computer_focus_window`, `computer_get_window_state`, `computer_key`, `computer_list_apps`, `computer_list_windows`, `computer_move`, `computer_open_app`, `computer_run_applescript`, `computer_screenshot`, `computer_screenshot_window`, `computer_scroll`, `computer_type`, `computer_use_task` | `ctx.tools`, `ctx.macosUse`, `ctx.guiModel`, `ctx.browserUse`, `ctx.attachments` | `tool/call`, `durable screenshot attachments`, `tool/result with optional UI-only step-image metadata` | - | Primitive desktop and browser tools execute directly against their capability seams. computer_use_task and browser_use_task call the separately configured GUI vision model once per step. Enabled step screenshots are durable tool-result metadata rendered only by the client; the driving model receives the textual task result. |
+ | `@deepseek-ai/dsh-tool-ralph` | `ralph` | `ctx.tools`, `ctx.workflowEngine`, `ctx.subagents`, `ctx.systemPrompt`, `a calling Agent (exec.agent parents every fresh round)` | `tool/call`, `tool/result`, `workflow and child session events during execution` | - | A fixed foreground workflow starts one fresh structured child per round; the model selects only the immutable objective and an optional round cap. |
+ | `@deepseek-ai/dsh-tool-skill` | `skill` | `ctx.tools`, `ctx.agents`, `ctx.skills` | `tool/call`, `tool/result`, `user/message replacement catalogs via agent.inject()` | - | - |
+ | `@deepseek-ai/dsh-tool-session-query` | `session_event_read`, `session_event_search`, `session_event_trace`, `session_search`, `session_trace` | `ctx.tools`, `ctx.systemPrompt`, `ctx.sessionQuery`, `a calling Agent for workspace authority` | `tool/call`, `tool/result` | - | The five read-only tools hide provider cursors and authorize every result from the immutable calling agent session. The package is opt-in; compositions that need enforced deadlines or bounded inline output also mount the generic timeout or spill policies. |
+@@ -1242,6 +1243,523 @@ Source: [`packages/lsp/tool-lsp/src/index.ts`](../packages/lsp/tool-lsp/src/inde
+ 
+ The lsp tool keeps provider selection and language-server subprocesses behind ctx.lsp, so its model-visible schema stays stable across providers. Requires a registered provider (e.g. `@deepseek-ai/dsh-lsp-stdio`) at runtime; without one, a query returns the structured `LSP_UNAVAILABLE` error rather than changing the schema.
+ 
++<a id="deepseek-aidsh-tool-macos-use"></a>
++
++## `@deepseek-ai/dsh-tool-macos-use`
++
++### `browser_click`
++
++Click the first element matching a CSS or Playwright text/role selector on the current page, e.g. "#submit" or 'text=Sign in'. Prefer this over browser_use_task for one known, selector-addressable click.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "selector": {
++      "type": "string",
++      "description": "CSS or Playwright text/role selector."
++    }
++  },
++  "required": [
++    "selector"
++  ]
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `browser_extract_text`
++
++Read the inner text of the first element matching a selector, or the whole page body when omitted.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "selector": {
++      "type": "string",
++      "description": "CSS or Playwright selector; omitted = the whole page body."
++    }
++  }
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `browser_fill`
++
++Replace the value of the first input matching a selector with literal text.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "selector": {
++      "type": "string",
++      "description": "CSS or Playwright text/role selector for the input."
++    },
++    "text": {
++      "type": "string",
++      "description": "Text to set as the input's value."
++    }
++  },
++  "required": [
++    "selector",
++    "text"
++  ]
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `browser_navigate`
++
++Navigate the automated browser tab to a URL, launching the browser first if needed.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "url": {
++      "type": "string",
++      "description": "Absolute URL to load."
++    }
++  },
++  "required": [
++    "url"
++  ]
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `browser_screenshot`
++
++Capture a screenshot of the automated browser tab's current viewport and return it as an image.
++
++```json
++{
++  "type": "object",
++  "properties": {}
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `browser_use_task`
++
++Autonomously operate the browser to accomplish a task: repeatedly screenshots the page, asks the configured GUI model where to click/type/press next, and executes that action, until the model reports the task done or the step budget runs out. Optionally navigates to a starting URL first. Use this for open-ended browsing tasks; prefer browser_navigate/browser_click/browser_fill/browser_extract_text when the exact selectors and steps are already known.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "task": {
++      "type": "string",
++      "description": "The task to accomplish in the browser, in natural language."
++    },
++    "url": {
++      "type": "string",
++      "description": "Optional starting URL to navigate to before the loop begins."
++    },
++    "max_steps": {
++      "type": "integer",
++      "description": "Step budget before giving up. Defaults to 20 unless changed visually."
++    }
++  },
++  "required": [
++    "task"
++  ]
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_abort`
++
++Immediately cancel every active computer_use_task/browser_use_task owned by this plugin instance.
++
++```json
++{
++  "type": "object",
++  "properties": {}
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_click`
++
++Click, double-click, or right-click using either an opaque element token from computer_get_window_state or absolute macOS screen coordinates.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "element": {
++      "type": "string",
++      "description": "Snapshot-scoped element token. Prefer this over coordinates."
++    },
++    "x": {
++      "type": "number",
++      "description": "Absolute screen x coordinate when element is omitted."
++    },
++    "y": {
++      "type": "number",
++      "description": "Absolute screen y coordinate when element is omitted."
++    },
++    "button": {
++      "type": "string",
++      "description": "Defaults to \"left\".",
++      "enum": [
++        "left",
++        "right"
++      ]
++    },
++    "double_click": {
++      "type": "boolean",
++      "description": "Double-click instead of a single click. Ignored when button is \"right\"."
++    }
++  }
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_drag`
++
++Drag from a semantic element token or coordinate to an absolute destination. Human confirmation is on by default.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "element": {
++      "type": "string",
++      "description": "Snapshot-scoped token for the drag start."
++    },
++    "x": {
++      "type": "number",
++      "description": "Absolute start x when element is omitted."
++    },
++    "y": {
++      "type": "number",
++      "description": "Absolute start y when element is omitted."
++    },
++    "to_x": {
++      "type": "number",
++      "description": "Absolute destination x."
++    },
++    "to_y": {
++      "type": "number",
++      "description": "Absolute destination y."
++    },
++    "duration_ms": {
++      "type": "integer",
++      "description": "Drag duration; defaults to 300ms."
++    }
++  },
++  "required": [
++    "to_x",
++    "to_y"
++  ]
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_focus_window`
++
++Bring one exact allowed macOS window to the front by id or app/title.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "window_id": {
++      "type": "integer",
++      "description": "CoreGraphics window id from computer_list_windows."
++    },
++    "app": {
++      "type": "string",
++      "description": "Application name when window_id is omitted."
++    },
++    "title": {
++      "type": "string",
++      "description": "Exact window title when selecting by app."
++    }
++  }
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_get_window_state`
++
++Capture one exact window and return its structured Accessibility controls with opaque tokens. Tokens become stale after the next snapshot or if the window moves/resizes.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "window_id": {
++      "type": "integer",
++      "description": "CoreGraphics window id from computer_list_windows."
++    },
++    "app": {
++      "type": "string",
++      "description": "Application name when window_id is omitted."
++    },
++    "title": {
++      "type": "string",
++      "description": "Exact window title when selecting by app."
++    }
++  }
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_key`
++
++Press a single key or modifier combo on macOS, e.g. "return", "escape", "cmd+shift+t", "a".
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "combo": {
++      "type": "string",
++      "description": "Key or \"+\"-joined modifier combo."
++    }
++  },
++  "required": [
++    "combo"
++  ]
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_list_apps`
++
++List running foreground-capable macOS applications allowed by the visual app policy.
++
++```json
++{
++  "type": "object",
++  "properties": {}
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_list_windows`
++
++List exact on-screen macOS windows with ids, titles, apps, and bounds.
++
++```json
++{
++  "type": "object",
++  "properties": {}
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_move`
++
++Move the macOS pointer to a semantic element token or absolute screen coordinate without clicking.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "element": {
++      "type": "string",
++      "description": "Snapshot-scoped element token."
++    },
++    "x": {
++      "type": "number",
++      "description": "Absolute screen x when element is omitted."
++    },
++    "y": {
++      "type": "number",
++      "description": "Absolute screen y when element is omitted."
++    }
++  }
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_open_app`
++
++Launch or bring to the front a macOS application by name, e.g. "Safari", "Notes".
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "name": {
++      "type": "string",
++      "description": "Application name as `open -a` resolves it."
++    }
++  },
++  "required": [
++    "name"
++  ]
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_run_applescript`
++
++Run arbitrary AppleScript via `osascript` for macOS automation the other computer_* tools do not cover directly (e.g. reading window titles, controlling a specific application's own scripting dictionary).
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "script": {
++      "type": "string",
++      "description": "Complete AppleScript source."
++    }
++  },
++  "required": [
++    "script"
++  ]
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_screenshot`
++
++Capture the current macOS screen. Windows owned by apps in the visual screenshot-exclusion list are redacted.
++
++```json
++{
++  "type": "object",
++  "properties": {}
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_screenshot_window`
++
++Capture one exact allowed window. Sensitive screenshot-excluded apps fail closed.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "window_id": {
++      "type": "integer",
++      "description": "CoreGraphics window id from computer_list_windows."
++    },
++    "app": {
++      "type": "string",
++      "description": "Application name when window_id is omitted."
++    },
++    "title": {
++      "type": "string",
++      "description": "Exact window title when selecting by app."
++    }
++  }
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_scroll`
++
++Scroll the frontmost app, optionally focusing a fresh semantic element token first.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "direction": {
++      "type": "string",
++      "enum": [
++        "up",
++        "down",
++        "left",
++        "right"
++      ]
++    },
++    "amount": {
++      "type": "integer",
++      "description": "Bounded scroll step count; defaults to 5."
++    },
++    "element": {
++      "type": "string",
++      "description": "Optional token to focus before scrolling."
++    }
++  },
++  "required": [
++    "direction"
++  ]
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_type`
++
++Type literal text into the focused macOS element, optionally focusing a fresh semantic element token first.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "text": {
++      "type": "string",
++      "description": "Text to type."
++    },
++    "element": {
++      "type": "string",
++      "description": "Optional token from computer_get_window_state to focus before typing."
++    }
++  },
++  "required": [
++    "text"
++  ]
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_use_task`
++
++Autonomously operate the macOS desktop to accomplish a task: repeatedly screenshots the screen, asks the configured GUI model where to click/type/press next, and executes that action, until the model reports the task done or the step budget runs out. Use this for open-ended desktop tasks; prefer the primitive computer_* tools for one specific, already-known action.
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "task": {
++      "type": "string",
++      "description": "The task to accomplish on the desktop, in natural language."
++    },
++    "max_steps": {
++      "type": "integer",
++      "description": "Step budget before giving up. Defaults to 20 unless changed visually."
++    }
++  },
++  "required": [
++    "task"
++  ]
++}
++```
++
++Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++Primitive desktop and browser tools execute directly against their capability seams. computer_use_task and browser_use_task call the separately configured GUI vision model once per step. Enabled step screenshots are durable tool-result metadata rendered only by the client; the driving model receives the textual task result.
++
+ <a id="deepseek-aidsh-tool-ralph"></a>
+ 
+ ## `@deepseek-ai/dsh-tool-ralph`
+diff --git a/docs/tool-catalog.zh.md b/docs/tool-catalog.zh.md
+index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b643dd2f507 100644
+--- a/docs/tool-catalog.zh.md
++++ b/docs/tool-catalog.zh.md
+@@ -34,6 +34,7 @@
+ | `@deepseek-ai/dsh-tool-goal` | `create_goal`、`get_goal`、`update_goal` | `ctx.tools`、`ctx.agents`、`ctx.goals`、`ctx.systemPrompt`、`a calling Agent in an authorized open turn` | `tool/call`、`goal/change for mutations`、`tool/result` | - | create、edit、pause 和 resume 要求直接来自人类的根权限；complete 和 blocked 也接受确切的当前 Goal Round。blocked 的默认下限是 3 个获准的 Round。 |
+ | `@deepseek-ai/dsh-schedule` | `schedule_create`、`schedule_delete`、`schedule_list` | `ctx.tools`、`ctx.sessions`、Session 持久化、未来创建的 live 根 Agent | `tool/call`、`schedule/change create or delete`、`tool/result` | - | 仅在选择启用的 Schedule 插件加载后创建的 live 根 Agent scope 内注册。版本 1 接受 after_seconds、显式绝对 at 和有界固定速率 every_seconds，并披露 session-local 交付；管理读取与变更必须通过共享的 Session 持久化 barrier。 |
+ | `@deepseek-ai/dsh-tool-lsp` | `lsp` | `ctx.tools`、`ctx.lsp`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | lsp 工具将提供方选择和语言服务器子进程置于 ctx.lsp 之后，因此其模型可见 schema 在更换提供方时保持稳定。运行时要求已注册提供方，例如 `@deepseek-ai/dsh-lsp-stdio`；如果没有提供方，查询会返回结构化 `LSP_UNAVAILABLE` 错误，而不会改变 schema。 |
++| `@deepseek-ai/dsh-tool-macos-use` | `browser_click`、`browser_extract_text`、`browser_fill`、`browser_navigate`、`browser_screenshot`、`browser_use_task`、`computer_abort`、`computer_click`、`computer_drag`、`computer_focus_window`、`computer_get_window_state`、`computer_key`、`computer_list_apps`、`computer_list_windows`、`computer_move`、`computer_open_app`、`computer_run_applescript`、`computer_screenshot`、`computer_screenshot_window`、`computer_scroll`、`computer_type`、`computer_use_task` | `ctx.tools`、`ctx.macosUse`、`ctx.guiModel`、`ctx.browserUse`、`ctx.attachments` | `tool/call`、持久截图附件、带可选仅 UI 步骤图片元数据的 `tool/result` | - | 基础桌面与浏览器工具直接通过其能力 seam 执行。computer_use_task 和 browser_use_task 每个步骤都会调用一次单独配置的 GUI 视觉模型。启用的步骤截图是持久工具结果元数据，仅由客户端渲染；驱动模型接收文本任务结果。 |
+ | `@deepseek-ai/dsh-tool-ralph` | `ralph` | `ctx.tools`、`ctx.workflowEngine`、`ctx.subagents`、`ctx.systemPrompt`、`a calling Agent (exec.agent parents every fresh round)` | `tool/call`、`tool/result`、`workflow and child session events during execution` | - | 固定的前台工作流会在每个 Round 启动一个全新的结构化子级；模型只能选择不可变目标和可选的 Round 上限。 |
+ | `@deepseek-ai/dsh-tool-skill` | `skill` | `ctx.tools`、`ctx.agents`、`ctx.skills` | `tool/call`、`tool/result`、`user/message replacement catalogs via agent.inject()` | - | - |
+ | `@deepseek-ai/dsh-tool-session-query` | `session_event_read`、`session_event_search`、`session_event_trace`、`session_search`、`session_trace` | `ctx.tools`、`ctx.systemPrompt`、`ctx.sessionQuery`、`a calling Agent for workspace authority` | `tool/call`、`tool/result` | - | 这 5 个只读工具会隐藏提供方游标，并根据不可变的调用 agent 会话为每个结果授权。该包需要选择启用；需要强制截止时间或限制行内输出的组合还会挂载通用超时或 spill 策略。 |
+@@ -1248,6 +1249,523 @@ create、edit、pause 和 resume 要求直接来自人类的根权限；complete
+ 
+ lsp 工具将提供方选择和语言服务器子进程置于 ctx.lsp 之后，因此其模型可见 schema 在更换提供方时保持稳定。运行时要求已注册提供方，例如 `@deepseek-ai/dsh-lsp-stdio`；如果没有提供方，查询会返回结构化 `LSP_UNAVAILABLE` 错误，而不会改变 schema。
+ 
++<a id="deepseek-aidsh-tool-macos-use"></a>
++
++## `@deepseek-ai/dsh-tool-macos-use`
++
++### `browser_click`
++
++点击当前页面中第一个匹配 CSS 或 Playwright 文本／角色选择器的元素，例如 "#submit" 或 'text=Sign in'。对于一次已知且可通过选择器定位的点击，请优先使用此工具，而不是 browser_use_task。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "selector": {
++      "type": "string",
++      "description": "CSS or Playwright text/role selector."
++    }
++  },
++  "required": [
++    "selector"
++  ]
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `browser_extract_text`
++
++读取第一个匹配选择器的元素内部文本；省略选择器时读取整个页面正文。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "selector": {
++      "type": "string",
++      "description": "CSS or Playwright selector; omitted = the whole page body."
++    }
++  }
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `browser_fill`
++
++使用字面文本替换第一个匹配选择器的输入框值。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "selector": {
++      "type": "string",
++      "description": "CSS or Playwright text/role selector for the input."
++    },
++    "text": {
++      "type": "string",
++      "description": "Text to set as the input's value."
++    }
++  },
++  "required": [
++    "selector",
++    "text"
++  ]
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `browser_navigate`
++
++让自动化浏览器标签页导航到指定 URL；必要时先启动浏览器。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "url": {
++      "type": "string",
++      "description": "Absolute URL to load."
++    }
++  },
++  "required": [
++    "url"
++  ]
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `browser_screenshot`
++
++捕获自动化浏览器标签页当前视口的截图，并将其作为图片返回。
++
++```json
++{
++  "type": "object",
++  "properties": {}
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `browser_use_task`
++
++自主操作浏览器以完成任务：反复截取页面、询问已配置的 GUI 模型下一步应在哪里点击、输入或按键，然后执行该动作，直到模型报告任务完成或步骤预算耗尽。可以先导航到可选的起始 URL。开放式浏览任务应使用此工具；已知确切选择器和步骤时，请优先使用 browser_navigate、browser_click、browser_fill 或 browser_extract_text。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "task": {
++      "type": "string",
++      "description": "The task to accomplish in the browser, in natural language."
++    },
++    "url": {
++      "type": "string",
++      "description": "Optional starting URL to navigate to before the loop begins."
++    },
++    "max_steps": {
++      "type": "integer",
++      "description": "Step budget before giving up. Defaults to 20 unless changed visually."
++    }
++  },
++  "required": [
++    "task"
++  ]
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_abort`
++
++立即取消此插件实例拥有的每个活动 computer_use_task 或 browser_use_task。
++
++```json
++{
++  "type": "object",
++  "properties": {}
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_click`
++
++使用 computer_get_window_state 返回的不透明元素令牌或 macOS 绝对屏幕坐标执行单击、双击或右键单击。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "element": {
++      "type": "string",
++      "description": "Snapshot-scoped element token. Prefer this over coordinates."
++    },
++    "x": {
++      "type": "number",
++      "description": "Absolute screen x coordinate when element is omitted."
++    },
++    "y": {
++      "type": "number",
++      "description": "Absolute screen y coordinate when element is omitted."
++    },
++    "button": {
++      "type": "string",
++      "description": "Defaults to \"left\".",
++      "enum": [
++        "left",
++        "right"
++      ]
++    },
++    "double_click": {
++      "type": "boolean",
++      "description": "Double-click instead of a single click. Ignored when button is \"right\"."
++    }
++  }
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_drag`
++
++从语义元素令牌或坐标拖拽到绝对目标位置。默认启用人类确认。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "element": {
++      "type": "string",
++      "description": "Snapshot-scoped token for the drag start."
++    },
++    "x": {
++      "type": "number",
++      "description": "Absolute start x when element is omitted."
++    },
++    "y": {
++      "type": "number",
++      "description": "Absolute start y when element is omitted."
++    },
++    "to_x": {
++      "type": "number",
++      "description": "Absolute destination x."
++    },
++    "to_y": {
++      "type": "number",
++      "description": "Absolute destination y."
++    },
++    "duration_ms": {
++      "type": "integer",
++      "description": "Drag duration; defaults to 300ms."
++    }
++  },
++  "required": [
++    "to_x",
++    "to_y"
++  ]
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_focus_window`
++
++根据 id 或应用／标题把一个策略允许的精确 macOS 窗口置于前台。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "window_id": {
++      "type": "integer",
++      "description": "CoreGraphics window id from computer_list_windows."
++    },
++    "app": {
++      "type": "string",
++      "description": "Application name when window_id is omitted."
++    },
++    "title": {
++      "type": "string",
++      "description": "Exact window title when selecting by app."
++    }
++  }
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_get_window_state`
++
++捕获一个精确窗口，并返回带不透明令牌的结构化辅助功能控件。获取下一份快照或窗口移动／缩放后，令牌会失效。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "window_id": {
++      "type": "integer",
++      "description": "CoreGraphics window id from computer_list_windows."
++    },
++    "app": {
++      "type": "string",
++      "description": "Application name when window_id is omitted."
++    },
++    "title": {
++      "type": "string",
++      "description": "Exact window title when selecting by app."
++    }
++  }
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_key`
++
++在 macOS 上按下单个按键或修饰键组合，例如 "return"、"escape"、"cmd+shift+t" 或 "a"。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "combo": {
++      "type": "string",
++      "description": "Key or \"+\"-joined modifier combo."
++    }
++  },
++  "required": [
++    "combo"
++  ]
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_list_apps`
++
++列出视觉应用策略允许且能够在前台运行的 macOS 应用。
++
++```json
++{
++  "type": "object",
++  "properties": {}
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_list_windows`
++
++列出屏幕上的精确 macOS 窗口及其 id、标题、应用与边界。
++
++```json
++{
++  "type": "object",
++  "properties": {}
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_move`
++
++把 macOS 指针移动到语义元素令牌或绝对屏幕坐标，而不执行点击。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "element": {
++      "type": "string",
++      "description": "Snapshot-scoped element token."
++    },
++    "x": {
++      "type": "number",
++      "description": "Absolute screen x when element is omitted."
++    },
++    "y": {
++      "type": "number",
++      "description": "Absolute screen y when element is omitted."
++    }
++  }
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_open_app`
++
++根据名称启动 macOS 应用或将其置于前台，例如 "Safari" 或 "Notes"。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "name": {
++      "type": "string",
++      "description": "Application name as `open -a` resolves it."
++    }
++  },
++  "required": [
++    "name"
++  ]
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_run_applescript`
++
++通过 `osascript` 运行任意 AppleScript，以完成其他 computer_* 工具未直接覆盖的 macOS 自动化，例如读取窗口标题或控制特定应用自身的脚本字典。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "script": {
++      "type": "string",
++      "description": "Complete AppleScript source."
++    }
++  },
++  "required": [
++    "script"
++  ]
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_screenshot`
++
++捕获当前 macOS 屏幕。属于视觉截图排除列表中应用的窗口会被遮盖。
++
++```json
++{
++  "type": "object",
++  "properties": {}
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_screenshot_window`
++
++捕获一个策略允许的精确窗口。对于敏感的截图排除应用，该操作会拒绝执行。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "window_id": {
++      "type": "integer",
++      "description": "CoreGraphics window id from computer_list_windows."
++    },
++    "app": {
++      "type": "string",
++      "description": "Application name when window_id is omitted."
++    },
++    "title": {
++      "type": "string",
++      "description": "Exact window title when selecting by app."
++    }
++  }
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_scroll`
++
++滚动前台应用；可以先聚焦一个新鲜的语义元素令牌。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "direction": {
++      "type": "string",
++      "enum": [
++        "up",
++        "down",
++        "left",
++        "right"
++      ]
++    },
++    "amount": {
++      "type": "integer",
++      "description": "Bounded scroll step count; defaults to 5."
++    },
++    "element": {
++      "type": "string",
++      "description": "Optional token to focus before scrolling."
++    }
++  },
++  "required": [
++    "direction"
++  ]
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_type`
++
++向当前聚焦的 macOS 元素输入字面文本；可以先聚焦一个新鲜的语义元素令牌。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "text": {
++      "type": "string",
++      "description": "Text to type."
++    },
++    "element": {
++      "type": "string",
++      "description": "Optional token from computer_get_window_state to focus before typing."
++    }
++  },
++  "required": [
++    "text"
++  ]
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++### `computer_use_task`
++
++自主操作 macOS 桌面以完成任务：反复截取屏幕、询问已配置的 GUI 模型下一步应在哪里点击、输入或按键，然后执行该动作，直到模型报告任务完成或步骤预算耗尽。开放式桌面任务应使用此工具；对于一个具体且已知的操作，请优先使用基础 computer_* 工具。
++
++```json
++{
++  "type": "object",
++  "properties": {
++    "task": {
++      "type": "string",
++      "description": "The task to accomplish on the desktop, in natural language."
++    },
++    "max_steps": {
++      "type": "integer",
++      "description": "Step budget before giving up. Defaults to 20 unless changed visually."
++    }
++  },
++  "required": [
++    "task"
++  ]
++}
++```
++
++来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
++
++基础桌面与浏览器工具直接通过其能力 seam 执行。computer_use_task 和 browser_use_task 每个步骤都会调用一次单独配置的 GUI 视觉模型。启用的步骤截图是持久工具结果元数据，仅由客户端渲染；驱动模型接收文本任务结果。
++
+ <a id="deepseek-aidsh-tool-ralph"></a>
+ 
+ ## `@deepseek-ai/dsh-tool-ralph`
+diff --git a/packages/api/session-controller/src/commands.ts b/packages/api/session-controller/src/commands.ts
+index 48c41f3aa143d420890a4ad244d5b7b75b7d3eb4..4b809ea243005bd0fdfb0e40baa99352b0ec0eb2 100644
+--- a/packages/api/session-controller/src/commands.ts
++++ b/packages/api/session-controller/src/commands.ts
+@@ -552,12 +552,15 @@ function imageInEvent(
+ ): ImageAttachmentRef | undefined {
+   const data = event.data as {
+     readonly content?: unknown
++    readonly meta?: { readonly content?: unknown }
+     readonly message?: { readonly content?: unknown }
+     readonly inserted?: readonly { readonly content?: unknown }[]
+     readonly chunk?: { readonly type?: unknown; readonly block?: unknown }
+   }
+   const direct = imageBlockIn(data.content, match)
+   if (direct !== undefined) return direct
++  const presentation = imageBlockIn(data.meta?.content, match)
++  if (presentation !== undefined) return presentation
+   const message = imageBlockIn(data.message?.content, match)
+   if (message !== undefined) return message
+   for (const inserted of data.inserted ?? []) {
+diff --git a/packages/api/session-controller/tests/commands-queue-attachment.host.spec.ts b/packages/api/session-controller/tests/commands-queue-attachment.host.spec.ts
+index 2ea8744bd1b9e8e8ca78fe1e4ae63ccc01e54fd9..374696543a816e94d11778d9ee5c2ba023d1e812 100644
+--- a/packages/api/session-controller/tests/commands-queue-attachment.host.spec.ts
++++ b/packages/api/session-controller/tests/commands-queue-attachment.host.spec.ts
+@@ -154,8 +154,9 @@ async function persistedController(
+ }
+ 
+ describe('Session attachment authorization', () => {
+-  it('finds references in direct, message, inserted, nested, and streamed content', async () => {
++  it('finds references in direct, presentation, message, inserted, nested, and streamed content', async () => {
+     const nested = imageRef('nested')
++    const presentation = imageRef('presentation')
+     const message = imageRef('message')
+     const inserted = imageRef('inserted')
+     const streamed = imageRef('streamed')
+@@ -164,6 +165,7 @@ describe('Session attachment authorization', () => {
+         content: [null, [], { type: 'tool-result', content: [{ type: 'text', text: 'none' }] }, {
+           type: 'tool-result', content: [{ type: 'image', attachment: nested }],
+         }],
++        meta: { content: [{ type: 'image', attachment: presentation }] },
+       }),
+       { ...event('assistant/message', 1, {
+         turn: 1,
+@@ -190,11 +192,11 @@ describe('Session attachment authorization', () => {
+     const readImage = vi.fn((ref: ImageAttachmentRef) => Promise.resolve({ ref, data: Uint8Array.of(1) }))
+     const { ctx, controller, sessionId } = await persistedController(events, readImage)
+ 
+-    for (const ref of [nested, message, inserted, streamed]) {
++    for (const ref of [nested, presentation, message, inserted, streamed]) {
+       await expect(controller.attachment({ sessionId, attachmentId: ref.attachmentId }))
+         .resolves.toEqual({ attachment: ref, data: 'AQ==' })
+     }
+-    expect(readImage).toHaveBeenCalledTimes(4)
++    expect(readImage).toHaveBeenCalledTimes(5)
+     await ctx.fiber.dispose()
+   })
+ 
+diff --git a/packages/extensions/cordis-client-runner/src/client/slot-catalog.ts b/packages/extensions/cordis-client-runner/src/client/slot-catalog.ts
+index cb8f1a7ebceef364e316ce2b0a10066a9a832237..6e513b53b3f38a1da5a125f09d7841ada052ec99 100644
+--- a/packages/extensions/cordis-client-runner/src/client/slot-catalog.ts
++++ b/packages/extensions/cordis-client-runner/src/client/slot-catalog.ts
+@@ -1726,6 +1726,8 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
+       'client-ui-settings-plugins AgentLoopCard',
+       'client-ui-settings-plugins SubagentModelSelectionCard',
+       'client-ui-settings-plugins WebSearchCard',
++      'tool-macos-use GuiModelCard',
++      'tool-macos-use GuiAgentCard',
+     ],
+     replaceRisk: 'none',
+     example: 'return {\n  inject: [\'slots\'],\n  apply(ctx) {\n    ctx.slots.inject(\'settings.plugin.item\', () => ctx.slots.register(\n      { name: \'settings.plugin.item\', key: \'<one key the owner dispatches>\' },\n      () => React.createElement(\'div\', null, \'hello\'),\n    ))\n  },\n}',
+@@ -2148,7 +2150,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
+       'useProjection: UseProjection',
+       'useTrajectory: UseTrajectory',
+     ],
+-    keyDomain: 'open: any string the owner dispatches (no compile-time key set), already taken: ask_user_question, bash, cordis_define, cordis_run, cordis_stop, cordis_undefine, edit, glob, grep, read, skill, todo_write, web_fetch, web_search, write',
++    keyDomain: 'open: any string the owner dispatches (no compile-time key set), already taken: ask_user_question, bash, browser_use_task, computer_use_task, cordis_define, cordis_run, cordis_stop, cordis_undefine, edit, glob, grep, read, skill, todo_write, web_fetch, web_search, write',
+     hookContext: '',
+     slotInject: '',
+     declaredBy: 'an entry in \'conversation.chat.node\' (client-ui-tool), so it exists while that entry is mounted',
+@@ -2168,6 +2170,8 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
+       'client-ui-cordis CordisRunRow key \'cordis_run\'',
+       'client-ui-cordis CordisActionRow key \'cordis_stop\'',
+       'client-ui-cordis CordisActionRow key \'cordis_undefine\'',
++      'tool-macos-use GuiTaskView key \'computer_use_task\'',
++      'tool-macos-use GuiTaskView key \'browser_use_task\'',
+     ],
+     replaceRisk: 'shadows-shipped-ui',
+     example: 'return {\n  inject: [\'slots\'],\n  apply(ctx) {\n    ctx.slots.inject(\'tool.call.toolview\', () => ctx.slots.register(\n      { name: \'tool.call.toolview\', key: \'<one key the owner dispatches>\' },\n      () => React.createElement(\'div\', null, \'hello\'),\n    ))\n  },\n}',
+diff --git a/packages/extensions/tool-cordis/src/api-catalog.ts b/packages/extensions/tool-cordis/src/api-catalog.ts
+index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119af5a4d3e6 100644
+--- a/packages/extensions/tool-cordis/src/api-catalog.ts
++++ b/packages/extensions/tool-cordis/src/api-catalog.ts
+@@ -542,6 +542,70 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
+       },
+     ],
+   },
++  {
++    key: 'browserUse',
++    summary: 'Browser-use service.',
++    description: 'Browser-use service. Registered as `ctx.browserUse` (one instance per context). Requires Playwright\'s Chromium browser to be installed (`pnpm exec playwright install chromium`) — a missing browser surfaces as `BROWSER_USE_LAUNCH_FAILED` on first use, not at plugin load.',
++    methods: [
++      {
++        signature: 'configureHeadless(headless: boolean): void',
++        description: 'Apply the visually managed launch mode. An existing browser is retired; the next action launches a fresh instance with the new value.',
++        parameters: [{ name: 'headless', description: 'whether the next Chromium instance has visible chrome.' }],
++      },
++      {
++        signature: 'async navigate(request: NavigateRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Navigate the active tab, launching the browser first if needed.',
++        parameters: [{ name: 'request', description: 'absolute URL to load.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
++      },
++      {
++        signature: 'async clickSelector(request: ClickSelectorRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Click the first element matching a CSS or Playwright text/role selector.',
++        parameters: [{ name: 'request', description: 'selector identifying the element.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
++      },
++      {
++        signature: 'async fillSelector(request: FillSelectorRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Fill the first matching input, replacing its current value.',
++        parameters: [{ name: 'request', description: 'selector and literal replacement text.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
++      },
++      {
++        signature: 'async extractText(request: ExtractTextRequest = {}, signal?: AbortSignal): Promise<string>',
++        description: 'Read the first matching element, or the whole page body when the selector is omitted.',
++        parameters: [{ name: 'request', description: 'optional selector.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
++        returns: 'the element\'s inner text.',
++      },
++      {
++        signature: 'async clickAt(request: ClickAtRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Click at absolute pixel coordinates within the current viewport.',
++        parameters: [{ name: 'request', description: 'point and optional double-click flag.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
++      },
++      {
++        signature: 'async moveAt(request: MoveAtRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Move the pointer within the viewport without clicking.',
++        parameters: [{ name: 'request', description: 'destination point in viewport pixels.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
++      },
++      {
++        signature: 'async dragAt(request: DragAtRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Drag between two viewport coordinates with the primary mouse button.',
++        parameters: [{ name: 'request', description: 'start and destination points in viewport pixels.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
++      },
++      {
++        signature: 'async type(request: TypeTextRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Type literal text into the currently focused element.',
++        parameters: [{ name: 'request', description: 'text to type.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
++      },
++      {
++        signature: 'async key(request: KeyPressRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Press a key or modifier combo using Playwright\'s vocabulary.',
++        parameters: [{ name: 'request', description: 'key or combo such as `"Enter"` or `"Control+A"`.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
++      },
++      {
++        signature: 'async screenshot(signal?: AbortSignal): Promise<BrowserScreenshotResult>',
++        description: 'Capture the current viewport.',
++        parameters: [{ name: 'signal', description: 'rejects before dispatch when already aborted.' }],
++        returns: 'base64-encoded PNG bytes.',
++      },
++    ],
++  },
+   {
+     key: 'clientModules',
+     summary: 'The web plugin table service: incremental `dsh.client` scan + wire composition + bundle route + index injection rows.',
+@@ -997,6 +1061,20 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
+       },
+     ],
+   },
++  {
++    key: 'guiModel',
++    summary: 'GUI-grounding vision model service.',
++    description: 'GUI-grounding vision model service. Registered as `ctx.guiModel` (one instance per context). Sends the screenshot as a `data:image/png;base64,...` `image_url` content part alongside the task and prior-step history, and parses the single JSON action object the model is instructed to answer with.',
++    methods: [
++      {
++        signature: 'async nextAction(request: NextActionRequest, signal?: AbortSignal): Promise<GuiAction>',
++        description: 'Ask the model for the single next action toward `request.task`, given the current screenshot.',
++        parameters: [{ name: 'request', description: 'screenshot, task, and prior-step history.' }, { name: 'signal', description: 'aborts the request.' }],
++        returns: 'the parsed, validated next action.',
++        throws: ['{GuiModelError} `GUI_MODEL_REQUEST_FAILED` on a non-2xx response or network failure, or `GUI_MODEL_MALFORMED_RESPONSE` when the model\'s answer cannot be parsed into a valid action.'],
++      },
++    ],
++  },
+   {
+     key: 'inspector',
+     summary: 'Shared Host/Client service façade over the realm\'s source publisher.',
+@@ -1199,6 +1277,101 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
+       },
+     ],
+   },
++  {
++    key: 'macosUse',
++    summary: 'macOS desktop-control service.',
++    description: 'macOS desktop-control service. Registered as `ctx.macosUse` (one instance per context). Every action shells out through `ctx.subprocess` — never `node:child_process` directly — to `osascript`, `screencapture`, or `open`. GUI automation and screen capture require the host process to hold Accessibility and Screen Recording permission respectively in System Settings; macOS prompts for both on first use and denies silently (an empty capture, a script that compiles but has no visible effect) until granted.',
++    methods: [
++      {
++        signature: 'configure(settings: MacosUseRuntimeSettings): void',
++        description: 'Apply the live, visually managed runtime policy used by every subsequent action.',
++        parameters: [{ name: 'settings', description: 'complete policy projection from the tool plugin\'s visual section.' }],
++      },
++      {
++        signature: 'async screenshot(signal?: AbortSignal): Promise<ScreenshotResult>',
++        description: 'Capture the full screen.',
++        parameters: [{ name: 'signal', description: 'aborts the capture.' }],
++        returns: 'the capture as base64-encoded PNG bytes.',
++      },
++      {
++        signature: 'async listApps(signal?: AbortSignal): Promise<readonly MacosApplication[]>',
++        description: 'List running foreground-capable apps after applying the allow/deny policy.',
++        parameters: [{ name: 'signal', description: 'aborts the native discovery request.' }],
++        returns: 'permitted applications with bundle and process metadata.',
++      },
++      {
++        signature: 'async listWindows(signal?: AbortSignal): Promise<readonly MacosWindow[]>',
++        description: 'List ordinary on-screen windows after applying the allow/deny policy.',
++        parameters: [{ name: 'signal', description: 'aborts the native discovery request.' }],
++        returns: 'permitted layer-zero windows and their point-space bounds.',
++      },
++      {
++        signature: 'async screenshotWindow(target: WindowTarget, signal?: AbortSignal): Promise<ScreenshotResult & { window: MacosWindow }>',
++        description: 'Capture one exact window by CoreGraphics window id or application/title selector.',
++        parameters: [{ name: 'target', description: 'selector resolving one permitted, non-sensitive window.' }, { name: 'signal', description: 'aborts discovery or capture.' }],
++        returns: 'PNG bytes paired with the exact resolved window metadata.',
++      },
++      {
++        signature: 'async windowState(request: WindowStateRequest, signal?: AbortSignal): Promise<WindowStateResult>',
++        description: 'Capture one exact window and flatten its Accessibility controls.',
++        parameters: [{ name: 'request', description: 'window selector and optional element budget.' }, { name: 'signal', description: 'aborts capture or Accessibility enumeration.' }],
++        returns: 'exact window pixels, metadata, and bounded semantic elements.',
++      },
++      {
++        signature: 'async click(request: ClickRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Click, double-click, or right-click at absolute screen coordinates.',
++        parameters: [{ name: 'request', description: 'target point, button, and held modifiers.' }, { name: 'signal', description: 'aborts the click.' }],
++      },
++      {
++        signature: 'async move(request: MoveRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Move the pointer without clicking.',
++        parameters: [{ name: 'request', description: 'absolute destination in macOS point space.' }, { name: 'signal', description: 'aborts the pointer action.' }],
++      },
++      {
++        signature: 'async drag(request: DragRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Drag from one absolute screen coordinate to another.',
++        parameters: [{ name: 'request', description: 'start, destination, and optional bounded duration.' }, { name: 'signal', description: 'aborts the pointer action.' }],
++      },
++      {
++        signature: 'async type(request: TypeTextRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Type literal text via keystroke events into the currently focused element.',
++        parameters: [{ name: 'request', description: 'the text to type.' }, { name: 'signal', description: 'aborts the keystrokes.' }],
++      },
++      {
++        signature: 'async key(request: KeyPressRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Press a single key or modifier combo.',
++        parameters: [{ name: 'request', description: 'a combo like `"return"`, `"cmd+shift+t"`, or `"a"`.' }, { name: 'signal', description: 'aborts the keystroke.' }],
++      },
++      {
++        signature: 'async scroll(request: ScrollRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Scroll by repeating an arrow/page key a bounded number of times — System Events exposes no scroll-wheel event, so this is an approximation, not a trackpad-accurate scroll delta.',
++        parameters: [{ name: 'request', description: 'direction and step count.' }, { name: 'signal', description: 'aborts the scroll.' }],
++      },
++      {
++        signature: 'async openApp(request: OpenAppRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Launch or activate an application by name.',
++        parameters: [{ name: 'request', description: 'the application name as `open -a` resolves it.' }, { name: 'signal', description: 'aborts the launch.' }],
++      },
++      {
++        signature: 'async focusWindow(target: WindowTarget, signal?: AbortSignal): Promise<MacosWindow>',
++        description: 'Bring one exact window to the foreground.',
++        parameters: [{ name: 'target', description: 'selector resolving one permitted window.' }, { name: 'signal', description: 'aborts discovery or focus.' }],
++        returns: 'metadata for the window the action targeted.',
++      },
++      {
++        signature: 'async runAppleScript(request: RunAppleScriptRequest | string, signal?: AbortSignal): Promise<string>',
++        description: 'Run caller-supplied AppleScript.',
++        parameters: [{ name: 'request', description: 'complete AppleScript source, or its shorthand string form.' }, { name: 'signal', description: 'aborts the script.' }],
++        returns: 'the script\'s stdout, trimmed.',
++      },
++      {
++        signature: 'async frontmostApp(signal?: AbortSignal): Promise<string>',
++        description: 'Resolve the frontmost application.',
++        parameters: [{ name: 'signal', description: 'aborts the lookup.' }],
++        returns: 'the frontmost process\'s name.',
++      },
++    ],
++  },
+   {
+     key: 'messageFeedback',
+     summary: 'Storage-domain sidecar service.',
+@@ -3382,6 +3555,10 @@ export const EVENT_API: readonly EventApiEntry[] = [
+ 
+ /** Shapes of every exported type the Service and Event signatures reference (transitively), sorted by name. */
+ export const TYPE_API: readonly TypeApiEntry[] = [
++  {
++    name: 'AccessibilityElement',
++    declaration: 'export interface AccessibilityElement {\n    role: string;\n    subrole?: string;\n    name?: string;\n    value?: string;\n    description?: string;\n    enabled: boolean;\n    bounds?: ScreenBounds;\n}',
++  },
+   {
+     name: 'AdapterRegistrationHandle',
+     declaration: 'export interface AdapterRegistrationHandle {\n    (): void;\n    replace(providers: string[]): void;\n}',
+@@ -3590,10 +3767,26 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+     name: 'Branded',
+     declaration: 'export type Branded<B extends string> = string & {\n    readonly [BRAND]: B;\n};',
+   },
++  {
++    name: 'BrowserScreenshotResult',
++    declaration: 'export interface BrowserScreenshotResult {\n    pngBase64: string;\n}',
++  },
+   {
+     name: 'ChunkRowEvent',
+     declaration: 'export type ChunkRowEvent = {\n    [Kind in ChunkRow[\'type\']]: {\n        readonly type: `chunkrow/${Kind}`;\n        readonly seq: number;\n        readonly time: number;\n        readonly data: Extract<ChunkRow, {\n            readonly type: Kind;\n        }>[\'data\'];\n    };\n}[ChunkRow[\'type\']];',
+   },
++  {
++    name: 'ClickAtRequest',
++    declaration: 'export interface ClickAtRequest {\n    x: number;\n    y: number;\n    doubleClick?: boolean;\n}',
++  },
++  {
++    name: 'ClickRequest',
++    declaration: 'export interface ClickRequest {\n    x: number;\n    y: number;\n    button?: MouseButton;\n    doubleClick?: boolean;\n    modifiers?: readonly KeyModifier[];\n}',
++  },
++  {
++    name: 'ClickSelectorRequest',
++    declaration: 'export interface ClickSelectorRequest {\n    selector: string;\n}',
++  },
+   {
+     name: 'ClientArtifactBaseline',
+     declaration: 'export interface ClientArtifactBaseline {\n    readonly path: string;\n    readonly mtimeMs: number;\n    readonly size: number;\n}',
+@@ -3930,6 +4123,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+     name: 'DomainTableSpec',
+     declaration: 'export interface DomainTableSpec<K extends string = string, V = unknown> {\n    readonly valueSchema: ZodType<V>;\n    readonly __key?: K;\n}',
+   },
++  {
++    name: 'DragAtRequest',
++    declaration: 'export interface DragAtRequest {\n    x: number;\n    y: number;\n    toX: number;\n    toY: number;\n}',
++  },
++  {
++    name: 'DragRequest',
++    declaration: 'export interface DragRequest {\n    x: number;\n    y: number;\n    toX: number;\n    toY: number;\n    durationMs?: number;\n}',
++  },
+   {
+     name: 'DshEnvironment',
+     declaration: 'export type DshEnvironment = Readonly<Record<DshEnvironmentKey, string>>;',
+@@ -3966,6 +4167,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+     name: 'EpochHeader',
+     declaration: 'export interface EpochHeader {\n    config: LlmCallConfig;\n    adapterDefaults?: LlmCallConfigAdapterDefaults;\n    system?: string;\n    tools?: ToolSchema[];\n}',
+   },
++  {
++    name: 'ExtractTextRequest',
++    declaration: 'export interface ExtractTextRequest {\n    selector?: string;\n}',
++  },
+   {
+     name: 'FileDiff',
+     declaration: 'export interface FileDiff {\n    path: string;\n    oldText: string | null;\n    newText: string;\n}',
+@@ -3978,6 +4183,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+     name: 'FileReferenceCandidate',
+     declaration: 'export interface FileReferenceCandidate {\n    path: string;\n    kind: \'file\' | \'directory\';\n}',
+   },
++  {
++    name: 'FillSelectorRequest',
++    declaration: 'export interface FillSelectorRequest {\n    selector: string;\n    text: string;\n}',
++  },
+   {
+     name: 'FinishReason',
+     declaration: 'export type FinishReason = FinishReasonMap[keyof FinishReasonMap];',
+@@ -4082,6 +4291,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+     name: 'GrantRecord',
+     declaration: 'export interface GrantRecord {\n    readonly kind: \'grant\';\n    readonly payload: unknown;\n}',
+   },
++  {
++    name: 'GuiAction',
++    declaration: 'export interface GuiAction {\n    kind: GuiActionKind;\n    x?: number;\n    y?: number;\n    toX?: number;\n    toY?: number;\n    text?: string;\n    combo?: string;\n    app?: string;\n    windowTitle?: string;\n    direction?: \'up\' | \'down\' | \'left\' | \'right\';\n    amount?: number;\n    ms?: number;\n    summary?: string;\n    reason?: string;\n}',
++  },
++  {
++    name: 'GuiActionKind',
++    declaration: 'export type GuiActionKind = \'click\' | \'double_click\' | \'right_click\' | \'move\' | \'drag\' | \'type\' | \'key\' | \'scroll\' | \'open_app\' | \'focus_window\' | \'wait\' | \'done\';',
++  },
++  {
++    name: 'GuiActionLogEntry',
++    declaration: 'export interface GuiActionLogEntry {\n    action: GuiAction;\n    outcome?: string;\n}',
++  },
+   {
+     name: 'ImageAttachmentLimits',
+     declaration: 'export interface ImageAttachmentLimits {\n    maxImageBytes: number;\n    maxImagesPerMessage: number;\n    maxMessageImageBytes: number;\n    maxImagePixels: number;\n    maxImageDimension: number;\n    mediaTypes: readonly ImageMediaType[];\n}',
+@@ -4214,6 +4435,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+     name: 'JsonValue',
+     declaration: 'export type JsonValue = null | boolean | number | string | JsonValue[] | {\n    [key: string]: JsonValue;\n};',
+   },
++  {
++    name: 'KeyModifier',
++    declaration: 'export type KeyModifier = \'command\' | \'control\' | \'option\' | \'shift\';',
++  },
+   {
+     name: 'KnobState',
+     declaration: 'export interface KnobState {\n    preset: string | null;\n    sandbox: SandboxMode | null;\n    approval: ApprovalPolicy | null;\n}',
+@@ -4338,6 +4563,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+     name: 'LspRange',
+     declaration: 'export interface LspRange {\n    readonly start: LspPosition;\n    readonly end: LspPosition;\n}',
+   },
++  {
++    name: 'MacosApplication',
++    declaration: 'export interface MacosApplication {\n    name: string;\n    bundleId?: string;\n    pid: number;\n    active: boolean;\n    hidden: boolean;\n}',
++  },
++  {
++    name: 'MacosUseRuntimeSettings',
++    declaration: 'export interface MacosUseRuntimeSettings {\n    commandTimeoutMs: number;\n    allowedApps: readonly string[];\n    deniedApps: readonly string[];\n    excludedScreenshotApps: readonly string[];\n    maxElementsPerSnapshot: number;\n}',
++  },
++  {
++    name: 'MacosWindow',
++    declaration: 'export interface MacosWindow {\n    id: number;\n    app: string;\n    pid: number;\n    title: string;\n    bounds: ScreenBounds;\n    onScreen: boolean;\n}',
++  },
+   {
+     name: 'ManualCompactAgentContext',
+     declaration: 'export interface ManualCompactAgentContext extends CompactionAgentContext {\n    runMaintenance<T>(task: (signal: AbortSignal) => Promise<T>): Promise<T>;\n}',
+@@ -4470,6 +4707,26 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+     name: 'ModelReasoningEffort',
+     declaration: 'export interface ModelReasoningEffort {\n    readonly id: string;\n    readonly name: string;\n    readonly description?: string;\n}',
+   },
++  {
++    name: 'MouseButton',
++    declaration: 'export type MouseButton = \'left\' | \'right\';',
++  },
++  {
++    name: 'MoveAtRequest',
++    declaration: 'export interface MoveAtRequest {\n    x: number;\n    y: number;\n}',
++  },
++  {
++    name: 'MoveRequest',
++    declaration: 'export interface MoveRequest {\n    x: number;\n    y: number;\n}',
++  },
++  {
++    name: 'NavigateRequest',
++    declaration: 'export interface NavigateRequest {\n    url: string;\n}',
++  },
++  {
++    name: 'NextActionRequest',
++    declaration: 'export interface NextActionRequest {\n    screenshotPngBase64: string;\n    task: string;\n    history?: readonly GuiActionLogEntry[];\n}',
++  },
+   {
+     name: 'ObjectJsonSchema',
+     declaration: 'export type ObjectJsonSchema = JsonSchemaNode & {\n    type: \'object\';\n};',
+@@ -4478,6 +4735,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+     name: 'OneShotSubagentDescriptorData',
+     declaration: 'export interface OneShotSubagentDescriptorData extends SubagentDescriptorBase {\n    readonly mode: \'one-shot\';\n    readonly label?: string;\n}',
+   },
++  {
++    name: 'OpenAppRequest',
++    declaration: 'export interface OpenAppRequest {\n    name: string;\n}',
++  },
+   {
+     name: 'PermissionSelect',
+     declaration: 'export interface PermissionSelect {\n    options: PresetOption[];\n    currentValue: string;\n}',
+@@ -4662,6 +4923,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+     name: 'ResumeAgentOptions',
+     declaration: 'export interface ResumeAgentOptions {\n    readonly resumeSessionId: SessionId;\n    readonly agentOptions?: AgentOptions;\n    readonly signal?: AbortSignal;\n    readonly setup?: AgentSetup;\n}',
+   },
++  {
++    name: 'RunAppleScriptRequest',
++    declaration: 'export interface RunAppleScriptRequest {\n    script: string;\n}',
++  },
+   {
+     name: 'RunnerFailureRule',
+     declaration: 'export interface RunnerFailureRule {\n    allowedExitCodes?: readonly number[];\n    fatalSignatures: readonly string[];\n    informationalLines?: readonly string[];\n}',
+@@ -4710,6 +4975,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+     name: 'ScopeKey',
+     declaration: 'export type ScopeKey = object;',
+   },
++  {
++    name: 'ScreenBounds',
++    declaration: 'export interface ScreenBounds {\n    x: number;\n    y: number;\n    width: number;\n    height: number;\n}',
++  },
++  {
++    name: 'ScreenshotResult',
++    declaration: 'export interface ScreenshotResult {\n    pngBase64: string;\n}',
++  },
++  {
++    name: 'ScrollRequest',
++    declaration: 'export interface ScrollRequest {\n    direction: \'up\' | \'down\' | \'left\' | \'right\';\n    amount?: number;\n}',
++  },
+   {
+     name: 'SearchFileMatches',
+     declaration: 'export interface SearchFileMatches {\n    path: string;\n    matches: SearchLineMatch[];\n}',
+@@ -5998,6 +6275,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+     name: 'WebUpgradeRoute',
+     declaration: 'export interface WebUpgradeRoute {\n    path: string;\n    handler: (req: IncomingMessage, socket: Duplex, head: Buffer) => void | Promise<void>;\n}',
+   },
++  {
++    name: 'WindowStateRequest',
++    declaration: 'export interface WindowStateRequest extends WindowTarget {\n    maxElements?: number;\n}',
++  },
++  {
++    name: 'WindowStateResult',
++    declaration: 'export interface WindowStateResult {\n    window: MacosWindow;\n    pngBase64: string;\n    elements: readonly AccessibilityElement[];\n    truncated: boolean;\n}',
++  },
++  {
++    name: 'WindowTarget',
++    declaration: 'export interface WindowTarget {\n    id?: number;\n    app?: string;\n    title?: string;\n}',
++  },
+   {
+     name: 'WorkflowAgentEndInfo',
+     declaration: 'export interface WorkflowAgentEndInfo extends WorkflowAgentInfo {\n    outcome: WorkflowAgentOutcome;\n}',
+diff --git a/packages/session-query/session-log-export/src/archive.ts b/packages/session-query/session-log-export/src/archive.ts
+index 2f7d1fbd1169a6199ba2bb6b8f906f6c158a7b6a..b1ec2e7e607c326ceed2d45463cad36b76cacaaf 100644
+--- a/packages/session-query/session-log-export/src/archive.ts
++++ b/packages/session-query/session-log-export/src/archive.ts
+@@ -144,11 +144,13 @@ function collectEventImageRefs(event: unknown, refs: Map<string, ImageAttachment
+   if (typeof data !== 'object' || data === null) return
+   const carrier = data as {
+     content?: unknown
++    meta?: { content?: unknown }
+     message?: { content?: unknown }
+     inserted?: Array<{ content?: unknown }>
+     chunk?: { type?: unknown; block?: unknown }
+   }
+   collectImageRefs(carrier.content, refs)
++  collectImageRefs(carrier.meta?.content, refs)
+   if (carrier.message !== undefined) collectImageRefs(carrier.message.content, refs)
+   if (carrier.inserted !== undefined) {
+     for (const message of carrier.inserted) collectImageRefs(message.content, refs)
+diff --git a/packages/session-query/session-log-export/tests/archive.host.spec.ts b/packages/session-query/session-log-export/tests/archive.host.spec.ts
+index c41846039a2bd019de673a1f8d85e9b34941a468..68ba46e40c9acc3883a4cef7b4b97957c9d3c628 100644
+--- a/packages/session-query/session-log-export/tests/archive.host.spec.ts
++++ b/packages/session-query/session-log-export/tests/archive.host.spec.ts
+@@ -644,6 +644,20 @@ describe('session.export download endpoint', () => {
+     expect(Object.keys(files).sort()).toEqual(['media/nested-1.webp', 'session.jsonl'])
+   })
+ 
++  it('collects UI-only media referenced from tool-result presentation metadata', async () => {
++    const presentation = '{"type":"tool/result","seq":2,"time":2000,"data":{"output":"ok","meta":{"content":[{"type":"image","attachment":{"attachmentId":"presentation-1","mediaType":"image/png","bytes":4,"width":2,"height":2}}]}}}'
++    const root = artifact('session-root', undefined, [
++      '{"type":"session","version":0,"id":"session-root","createdAt":1000}',
++      presentation,
++    ].join('\n') + '\n')
++    const api = await buildApi({ 'session-root': root })
++    const response = await toFetchHandler(api).fetch(
++      new Request('http://host/api/session.export?sessionId=session-root'),
++    )
++    const files = unzipSync(await responseBytes(response))
++    expect(Object.keys(files).sort()).toEqual(['media/presentation-1.png', 'session.jsonl'])
++  })
++
+   it('scans the wrapped, inserted, and chunk carriers plus non-object content items', async () => {
+     const block = (id: string, mediaType: string) =>
+       `{"type":"image","attachment":{"attachmentId":"${id}","mediaType":"${mediaType}","bytes":4,"width":2,"height":2}}`
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index 06d5d75a109ab21a16a98f6fcfdb7bbda4e33f7d..c4cd52f55902d46796a1663498517fd03caf43ea 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -156,6 +156,9 @@ importers:
+       '@deepseek-ai/dsh-base':
+         specifier: workspace:^
+         version: link:../../packages/bundle/base
++      '@deepseek-ai/dsh-browser-use':
++        specifier: workspace:^
++        version: link:../../packages/macos-use/browser-use
+       '@deepseek-ai/dsh-client-ui-agent-preset':
+         specifier: workspace:^
+         version: link:../../packages/client/ui-agent-preset
+@@ -189,6 +192,9 @@ importers:
+       '@deepseek-ai/dsh-goal-round-driver':
+         specifier: workspace:^
+         version: link:../../packages/goal/goal-round-driver
++      '@deepseek-ai/dsh-gui-model':
++        specifier: workspace:^
++        version: link:../../packages/macos-use/gui-model
+       '@deepseek-ai/dsh-headless':
+         specifier: workspace:^
+         version: link:../../packages/bundle/headless
+@@ -207,6 +213,9 @@ importers:
+       '@deepseek-ai/dsh-launch-environment':
+         specifier: workspace:^
+         version: link:../../packages/util/launch-environment
++      '@deepseek-ai/dsh-macos-use':
++        specifier: workspace:^
++        version: link:../../packages/macos-use/macos-use
+       '@deepseek-ai/dsh-mcp-client':
+         specifier: workspace:^
+         version: link:../../packages/mcp/mcp-client
+@@ -282,6 +291,9 @@ importers:
+       '@deepseek-ai/dsh-tool-jobs':
+         specifier: workspace:^
+         version: link:../../packages/jobs/tool-jobs
++      '@deepseek-ai/dsh-tool-macos-use':
++        specifier: workspace:^
++        version: link:../../packages/macos-use/tool-macos-use
+       '@deepseek-ai/dsh-tool-pwsh':
+         specifier: workspace:^
+         version: link:../../packages/shell/tool-pwsh
+@@ -6585,6 +6597,154 @@ importers:
+         specifier: workspace:^
+         version: link:../../core/tools
+ 
++  packages/macos-use/browser-use:
++    dependencies:
++      '@deepseek-ai/schemastery':
++        specifier: link:../../../vendor/schemastery
++        version: link:../../../vendor/schemastery
++      playwright:
++        specifier: ^1.49.0
++        version: 1.61.1
++    devDependencies:
++      '@deepseek-ai/cordis':
++        specifier: workspace:^
++        version: link:../../../vendor/cordis
++      '@deepseek-ai/dsh-invariants':
++        specifier: workspace:^
++        version: link:../../runtime-diagnostics/invariants
++
++  packages/macos-use/gui-model:
++    dependencies:
++      '@deepseek-ai/schemastery':
++        specifier: link:../../../vendor/schemastery
++        version: link:../../../vendor/schemastery
++    devDependencies:
++      '@deepseek-ai/cordis':
++        specifier: workspace:^
++        version: link:../../../vendor/cordis
++      '@deepseek-ai/dsh-credentials':
++        specifier: workspace:^
++        version: link:../../credentials/credentials
++      '@deepseek-ai/dsh-invariants':
++        specifier: workspace:^
++        version: link:../../runtime-diagnostics/invariants
++      '@deepseek-ai/dsh-launch-environment':
++        specifier: workspace:^
++        version: link:../../util/launch-environment
++      '@deepseek-ai/dsh-settings':
++        specifier: workspace:^
++        version: link:../../settings/settings
++
++  packages/macos-use/macos-use:
++    dependencies:
++      '@deepseek-ai/schemastery':
++        specifier: link:../../../vendor/schemastery
++        version: link:../../../vendor/schemastery
++      sharp:
++        specifier: ^0.35.3
++        version: 0.35.3(@types/node@22.20.0)
++    devDependencies:
++      '@deepseek-ai/cordis':
++        specifier: workspace:^
++        version: link:../../../vendor/cordis
++      '@deepseek-ai/dsh-invariants':
++        specifier: workspace:^
++        version: link:../../runtime-diagnostics/invariants
++      '@deepseek-ai/dsh-subprocess':
++        specifier: workspace:^
++        version: link:../../subprocess/subprocess
++
++  packages/macos-use/tool-macos-use:
++    dependencies:
++      '@deepseek-ai/dsh-system-prompt':
++        specifier: workspace:^
++        version: link:../../core/system-prompt
++      '@deepseek-ai/schemastery':
++        specifier: link:../../../vendor/schemastery
++        version: link:../../../vendor/schemastery
++      sharp:
++        specifier: ^0.35.3
++        version: 0.35.3(@types/node@22.20.0)
++    devDependencies:
++      '@deepseek-ai/cordis':
++        specifier: workspace:^
++        version: link:../../../vendor/cordis
++      '@deepseek-ai/dsh-api-remotes':
++        specifier: workspace:^
++        version: link:../../api/remotes
++      '@deepseek-ai/dsh-api-session-controller':
++        specifier: workspace:^
++        version: link:../../api/session-controller
++      '@deepseek-ai/dsh-attachment':
++        specifier: workspace:^
++        version: link:../../attachment/attachment
++      '@deepseek-ai/dsh-browser-use':
++        specifier: workspace:^
++        version: link:../browser-use
++      '@deepseek-ai/dsh-client-connection':
++        specifier: workspace:^
++        version: link:../../client/connection
++      '@deepseek-ai/dsh-client-locale':
++        specifier: workspace:^
++        version: link:../../client/locale
++      '@deepseek-ai/dsh-client-store':
++        specifier: workspace:^
++        version: link:../../client/store
++      '@deepseek-ai/dsh-client-test-runtime':
++        specifier: workspace:^
++        version: link:../../test-support/client-runtime
++      '@deepseek-ai/dsh-client-ui-conversation':
++        specifier: workspace:^
++        version: link:../../client/ui-conversation
++      '@deepseek-ai/dsh-client-ui-renderer':
++        specifier: workspace:^
++        version: link:../../client/ui-renderer
++      '@deepseek-ai/dsh-client-ui-settings':
++        specifier: workspace:^
++        version: link:../../client/ui-settings
++      '@deepseek-ai/dsh-client-ui-settings-plugins':
++        specifier: workspace:^
++        version: link:../../client/ui-settings-plugins
++      '@deepseek-ai/dsh-client-ui-slots':
++        specifier: workspace:^
++        version: link:../../client/ui-slots
++      '@deepseek-ai/dsh-client-ui-tool':
++        specifier: workspace:^
++        version: link:../../client/ui-tool
++      '@deepseek-ai/dsh-gui-model':
++        specifier: workspace:^
++        version: link:../gui-model
++      '@deepseek-ai/dsh-invariants':
++        specifier: workspace:^
++        version: link:../../runtime-diagnostics/invariants
++      '@deepseek-ai/dsh-macos-use':
++        specifier: workspace:^
++        version: link:../macos-use
++      '@deepseek-ai/dsh-session':
++        specifier: workspace:^
++        version: link:../../core/session
++      '@deepseek-ai/dsh-settings':
++        specifier: workspace:^
++        version: link:../../settings/settings
++      '@deepseek-ai/dsh-tools':
++        specifier: workspace:^
++        version: link:../../core/tools
++      '@deepseek-ai/dsh-user-approval':
++        specifier: workspace:^
++        version: link:../../interaction/user-approval
++      '@testing-library/react':
++        specifier: ^16.1.0
++        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.31))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
++      '@types/react':
++        specifier: ~18.3.1
++        version: 18.3.31
++      react:
++        specifier: ^18.2.0
++        version: 18.3.1
++      react-dom:
++        specifier: ^18.2.0
++        version: 18.3.1(react@18.3.1)
++
+   packages/mcp/mcp-client:
+     dependencies:
+       '@deepseek-ai/schemastery':
+diff --git a/scripts/gen-cordis-catalog.ts b/scripts/gen-cordis-catalog.ts
+index 1bae81253b379591a9fd3c1ceab627f8e859c7a8..d7b68332a272a779377cc26e7b3d1876b63a0f2f 100644
+--- a/scripts/gen-cordis-catalog.ts
++++ b/scripts/gen-cordis-catalog.ts
+@@ -60,6 +60,7 @@ export const SERVICE_PAGE: Record<string, string> = {
+   agents: 'core.md',
+   approval: 'approval.md',
+   attachments: 'attachment.md',
++  browserUse: 'tools.md',
+   shell: 'shell.md',
+   shellEnv: 'shell.md',
+   clientModules: 'client-modules.md',
+@@ -78,11 +79,13 @@ export const SERVICE_PAGE: Record<string, string> = {
+   fileReferences: 'session-reference.md',
+   fs: 'filesystem.md',
+   goals: 'goal.md',
++  guiModel: 'tools.md',
+   inspector: 'extensions.md',
+   webServer: 'web-server.md',
+   invariants: 'invariants.md',
+   llm: 'llm-streaming.md',
+   lsp: 'lsp.md',
++  macosUse: 'tools.md',
+   messageFeedback: 'feedback.md',
+   permissionPresets: 'permission-presets.md',
+   planMode: 'plan.md',
+@@ -354,6 +357,31 @@ export const LINK_MAP: Readonly<Record<string, string>> = {
+   RequestImageAttachment: 'attachment.md',
+   SaveImageAttachment: 'attachment.md',
+   StoredImageAttachment: 'attachment.md',
++  BrowserScreenshotResult: 'tools.md',
++  ClickAtRequest: 'tools.md',
++  ClickRequest: 'tools.md',
++  ClickSelectorRequest: 'tools.md',
++  DragAtRequest: 'tools.md',
++  DragRequest: 'tools.md',
++  ExtractTextRequest: 'tools.md',
++  FillSelectorRequest: 'tools.md',
++  GuiAction: 'tools.md',
++  KeyPressRequest: 'tools.md',
++  MacosApplication: 'tools.md',
++  MacosUseRuntimeSettings: 'tools.md',
++  MacosWindow: 'tools.md',
++  MoveAtRequest: 'tools.md',
++  MoveRequest: 'tools.md',
++  NavigateRequest: 'tools.md',
++  NextActionRequest: 'tools.md',
++  OpenAppRequest: 'tools.md',
++  RunAppleScriptRequest: 'tools.md',
++  ScreenshotResult: 'tools.md',
++  ScrollRequest: 'tools.md',
++  TypeTextRequest: 'tools.md',
++  WindowStateRequest: 'tools.md',
++  WindowStateResult: 'tools.md',
++  WindowTarget: 'tools.md',
+   ShellExecRequest: 'shell.md',
+   ShellExecSpec: 'shell.md',
+   ShellProcess: 'shell.md',
+diff --git a/scripts/gen-doc-graphs.ts b/scripts/gen-doc-graphs.ts
+index 0ea6043121d4d0a1377c656ce1472209fba6bf00..ef1f02c82988100f8cbbab38979f7568470b4928 100644
+--- a/scripts/gen-doc-graphs.ts
++++ b/scripts/gen-doc-graphs.ts
+@@ -98,6 +98,33 @@ const GROUP_ORDER = [
+ ]
+ 
+ const SERVICE_ROLES: ServiceRole[] = [
++  {
++    key: 'browserUse',
++    pkg: 'browser-use',
++    title: 'Managed Chromium control seam',
++    mode: 'seam',
++    implementations: ['browser-use'],
++    consumers: ['tool-macos-use'],
++    note: 'One lazy Playwright browser page supplies selector and screenshot-coordinate actions; the model-facing consumer owns task policy and presentation.',
++  },
++  {
++    key: 'guiModel',
++    pkg: 'gui-model',
++    title: 'GUI screenshot-grounding seam',
++    mode: 'seam',
++    implementations: ['gui-model'],
++    consumers: ['tool-macos-use'],
++    note: 'The provider makes one OpenAI-compatible vision request per autonomous step and returns one validated action outside the driving Session model request.',
++  },
++  {
++    key: 'macosUse',
++    pkg: 'macos-use',
++    title: 'Native macOS control seam',
++    mode: 'seam',
++    implementations: ['macos-use'],
++    consumers: ['tool-macos-use'],
++    note: 'One native provider owns screenshots, Accessibility state, window and application discovery, pointer and keyboard actions, and AppleScript under live application policy.',
++  },
+   {
+     key: 'attachments',
+     pkg: 'attachment',
+diff --git a/scripts/gen-tool-catalog.ts b/scripts/gen-tool-catalog.ts
+index 36e0b0833cad949592000ab41ee45791c9442f10..419a4dff3acbb528b337ede3a491e6e50c70c05b 100644
+--- a/scripts/gen-tool-catalog.ts
++++ b/scripts/gen-tool-catalog.ts
+@@ -56,6 +56,10 @@ import * as ToolGoal from '@deepseek-ai/dsh-tool-goal'
+ import * as ToolSchedule from '@deepseek-ai/dsh-schedule'
+ import Lsp from '@deepseek-ai/dsh-lsp'
+ import * as ToolLsp from '@deepseek-ai/dsh-tool-lsp'
++import MacosUse from '@deepseek-ai/dsh-macos-use'
++import BrowserUse from '@deepseek-ai/dsh-browser-use'
++import GuiModel from '@deepseek-ai/dsh-gui-model'
++import * as ToolMacosUse from '@deepseek-ai/dsh-tool-macos-use'
+ import * as ToolSkill from '@deepseek-ai/dsh-tool-skill'
+ import * as ToolSessionQuery from '@deepseek-ai/dsh-tool-session-query'
+ import * as ToolTasks from '@deepseek-ai/dsh-tool-jobs'
+@@ -409,6 +413,26 @@ const TOOL_PACKAGES: ToolPackage[] = [
+     note:
+       'The lsp tool keeps provider selection and language-server subprocesses behind ctx.lsp, so its model-visible schema stays stable across providers. Requires a registered provider (e.g. `@deepseek-ai/dsh-lsp-stdio`) at runtime; without one, a query returns the structured `LSP_UNAVAILABLE` error rather than changing the schema.',
+   },
++  {
++    pkg: '@deepseek-ai/dsh-tool-macos-use',
++    dir: 'tool-macos-use',
++    source: 'packages/macos-use/tool-macos-use/src/index.ts',
++    requires: ['ctx.tools', 'ctx.macosUse', 'ctx.guiModel', 'ctx.browserUse', 'ctx.attachments'],
++    writes: ['tool/call', 'durable screenshot attachments', 'tool/result with optional UI-only step-image metadata'],
++    async mount(ctx) {
++      // All providers are inert during schema harvest: Chromium launches on
++      // first use, native commands execute only on calls, and the GUI endpoint
++      // is contacted only by the autonomous task executors.
++      await ctx.plugin(LocalSubprocessRuntime)
++      await ctx.plugin(MacosUse)
++      await ctx.plugin(GuiModel, { baseURL: 'http://127.0.0.1', model: 'tool-catalog' })
++      await ctx.plugin(BrowserUse)
++      await ctx.plugin(CatalogAttachmentStore)
++      await ctx.plugin(ToolMacosUse)
++    },
++    note:
++      'Primitive desktop and browser tools execute directly against their capability seams. computer_use_task and browser_use_task call the separately configured GUI vision model once per step. Enabled step screenshots are durable tool-result metadata rendered only by the client; the driving model receives the textual task result.',
++  },
+   {
+     pkg: '@deepseek-ai/dsh-tool-ralph',
+     dir: 'tool-ralph',
+diff --git a/scripts/verify-package-readme-model-experience.ts b/scripts/verify-package-readme-model-experience.ts
+index 1caf31ec917095e678587c74ad45172cd5a1eac6..61bd740953d134c2a0757c882801313b14ed1ca7 100644
+--- a/scripts/verify-package-readme-model-experience.ts
++++ b/scripts/verify-package-readme-model-experience.ts
+@@ -128,6 +128,8 @@ const SENTENCE_MODEL_EXPERIENCE: Readonly<Record<string, SentenceContract>> = {
+   'packages/llm/token-meter': { kind: 'indirect', reason: 'The measurement service leaves model-visible changes to its consumers.' },
+   'packages/lsp/lsp': { kind: 'indirect', reason: 'The provider registry delegates model rendering to dsh-tool-lsp.' },
+   'packages/lsp/lsp-stdio': { kind: 'indirect', reason: 'The provider backend delegates model rendering to dsh-tool-lsp.' },
++  'packages/macos-use/browser-use': { kind: 'indirect', reason: 'The browser capability seam delegates model rendering to dsh-tool-macos-use.' },
++  'packages/macos-use/macos-use': { kind: 'indirect', reason: 'The native desktop capability seam delegates model rendering to dsh-tool-macos-use.' },
+   'packages/subprocess/subprocess': { kind: 'indirect', reason: 'The seam delegates all model rendering to consumer seams such as the bash executor family.' },
+   'packages/e2b/subprocess-e2b': { kind: 'indirect', reason: 'The remote spawn backend delegates model rendering to consumer seams such as the bash executor family.' },
+   'packages/subprocess/subprocess-local': { kind: 'indirect', reason: 'The spawn backend delegates model rendering to consumer seams such as the bash executor family.' },
+diff --git a/tsconfig.base.json b/tsconfig.base.json
+index 661a546bf8eaae2770a69fb10874b99efc08b385..ad94326af59ae9753165a9bc5a69e98a92892f1d 100644
+--- a/tsconfig.base.json
++++ b/tsconfig.base.json
+@@ -72,6 +72,7 @@
+       "@deepseek-ai/dsh-session-projection/types": ["./packages/session/session-projection/src/types.ts"],
+       "@deepseek-ai/dsh-tool-todo/types": ["./packages/todo/tool-todo/src/types.ts"],
+       "@deepseek-ai/dsh-tool-todo/client": ["./packages/todo/tool-todo/src/client.ts"],
++      "@deepseek-ai/dsh-tool-macos-use/client": ["./packages/macos-use/tool-macos-use/src/client/index.ts"],
+       "@deepseek-ai/dsh-session-title/types": ["./packages/session/session-title/src/types.ts"],
+       "@deepseek-ai/dsh-session-title/client": ["./packages/session/session-title/src/client.ts"],
+       "@deepseek-ai/dsh-subagent/client": ["./packages/subagent/subagent/src/client.ts"],
+@@ -270,6 +271,8 @@
+       "@deepseek-ai/dsh-bash-sandbox/invariant": ["./packages/shell/bash-sandbox/src/invariant.ts"],
+       "@deepseek-ai/dsh-brand": ["./packages/util/brand/src"],
+       "@deepseek-ai/dsh-brand/invariant": ["./packages/util/brand/src/invariant.ts"],
++      "@deepseek-ai/dsh-browser-use": ["./packages/macos-use/browser-use/src"],
++      "@deepseek-ai/dsh-browser-use/invariant": ["./packages/macos-use/browser-use/src/invariant.ts"],
+       "@deepseek-ai/dsh-cmdline": ["./packages/boot/cmdline/src"],
+       "@deepseek-ai/dsh-cmdline/invariant": ["./packages/boot/cmdline/src/invariant.ts"],
+       "@deepseek-ai/dsh-code-runtime": ["./packages/code-runtime/code-runtime/src"],
+@@ -319,6 +322,8 @@
+       "@deepseek-ai/dsh-goal/invariant": ["./packages/goal/goal/src/invariant.ts"],
+       "@deepseek-ai/dsh-goal-round-driver": ["./packages/goal/goal-round-driver/src"],
+       "@deepseek-ai/dsh-goal-round-driver/invariant": ["./packages/goal/goal-round-driver/src/invariant.ts"],
++      "@deepseek-ai/dsh-gui-model": ["./packages/macos-use/gui-model/src"],
++      "@deepseek-ai/dsh-gui-model/invariant": ["./packages/macos-use/gui-model/src/invariant.ts"],
+       "@deepseek-ai/dsh-headless": ["./packages/bundle/headless/src"],
+       "@deepseek-ai/dsh-headless/invariant": ["./packages/bundle/headless/src/invariant.ts"],
+       "@deepseek-ai/dsh-home-paths": ["./packages/util/home-paths/src"],
+@@ -354,6 +359,8 @@
+       "@deepseek-ai/dsh-lsp/invariant": ["./packages/lsp/lsp/src/invariant.ts"],
+       "@deepseek-ai/dsh-lsp-stdio": ["./packages/lsp/lsp-stdio/src"],
+       "@deepseek-ai/dsh-lsp-stdio/invariant": ["./packages/lsp/lsp-stdio/src/invariant.ts"],
++      "@deepseek-ai/dsh-macos-use": ["./packages/macos-use/macos-use/src"],
++      "@deepseek-ai/dsh-macos-use/invariant": ["./packages/macos-use/macos-use/src/invariant.ts"],
+       "@deepseek-ai/dsh-mcp-client": ["./packages/mcp/mcp-client/src"],
+       "@deepseek-ai/dsh-mcp-client/invariant": ["./packages/mcp/mcp-client/src/invariant.ts"],
+       "@deepseek-ai/dsh-message-feedback": ["./packages/feedback/message-feedback/src"],
+@@ -510,6 +517,8 @@
+       "@deepseek-ai/dsh-tool-jobs/invariant": ["./packages/jobs/tool-jobs/src/invariant.ts"],
+       "@deepseek-ai/dsh-tool-lsp": ["./packages/lsp/tool-lsp/src"],
+       "@deepseek-ai/dsh-tool-lsp/invariant": ["./packages/lsp/tool-lsp/src/invariant.ts"],
++      "@deepseek-ai/dsh-tool-macos-use": ["./packages/macos-use/tool-macos-use/src"],
++      "@deepseek-ai/dsh-tool-macos-use/invariant": ["./packages/macos-use/tool-macos-use/src/invariant.ts"],
+       "@deepseek-ai/dsh-tool-pwsh/invariant": ["./packages/shell/tool-pwsh/src/invariant.ts"],
+       "@deepseek-ai/dsh-tool-pwsh-persistent": ["./packages/shell/tool-pwsh-persistent/src"],
+       "@deepseek-ai/dsh-tool-pwsh-persistent/invariant": ["./packages/shell/tool-pwsh-persistent/src/invariant.ts"],
+diff --git a/tsconfig.client.json b/tsconfig.client.json
+index ddeb2e84b71cc56b0d4f0db21d2e2e8e7ec2bbd6..3cf6a9c62740c4a7115c37b8e87b1bc6a40d8b82 100644
+--- a/tsconfig.client.json
++++ b/tsconfig.client.json
+@@ -69,6 +69,7 @@
+     { "path": "./packages/client/ui-chat" },
+     { "path": "./packages/client/ui-conversation" },
+     { "path": "./packages/client/ui-tool" },
++    { "path": "./packages/macos-use/tool-macos-use/tsconfig.client.json" },
+     { "path": "./packages/client/ui-deliverables" },
+     { "path": "./packages/client/ui-workflow-run" },
+     { "path": "./packages/client/ui-workspace" },
+diff --git a/tsconfig.host.json b/tsconfig.host.json
+index 561cee9b175c9614f6b8e5a70ac74c3694e19329..b1e846e22101e6a2a19571ad727b8d70407e07bd 100644
+--- a/tsconfig.host.json
++++ b/tsconfig.host.json
+@@ -302,6 +302,10 @@
+     { "path": "./packages/workflow/tool-ralph" },
+     { "path": "./packages/webhook/webhook" },
+     { "path": "./packages/webhook/webhook-github" },
++    { "path": "./packages/macos-use/macos-use" },
++    { "path": "./packages/macos-use/browser-use" },
++    { "path": "./packages/macos-use/gui-model" },
++    { "path": "./packages/macos-use/tool-macos-use/tsconfig.host.json" },
+     { "path": "./packages/todo/tool-todo" },
+     { "path": "./packages/plan/plan-mode" },
+     { "path": "./packages/preset/agent-presets" },

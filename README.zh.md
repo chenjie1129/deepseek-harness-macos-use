@@ -23,20 +23,20 @@ Retina 和其他超大截图只会在持久展示存储前按当前附件限制�
 
 ## 兼容性
 
-源码与集成补丁已在 DeepSeek Harness `0.1.0-rc.8` 发布基线提交 [`141eb6f`](https://github.com/deepseek-ai/deepseek-harness/commit/141eb6fef83422698aef7a981029e843e8161534) 上验证。各包清单有意保留 Harness 的 `workspace:^` 依赖，因为这些包需要组合进 Harness 工作区。
+源码与当前集成补丁已在 DeepSeek Harness `0.1.2-alpha.1` 发布基线提交 [`cd5ef81`](https://github.com/deepseek-ai/deepseek-harness/commit/cd5ef8148158c3a752a658978873241fdf8e2bbc) 上验证。各包清单有意保留 Harness 的 `workspace:^` 依赖，因为这些包需要组合进 Harness 工作区。
 
 ## 集成到 Harness
 
 1. 检出兼容的 Harness 提交。
 2. 把本仓库的 `packages/macos-use` 目录复制到 Harness 的同一路径。
-3. 在 Harness 根目录检查并应用 [`integration/deepseek-harness-rc8.patch`](integration/deepseek-harness-rc8.patch)。
+3. 在 Harness 根目录检查并应用 [`integration/deepseek-harness-v0.1.2-alpha.1.patch`](integration/deepseek-harness-v0.1.2-alpha.1.patch)。
 4. 安装依赖、构建并运行聚焦测试：
 
 ```bash
-git checkout 141eb6fef83422698aef7a981029e843e8161534
+git checkout cd5ef8148158c3a752a658978873241fdf8e2bbc
 cp -R /path/to/deepseek-harness-macos-use/packages/macos-use ./packages/
-git apply --check /path/to/deepseek-harness-macos-use/integration/deepseek-harness-rc8.patch
-git apply /path/to/deepseek-harness-macos-use/integration/deepseek-harness-rc8.patch
+git apply --check /path/to/deepseek-harness-macos-use/integration/deepseek-harness-v0.1.2-alpha.1.patch
+git apply /path/to/deepseek-harness-macos-use/integration/deepseek-harness-v0.1.2-alpha.1.patch
 corepack pnpm install --frozen-lockfile
 corepack pnpm run build
 corepack pnpm exec vitest run packages/macos-use/*/tests/*.spec.ts
@@ -54,4 +54,4 @@ corepack pnpm exec playwright install chromium
 
 ## 当前限制
 
-在兼容基线上，P0 聚焦测试通过 121 项，完整 GUI 套件通过 3,968 项并跳过 1 项，生产构建通过，全部 28 项文档门禁也通过。干净 profile 的 UI 冒烟使用真实 macOS 截图服务和确定性的本地视觉端点：GUI 模型收到 PNG，Harness 在第 1 步内联显示了 2000×1125 图片。同一次浏览器检查也确认全部智能体配置都位于可视化插件配置页面。组装后的 Web 回放成功构建，通过 79 个文件并跳过 1 个；仍有 3 个与本插件变更无关的既有回放预期失败。真实第三方提供方兼容性以及会执行动作的桌面／浏览器端到端测试，仍需要部署凭据和合适的操作系统权限。
+插件套件通过 59 项测试，插件加 Harness 附件的聚焦套件通过 98 项测试。完整 GUI 套件通过 3,822 项并跳过 1 项，兼容基线上的生产 Web 构建也通过。确定性 Web 回放在 91 个文件中通过 310 项并跳过 15 项；唯一失败的 Harness 核心 HMR 测试在 Node 22.22.0 下也会原样复现于未修改的兼容基线。干净 profile 的 UI 测试使用真实 macOS 截图服务以及确定性的本地驱动与视觉端点：`computer_use_task` 成功完成，Harness 从经过授权的附件中把 `computer-use-task-step-1.png` 内联显示在第 1 步。同一次浏览器检查确认默认开启的开关与所有可调整的智能体设置都位于可视化插件配置页面。真实第三方提供方兼容性仍需部署凭据；确定性运行证明了真实任务、截图、存储、授权与客户端渲染路径，但不宣称提供方兼容性。

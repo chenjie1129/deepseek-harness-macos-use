@@ -25,6 +25,8 @@ macOS Accessibility and Screen Recording permissions remain host-controlled. Den
 
 Screenshot bytes are stored through `ctx.attachments`, while the driving model receives text references because its primary adapter rejects image tool-result content. GUI-model requests and intermediate decisions remain outside the driving Session log. A default-on presentation setting can retain each step's grounding screenshot as authorized UI-only result content, while the final task result still retains the completion state, summary, action/outcome list, and final screenshot reference. Stored copies are normalized to the active attachment limits without changing the original grounding pixels or action coordinates.
 
+The tool package has Host and Client faces. The Host projects retained step images into `tool/result.data.meta.content`; the Session Controller authorizes those references and Session export includes their objects. The Client validates that metadata, loads images through the Session attachment route, and renders the task card through the keyed `tool.call.toolview` slot. The task output schema accepts the attachment service's optional `originalDimensions` metadata when normalization downscales a capture.
+
 ## Alternatives considered
 
 - **Shell-only control.** Shell commands cannot reliably observe or operate applications whose meaningful state exists only in a rendered interface.
@@ -33,7 +35,7 @@ Screenshot bytes are stored through `ctx.attachments`, while the driving model r
 
 ## Verification
 
-Focused suites cover AppleScript and native-script construction, macOS service behavior, semantic-token expiry, task coordination and abort, GUI response parsing and requests, browser lifecycle/actions, policy confirmations, visual settings-card registration, and bounded task-loop execution. The packages pass repository build, generated-catalog, bilingual-documentation, and full GUI gates. A clean-profile live UI test also exercised a real screenshot through the local vision boundary and displayed it inline in Step 1. Live third-party provider credentials and action-taking desktop/browser runs remain deployment checks.
+Focused suites cover AppleScript and native-script construction, macOS service behavior, semantic-token expiry, task coordination and abort, GUI response parsing and requests, browser lifecycle/actions, policy confirmations, output-schema validation, visual settings-card registration, authorized attachment loading, and bounded task-loop execution. The packages pass the production web build and full GUI gate. A clean-profile live UI test also exercised a real screenshot through the local vision boundary and displayed its attachment inline in Step 1. Live third-party provider credentials remain a deployment check.
 
 ## Consequences
 

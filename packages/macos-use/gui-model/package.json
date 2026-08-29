@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-gui-model",
   "description": "GUI-grounding vision model seam (ctx.guiModel): calls an OpenAI-compatible vision chat-completions endpoint with a screenshot and a task, and returns one structured next action",
-  "version": "0.1.0-rc.8",
+  "version": "0.1.2-alpha.1",
   "publishConfig": {
     "access": "public"
   },

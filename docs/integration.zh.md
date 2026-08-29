@@ -4,11 +4,11 @@
 
 ## 支持的基线
 
-随附补丁面向 DeepSeek Harness 提交 `141eb6fef83422698aef7a981029e843e8161534`（`0.1.0-rc.8`）。应用前请先运行 `git apply --check`。较新的 Harness 版本可能需要手工变基，因为设置卡片、包引用、生成目录和锁文件都可能变化。
+随附的 [`deepseek-harness-v0.1.2-alpha.1.patch`](../integration/deepseek-harness-v0.1.2-alpha.1.patch) 面向 DeepSeek Harness 提交 `cd5ef8148158c3a752a658978873241fdf8e2bbc`（`0.1.2-alpha.1`）。应用前请先运行 `git apply --check`。其他 Harness 版本需要重新做兼容性检查，因为客户端 slot、附件引用、包闭包、项目引用和锁文件都可能变化。
 
 ## 补丁接入的内容
 
-补丁会把四个包注册到 CLI／运行时闭包和 TypeScript 项目引用中，把 GUI 模型与 GUI 智能体设置命名空间暴露给 Web 客户端，加入 GUI 模型与 GUI 智能体配置卡片，在通用任务结果中渲染经过授权的仅 UI 每步图片，并将这些图片随 Session 导出；同时注册面向模型的工具与 Cordis 目录，更新锁文件和第三方声明，并加入同步的子系统、工具及配置文档。
+补丁会把四个包注册到 CLI／运行时闭包和 TypeScript 项目引用中，让工具包加载其浏览器客户端，授权 `tool/result.data.meta.content` 所引用的仅 UI 结果图片，并把这些图片随 Session 导出；它还会更新锁文件、第三方声明，并为附件决策加入同步的 Agent Note。客户端包会把 GUI 模型与 GUI 智能体配置卡注册到 `settings.plugin.item`，并把两个任务渲染器注册到 `tool.call.toolview`。
 
 补丁不会重复包含包源码。请在应用补丁前或之后，把 `packages/macos-use` 复制到 Harness 工作区。
 
@@ -53,4 +53,4 @@ corepack pnpm exec playwright install chromium
 
 ## 已完成的验证
 
-在支持的基线上，121 项 P0 聚焦测试、包含 3,968 个通过用例和 1 个跳过用例的 GUI 套件、生产构建、28 项文档检查、空白检查和定向 TypeScript 构建均通过。原生 JXA／AppKit／CoreGraphics／System Events 脚本也都编译成功。干净 profile 的浏览器检查使用确定性的本地视觉响应运行 `computer_use_task`，并捕获真实 macOS 截图。本地 GUI 端点确认收到 PNG 图片输入；默认开关开启时，Harness 在第 1 步以 2000×1125 自然尺寸内联渲染图片，然后完成任务。同一次检查也验证了 GUI 模型与 GUI 智能体卡中的全部 P0 可视化控件。组装后的 Web 回放成功构建；运行结果为 79 个通过文件、1 个跳过文件和 3 个无关的既有失败（官方 Logo 快照、Node 22 开发加载器以及现有 plan-review golden）。未执行真实第三方提供方以及会执行动作的桌面／浏览器端到端测试。
+在支持的基线上，59 项插件测试与 98 项插件加 Harness 附件聚焦测试均通过。GUI 套件通过 3,822 项测试并跳过 1 项，生产 Web 构建通过。原生 JXA／AppKit／CoreGraphics／System Events 脚本也都编译成功。干净 profile 的浏览器检查通过确定性的本地驱动与视觉端点以及真实 macOS 截图服务运行 `computer_use_task`。任务成功完成，保存的 `computer-use-task-step-1.png` 通过会话附件线路加载，并由 Harness 内联渲染在第 1 步；浏览器没有 warning 或 error。同一次检查验证了默认开启的开关与 GUI 模型和 GUI 智能体卡中的全部 P0 控件。未执行真实第三方提供方运行。

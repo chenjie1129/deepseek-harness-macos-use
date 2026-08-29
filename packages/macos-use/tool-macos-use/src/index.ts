@@ -42,6 +42,14 @@ const IMAGE_REF_SCHEMA = {
     width: { type: 'number', required: true },
     height: { type: 'number', required: true },
     name: { type: 'string' },
+    originalDimensions: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        width: { type: 'number', required: true },
+        height: { type: 'number', required: true },
+      },
+    },
   },
 } as const
 
