@@ -1,0 +1,12 @@
+{
+  "name": "dsh-macos-use-evaluations",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "smoke": "node src/cli.mjs --mode deterministic --suite cases/smoke.json"
+  }
+}

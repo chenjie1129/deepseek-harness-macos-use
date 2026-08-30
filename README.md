@@ -45,6 +45,10 @@ corepack pnpm exec playwright install chromium
 
 See the [integration guide](docs/integration.md) and [architecture decision](docs/architecture.md) for configuration, security boundaries, and verification evidence.
 
+## Evaluate from a user prompt
+
+The repository includes a [prompt-level evaluation runner](evaluations/README.md). It sends an exact natural-language prompt through a fresh Harness SDK session, records tool and per-step screenshot presentation evidence, and scores the outcome with an independent HTTP or workspace-file oracle. A deterministic smoke exercises the real Playwright and screenshot path without third-party credentials; a live mode reuses GUI Model and GUI Agent settings made visually on the Plugin Configuration page.
+
 ## Runtime requirements
 
 - macOS Accessibility permission for GUI actions.
@@ -54,4 +58,4 @@ See the [integration guide](docs/integration.md) and [architecture decision](doc
 
 ## Current limits
 
-The plugin suites pass 59 tests, and the focused plugin-plus-Harness attachment suites pass 98 tests. The complete GUI suite passes 3,822 tests with one skip, and the production web build passes on the compatible base. Deterministic web replay passes 310 tests across 91 files with 15 skips; its sole failing core HMR test reproduces unchanged on the pristine compatible base under Node 22.22.0. A clean-profile UI test used the real macOS screenshot service and deterministic local driving and vision endpoints: `computer_use_task` completed, and Harness displayed `computer-use-task-step-1.png` inline in Step 1 from its authorized attachment. The same browser inspection confirmed the default-on switch and every adjustable agent setting on the visual Plugin Configuration page. Live third-party provider compatibility still requires deployment credentials; the deterministic run proves the real task, screenshot, storage, authorization, and client-rendering path without claiming provider compatibility.
+The plugin suites pass 59 tests, and the focused plugin-plus-Harness attachment suites pass 98 tests. The prompt evaluator passes 17 focused tests. Its deterministic prompt smoke passed on Harness commit `cd5ef81`: the exact prompt selected `browser_use_task`, changed the independent order-state oracle to `Reviewed`, and produced two 1280×720 per-step screenshot attachments. The complete GUI suite passes 3,822 tests with one skip, and the production web build passes on the compatible base. Deterministic web replay passes 310 tests across 91 files with 15 skips; its sole failing core HMR test reproduces unchanged on the pristine compatible base under Node 22.22.0. A clean-profile UI test used the real macOS screenshot service and deterministic local driving and vision endpoints: `computer_use_task` completed, and Harness displayed `computer-use-task-step-1.png` inline in Step 1 from its authorized attachment. The same browser inspection confirmed the default-on switch and every adjustable agent setting on the visual Plugin Configuration page. Live third-party provider compatibility still requires deployment credentials; deterministic runs do not claim provider compatibility.

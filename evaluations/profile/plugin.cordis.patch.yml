@@ -1,0 +1,18 @@
+# Mount the four packages into the SDK profile. Configure GUI Model and GUI
+# Agent visually in a web profile that uses the same DSH_HOME before a live run.
+
+- insert:
+    - id: macos-use
+      name: '@deepseek-ai/dsh-macos-use'
+
+    - id: browser-use
+      name: '@deepseek-ai/dsh-browser-use'
+
+    - id: gui-model
+      name: '@deepseek-ai/dsh-gui-model'
+      config:
+        baseURL: http://127.0.0.1
+        model: configure-in-plugin-page
+
+    - id: tool-macos-use
+      name: '@deepseek-ai/dsh-tool-macos-use'

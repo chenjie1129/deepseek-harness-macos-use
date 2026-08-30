@@ -1,0 +1,27 @@
+{
+  "formatVersion": 1,
+  "name": "deterministic-prompt-smoke",
+  "cases": [
+    {
+      "id": "browser-order-review",
+      "prompt": "On the evaluation page at {{fixtureBaseUrl}}/orders, find order A-1042, mark it Reviewed, and save the change.",
+      "reset": {
+        "method": "POST",
+        "url": "{{fixtureBaseUrl}}/api/reset"
+      },
+      "expected": {
+        "requiredTools": ["browser_use_task"],
+        "forbiddenTools": ["bash", "computer_run_applescript"],
+        "taskCompleted": true,
+        "stepScreenshots": "present",
+        "maxDurationMs": 30000,
+        "oracle": {
+          "type": "http-json",
+          "url": "{{fixtureBaseUrl}}/api/state",
+          "path": ["orders", "A-1042", "status"],
+          "equals": "Reviewed"
+        }
+      }
+    }
+  ]
+}

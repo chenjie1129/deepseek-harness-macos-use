@@ -45,6 +45,10 @@ corepack pnpm exec playwright install chromium
 
 配置、安全边界和验证证据请参阅[集成指南](docs/integration.zh.md)与[架构决策](docs/architecture.zh.md)。
 
+## 从用户提示词开始评测
+
+本仓库包含一个[提示词级评测运行器](evaluations/README.zh.md)。它把原样自然语言提示词送入全新的 Harness SDK 会话，记录工具与每步截图展示证据，再通过独立 HTTP 或工作区文件判定器评分。确定性冒烟测试无需第三方凭据即可走通真实 Playwright 与截图路径；真实模式则复用在插件配置页面中可视化完成的 GUI 模型与 GUI 智能体设置。
+
 ## 运行要求
 
 - GUI 操作需要 macOS“辅助功能”权限。
@@ -54,4 +58,4 @@ corepack pnpm exec playwright install chromium
 
 ## 当前限制
 
-插件套件通过 59 项测试，插件加 Harness 附件的聚焦套件通过 98 项测试。完整 GUI 套件通过 3,822 项并跳过 1 项，兼容基线上的生产 Web 构建也通过。确定性 Web 回放在 91 个文件中通过 310 项并跳过 15 项；唯一失败的 Harness 核心 HMR 测试在 Node 22.22.0 下也会原样复现于未修改的兼容基线。干净 profile 的 UI 测试使用真实 macOS 截图服务以及确定性的本地驱动与视觉端点：`computer_use_task` 成功完成，Harness 从经过授权的附件中把 `computer-use-task-step-1.png` 内联显示在第 1 步。同一次浏览器检查确认默认开启的开关与所有可调整的智能体设置都位于可视化插件配置页面。真实第三方提供方兼容性仍需部署凭据；确定性运行证明了真实任务、截图、存储、授权与客户端渲染路径，但不宣称提供方兼容性。
+插件套件通过 59 项测试，插件加 Harness 附件的聚焦套件通过 98 项测试。提示词评测器通过 17 项聚焦测试；它在 Harness 提交 `cd5ef81` 上完成确定性提示词冒烟测试：原样提示词选择了 `browser_use_task`，把独立订单状态判定器改为 `Reviewed`，并产生两个 1280×720 每步截图附件。完整 GUI 套件通过 3,822 项并跳过 1 项，兼容基线上的生产 Web 构建也通过。确定性 Web 回放在 91 个文件中通过 310 项并跳过 15 项；唯一失败的 Harness 核心 HMR 测试在 Node 22.22.0 下也会原样复现于未修改的兼容基线。干净 profile 的 UI 测试使用真实 macOS 截图服务以及确定性的本地驱动与视觉端点：`computer_use_task` 成功完成，Harness 从经过授权的附件中把 `computer-use-task-step-1.png` 内联显示在第 1 步。同一次浏览器检查确认默认开启的开关与所有可调整的智能体设置都位于可视化插件配置页面。真实第三方提供方兼容性仍需部署凭据；确定性运行不宣称提供方兼容性。
