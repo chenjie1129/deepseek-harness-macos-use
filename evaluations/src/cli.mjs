@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { realpathSync } from 'node:fs'
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
@@ -257,4 +258,5 @@ async function main() {
   }
 }
 
-if (process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main()
+if (process.argv[1] !== undefined
+    && realpathSync(resolve(process.argv[1])) === realpathSync(fileURLToPath(import.meta.url))) await main()
