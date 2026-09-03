@@ -1,0 +1,337 @@
+name: macOS Use plugin CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-use-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: macos-15
+    timeout-minutes: 75
+
+    env:
+      HARNESS_SHA: cd5ef8148158c3a752a658978873241fdf8e2bbc
+      NODE_VERSION: 22.22.0
+      PNPM_VERSION: 11.7.0
+      ARTIFACT_DIR: ${{ runner.temp }}/macos-use-artifacts
+      DSH_HOME: ${{ runner.temp }}/macos-use-dsh-home
+      # CI boots real Web and SDK profiles; never report those runs to the
+      # production telemetry exporter mounted by the upstream alpha.1 bundle.
+      DSH_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - name: Check out plugin
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: plugin
+          persist-credentials: false
+
+      - name: Check out exact DeepSeek Harness alpha.1
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: deepseek-ai/deepseek-harness
+          ref: ${{ env.HARNESS_SHA }}
+          path: harness
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable exact pnpm
+        shell: bash
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack prepare "pnpm@${PNPM_VERSION}" --activate
+          node --version
+          pnpm --version
+
+      - name: Integrate plugin into clean Harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p harness/packages/macos-use
+          rsync -a --delete plugin/packages/macos-use/ harness/packages/macos-use/
+
+          git -C harness apply --check \
+            "$GITHUB_WORKSPACE/plugin/integration/deepseek-harness-v0.1.2-alpha.1.patch"
+          git -C harness apply \
+            "$GITHUB_WORKSPACE/plugin/integration/deepseek-harness-v0.1.2-alpha.1.patch"
+          git -C harness diff --check
+
+          test -f harness/integration/macos-use.cordis.patch.yml
+          cmp \
+            plugin/integration/macos-use.cordis.patch.yml \
+            harness/integration/macos-use.cordis.patch.yml
+
+      - name: Install frozen Harness dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm --dir harness install --frozen-lockfile
+
+      - name: Build integrated Harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm --dir harness run build
+
+      - name: Run structural and type-aware lint gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd harness
+          pnpm run verify-runtime-closure
+          pnpm run verify-application-entrypoints
+          pnpm run verify-cordis-config
+          pnpm run verify-client-packages
+          pnpm run verify-client-ui-i18n
+          pnpm run verify-export-jsdoc
+          pnpm run verify-config-catalog
+          pnpm run verify-cordis-catalog
+          pnpm run verify-tool-catalog
+          pnpm run verify-doc-graphs
+          pnpm run verify-md-links
+          pnpm run verify-package-paths
+          pnpm run verify-tsconfig-paths
+          pnpm run verify-config-source-ownership
+          pnpm run verify-third-party-notices
+          pnpm run verify-dsh-package-licenses
+          pnpm run verify-package-invariants
+          pnpm run verify-built-package-invariants
+          pnpm run verify-package-readme-model-experience
+          pnpm run verify-package-readme-limitations
+          pnpm run constraints
+          pnpm run verify-translation-pairing
+          pnpm exec tsx scripts/run-oxlint.ts packages/macos-use
+
+      - name: Verify mount-only normal-profile composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$ARTIFACT_DIR/config" "$DSH_HOME"
+
+          MOUNT_FILE="$GITHUB_WORKSPACE/plugin/integration/macos-use.cordis.patch.yml" \
+            node <<'NODE'
+          const assert = require('node:assert/strict')
+          const fs = require('node:fs')
+          const lines = fs.readFileSync(process.env.MOUNT_FILE, 'utf8')
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(line => line !== '' && !line.startsWith('#'))
+          assert.deepEqual(lines, [
+            '- insert:',
+            '- id: macos-use',
+            "name: '@deepseek-ai/dsh-macos-use'",
+            '- id: browser-use',
+            "name: '@deepseek-ai/dsh-browser-use'",
+            '- id: gui-model',
+            "name: '@deepseek-ai/dsh-gui-model'",
+            '- id: tool-macos-use',
+            "name: '@deepseek-ai/dsh-tool-macos-use'",
+          ])
+          NODE
+
+          node harness/apps/cli/lib/bin.js \
+            --profile web \
+            --patch "$GITHUB_WORKSPACE/plugin/integration/macos-use.cordis.patch.yml" \
+            --dump-config \
+            > "$ARTIFACT_DIR/config/dump-config.yml"
+
+          for package in \
+            @deepseek-ai/dsh-macos-use \
+            @deepseek-ai/dsh-browser-use \
+            @deepseek-ai/dsh-gui-model \
+            @deepseek-ai/dsh-tool-macos-use
+          do
+            grep -Fq -- "$package" "$ARTIFACT_DIR/config/dump-config.yml"
+          done
+
+      - name: Boot normal web profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          web_log="$RUNNER_TEMP/macos-use-web-profile.log"
+          node harness/apps/cli/lib/bin.js \
+            --profile web \
+            --patch "$GITHUB_WORKSPACE/plugin/integration/macos-use.cordis.patch.yml" \
+            --no-open \
+            > "$web_log" 2>&1 &
+          web_pid=$!
+
+          cleanup() {
+            if kill -0 "$web_pid" 2>/dev/null; then
+              kill "$web_pid"
+              wait "$web_pid" || true
+            fi
+          }
+          trap cleanup EXIT
+
+          ready_url=''
+          for _ in {1..90}; do
+            ready_url="$(sed -nE 's/^dsh web: (http:\/\/[^[:space:]]+).*$/\1/p' "$web_log" | head -n 1)"
+            if [[ -n "$ready_url" ]]; then
+              break
+            fi
+            if ! kill -0 "$web_pid" 2>/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+
+          if [[ -z "$ready_url" ]]; then
+            sed -E 's/(token=)[^[:space:]&]+/\1[REDACTED]/g' "$web_log" | tail -n 200
+            exit 1
+          fi
+
+          READY_URL="$ready_url" OUTPUT_FILE="$ARTIFACT_DIR/config/index.html" \
+            node <<'NODE'
+          const fs = require('node:fs/promises')
+
+          async function main() {
+            const launch = await fetch(process.env.READY_URL, {
+              redirect: 'manual',
+              signal: AbortSignal.timeout(5_000),
+            })
+            const cookie = launch.headers.get('set-cookie')?.split(';', 1)[0]
+            const location = launch.headers.get('location')
+            if (launch.status !== 303 || cookie === undefined || location !== '/') {
+              throw new Error(`web token exchange failed with HTTP ${launch.status}`)
+            }
+            const origin = new URL(process.env.READY_URL).origin
+            const page = await fetch(`${origin}/`, {
+              headers: { cookie },
+              signal: AbortSignal.timeout(5_000),
+            })
+            if (!page.ok) throw new Error(`authenticated web root failed with HTTP ${page.status}`)
+            await fs.writeFile(process.env.OUTPUT_FILE, await page.text())
+            await fs.writeFile(
+              new URL('normal-profile-boot.txt', `file://${process.env.OUTPUT_FILE}`),
+              'authenticated normal-profile boot: PASS\n',
+            )
+          }
+
+          main().catch(error => {
+            console.error(error instanceof Error ? error.message : String(error))
+            process.exitCode = 1
+          })
+          NODE
+
+          cleanup
+          trap - EXIT
+          rm -f "$web_log"
+
+      - name: Run plugin tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd harness
+          pnpm exec vitest run \
+            packages/macos-use/*/tests/*.spec.ts \
+            packages/macos-use/*/tests/*.spec.tsx
+
+      - name: Run changed Harness integration tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd harness
+          pnpm exec vitest run \
+            packages/api/session-controller/tests/commands-queue-attachment.host.spec.ts \
+            packages/session-query/session-log-export/tests/archive.host.spec.ts \
+            scripts/check-workspace-constraints.spec.ts \
+            scripts/verify-cordis-config.spec.ts
+
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm --dir harness/packages/macos-use/browser-use \
+            exec playwright install chromium
+
+      - name: Run evaluator unit and loopback tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm --prefix plugin/evaluations test
+
+      - name: Run deterministic prompt evaluator
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$ARTIFACT_DIR/evaluator"
+          npm --prefix plugin/evaluations run smoke -- \
+            --harness-root "$GITHUB_WORKSPACE/harness" \
+            --report-dir "$ARTIFACT_DIR/evaluator"
+
+      - name: Bundle actual client components
+        shell: bash
+        run: |
+          set -euo pipefail
+          render_root="$GITHUB_WORKSPACE/harness/packages/macos-use/tool-macos-use/.ci-render-ui"
+          rm -rf "$render_root"
+          mkdir -p "$render_root"
+          cp plugin/ci/render-ui/index.html "$render_root/"
+          cp plugin/ci/render-ui/main.tsx "$render_root/"
+          cp plugin/ci/render-ui/page.css "$render_root/"
+          cp plugin/ci/render-ui/capture.mjs "$render_root/"
+
+          harness/vendor/hmr/node_modules/.bin/esbuild \
+            "$render_root/main.tsx" \
+            --bundle \
+            --format=iife \
+            --platform=browser \
+            --jsx=automatic \
+            --sourcemap \
+            --define:process.env.NODE_ENV='"production"' \
+            --outfile="$render_root/dist/main.js"
+
+      - name: Render and assert SettingsCards and GuiTaskView
+        shell: bash
+        env:
+          HARNESS_ROOT: ${{ github.workspace }}/harness
+        run: |
+          set -euo pipefail
+          mkdir -p "$ARTIFACT_DIR/ui"
+          node \
+            harness/packages/macos-use/tool-macos-use/.ci-render-ui/capture.mjs \
+            "$ARTIFACT_DIR/ui"
+
+      - name: Validate and pack four packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$ARTIFACT_DIR/tarballs"
+
+          for package in macos-use browser-use gui-model tool-macos-use; do
+            pnpm --dir harness exec publint "packages/macos-use/$package"
+            pnpm --dir "harness/packages/macos-use/$package" pack \
+              --pack-destination "$ARTIFACT_DIR/tarballs"
+          done
+
+          test "$(find "$ARTIFACT_DIR/tarballs" -name '*.tgz' | wc -l | tr -d ' ')" = 4
+          shasum -a 256 "$ARTIFACT_DIR"/tarballs/*.tgz \
+            > "$ARTIFACT_DIR/tarballs/SHA256SUMS"
+
+          for archive in "$ARTIFACT_DIR"/tarballs/*.tgz; do
+            tar -tzf "$archive"
+          done > "$ARTIFACT_DIR/tarballs/contents.txt"
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: macos-use-${{ github.sha }}
+          path: ${{ runner.temp }}/macos-use-artifacts
+          if-no-files-found: warn
+          retention-days: 14

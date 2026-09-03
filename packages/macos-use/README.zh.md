@@ -9,7 +9,7 @@ kind: "package-group"
 
 ## 概述
 
-该包组让智能体操作本地 Mac 和真实 Chromium 页面、检查 macOS 辅助功能状态，并把截图定位委托给 OpenAI 兼容视觉模型。`macos-use` 负责原生桌面控制，`browser-use` 负责托管浏览器，`gui-model` 负责视觉决策，`tool-macos-use` 则把这些能力提供给智能体。所有可调整的智能体设置都显示在插件配置页面中，包括默认开启的每步截图开关与紧急停止。包边界不会绕过 macOS 权限、应用策略或用户确认。
+该包组让智能体操作本地 Mac 和隔离的 Chromium 页面、检查 macOS 辅助功能状态，并把截图定位委托给 OpenAI 兼容视觉模型。`macos-use` 负责原生桌面控制，`browser-use` 负责每个 Agent 的托管浏览器上下文，`gui-model` 负责视觉决策，`tool-macos-use` 则把这些能力提供给智能体。所有可调整的智能体设置都显示在插件配置页面中，包括默认拒绝的应用／网络授权、默认开启的每次 GUI 变更确认、默认开启的每步截图开关与紧急停止。只有当部署具备等效、可信的安全或审批边界时，才应关闭每次变更确认。包边界不会绕过 macOS 权限、应用策略或用户确认。
 
 ## 目录
 
@@ -26,9 +26,9 @@ kind: "package-group"
 
 | 包 | `ctx` 键 | 作用 |
 |---|---|---|
-| [`macos-use`](macos-use/README.zh.md) | `macosUse` | 捕获屏幕并控制策略允许的 macOS 应用与窗口 |
+| [`macos-use`](macos-use/README.zh.md) | `macosUse` | 只捕获精确授权的前台／窗口像素，并控制策略允许的 macOS 应用与窗口 |
 | [`gui-model`](gui-model/README.zh.md) | `guiModel` | 根据截图与任务选择一个经过校验的 GUI 动作 |
-| [`browser-use`](browser-use/README.zh.md) | `browserUse` | 通过选择器或坐标操作驱动一个 Playwright Chromium 页面 |
+| [`browser-use`](browser-use/README.zh.md) | `browserUse` | 通过 DNS 固定的策略代理，为每个 Agent 驱动隔离的 Playwright Chromium 上下文／页面 |
 | [`tool-macos-use`](tool-macos-use/README.zh.md) | — | 注册基础工具、自主任务循环、可视化设置与截图展示 |
 
 <a id="related-documentation"></a>

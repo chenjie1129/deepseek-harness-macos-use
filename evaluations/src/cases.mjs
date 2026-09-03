@@ -49,6 +49,16 @@ function validateCase(value, index) {
   if (expected.taskCompleted !== undefined && typeof expected.taskCompleted !== 'boolean') {
     throw new Error(`${label}.expected.taskCompleted must be boolean when present`)
   }
+  const taskVerificationStatuses = [
+    'not_reached',
+    'model_done_unverified',
+    'verified',
+    'postcondition_failed',
+    'verification_error',
+  ]
+  if (expected.taskVerification !== undefined && !taskVerificationStatuses.includes(expected.taskVerification)) {
+    throw new Error(`${label}.expected.taskVerification must be a known verification status`)
+  }
   if (expected.stepScreenshots !== undefined
     && expected.stepScreenshots !== 'present'
     && expected.stepScreenshots !== 'absent'
@@ -74,6 +84,7 @@ function validateCase(value, index) {
       requiredTools,
       forbiddenTools,
       ...(expected.taskCompleted === undefined ? {} : { taskCompleted: expected.taskCompleted }),
+      ...(expected.taskVerification === undefined ? {} : { taskVerification: expected.taskVerification }),
       stepScreenshots: expected.stepScreenshots ?? 'ignore',
       maxDurationMs: expected.maxDurationMs,
       oracle: expected.oracle,

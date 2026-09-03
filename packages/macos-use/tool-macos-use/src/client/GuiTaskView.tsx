@@ -4,15 +4,20 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
 import type { InjectFace, PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client'
+import type { GuiTaskProgressSnapshot, LiveScreenshotPreview } from '../progress.ts'
 import css from './styles.module.css'
 
 type PresentationBlock =
   | { type: 'text'; text: string }
   | { type: 'image'; attachment: ImageAttachmentRef }
 
+type VisibleBlock = PresentationBlock | { type: 'preview'; preview: LiveScreenshotPreview }
+
 /** Session-authorized image loader injected into one GUI task view. */
 export interface GuiTaskInjected {
   loadImage: (attachment: ImageAttachmentRef) => Promise<string>
+  /** Optional process-local snapshot bridge; absent on older/headless Harness surfaces. */
+  loadProgress?: (callId: string) => Promise<GuiTaskProgressSnapshot | null>
 }
 
 /** Owner, locale, and injected props for an autonomous GUI task call. */
@@ -61,6 +66,12 @@ export function presentationContent(meta: unknown): readonly PresentationBlock[]
   return content
 }
 
+function presentationVerificationStatus(meta: unknown): string | undefined {
+  if (typeof meta !== 'object' || meta === null || Array.isArray(meta)) return undefined
+  const value = (meta as { verificationStatus?: unknown }).verificationStatus
+  return typeof value === 'string' ? value : undefined
+}
+
 function StepImage(props: Pick<GuiTaskViewProps, 'loadImage' | 't'> & { attachment: ImageAttachmentRef }) {
   const [src, setSrc] = useState<string>()
   const [failed, setFailed] = useState(false)
@@ -95,6 +106,26 @@ function StepImage(props: Pick<GuiTaskViewProps, 'loadImage' | 't'> & { attachme
   )
 }
 
+function LivePreviewImage(props: Pick<GuiTaskViewProps, 't'> & { preview: LiveScreenshotPreview }) {
+  return (
+    <a
+      className={css.stepImageLink}
+      href={props.preview.dataUrl}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={props.t('task.openImage')}
+    >
+      <img
+        className={css.stepImage}
+        src={props.preview.dataUrl}
+        alt={props.t('task.image')}
+        width={props.preview.width}
+        height={props.preview.height}
+      />
+    </a>
+  )
+}
+
 function rawOutput(block: GuiTaskViewProps['block']): string {
   if (!('kind' in block)) return ''
   return block.content.map(item => item.type === 'text' ? item.text : JSON.stringify(item, null, 2)).join('\n')
@@ -103,15 +134,61 @@ function rawOutput(block: GuiTaskViewProps['block']): string {
 /** Render one running or settled desktop/browser task with inline step images. */
 export function GuiTaskView(props: GuiTaskViewProps) {
   const [details, setDetails] = useState(false)
+  const [progress, setProgress] = useState<GuiTaskProgressSnapshot | null>(null)
   const settled = 'kind' in props.block ? props.block : undefined
   const done = settled !== undefined
   const argsRaw = 'kind' in props.block ? props.block.call?.argsRaw : props.block.argsRaw
   const content = presentationContent(settled?.meta)
+  const verificationStatus = presentationVerificationStatus(settled?.meta)
   const task = useMemo(() => taskText(argsRaw, props.callId), [argsRaw, props.callId])
   const status = settled === undefined ? 'task.running'
     : settled.error?.code === 'interrupted' ? 'task.stopped'
-      : settled.isError ? 'task.failed' : 'task.completed'
+      : settled.isError ? 'task.failed'
+        : verificationStatus === 'verified' ? 'task.verified'
+          : verificationStatus === 'model_done_unverified' ? 'task.unverified'
+            : verificationStatus === 'postcondition_failed' ? 'task.postconditionFailed'
+              : verificationStatus === 'verification_error' ? 'task.verificationError'
+                : verificationStatus === 'not_reached' ? 'task.stopped'
+                  : 'task.completed'
   const title = props.toolName === 'browser_use_task' ? 'task.browser' : 'task.desktop'
+  const loadProgress = props.loadProgress
+  useEffect(() => {
+    if (loadProgress === undefined) return
+    let live = true
+    let pending = false
+    const refresh = (): void => {
+      if (pending) return
+      pending = true
+      void loadProgress(props.callId).then(
+        (snapshot) => {
+          if (live && snapshot !== null) {
+            setProgress(current => current === null || snapshot.revision >= current.revision ? snapshot : current)
+          }
+        },
+        () => {},
+      ).finally(() => { pending = false })
+    }
+    refresh()
+    if (done) return () => { live = false }
+    const timer = window.setInterval(refresh, 350)
+    return () => {
+      live = false
+      window.clearInterval(timer)
+    }
+  }, [done, props.callId, loadProgress])
+  const liveContent: VisibleBlock[] | undefined = progress === null ? undefined : progress.steps.flatMap((step) => {
+    const prefix = `${props.t('task.step')} ${String(step.step)}:`
+    const text = step.phase === 'observed'
+      ? `${prefix} ${props.t('task.observing')}`
+      : step.phase === 'decided'
+        ? `${prefix} ${step.action ?? ''} → ${props.t('task.executing')}`
+        : `${prefix} ${step.action ?? ''}${step.outcome === undefined ? '' : ` → ${step.outcome}`}`
+    return [
+      { type: 'text' as const, text },
+      ...step.preview === undefined ? [] : [{ type: 'preview' as const, preview: step.preview }],
+    ]
+  })
+  const visibleContent: readonly VisibleBlock[] | undefined = content ?? liveContent
   return (
     <div className={css.taskCard} data-state={settled?.isError === true ? 'error' : done ? 'done' : 'running'}>
       <button
@@ -127,15 +204,21 @@ export function GuiTaskView(props: GuiTaskViewProps) {
         <span className={css.taskStatus}>{props.t(status)}</span>
       </button>
       {details ? <pre className={css.taskArgs}>{argsRaw ?? ''}</pre> : null}
-      {content !== undefined && content.length > 0 ? (
+      {visibleContent !== undefined && visibleContent.length > 0 ? (
         <div className={css.taskOutput} data-tool-result-presentation>
-          {content.map((item, index) => item.type === 'text'
+          {visibleContent.map((item, index) => item.type === 'text'
             ? <p className={css.stepText} key={`text:${String(index)}`}>{item.text}</p>
-            : <StepImage key={`image:${item.attachment.attachmentId}:${String(index)}`} {...props} attachment={item.attachment} />)}
+            : item.type === 'image'
+              ? <StepImage key={`image:${item.attachment.attachmentId}:${String(index)}`} {...props} attachment={item.attachment} />
+              : <LivePreviewImage key={`preview:${String(index)}`} t={props.t} preview={item.preview} />)}
         </div>
       ) : done && rawOutput(props.block) !== '' ? (
         <pre className={css.rawOutput}>{rawOutput(props.block)}</pre>
       ) : null}
+      {settled !== undefined && settled.isError && visibleContent !== undefined && visibleContent.length > 0
+        && rawOutput(props.block) !== ''
+        ? <pre className={css.rawOutput}>{rawOutput(props.block)}</pre>
+        : null}
     </div>
   )
 }

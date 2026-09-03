@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-tool-macos-use",
-  "description": "Model-facing Consumer of the ctx.macosUse / ctx.guiModel / ctx.browserUse capability seams: primitive screen/keyboard/AppleScript tools plus vision-model-driven computer_use_task and browser_use_task tools",
+  "description": "Model-facing consumer of the ctx.macosUse / ctx.guiModel / ctx.browserUse capability seams: bounded desktop and browser primitives plus vision-model-driven computer_use_task and browser_use_task tools",
   "version": "0.1.2-alpha.1",
   "publishConfig": {
     "access": "public"
@@ -61,6 +61,7 @@
   },
   "peerDependencies": {
     "@deepseek-ai/dsh-attachment": "workspace:^",
+    "@deepseek-ai/dsh-agent": "workspace:^",
     "@deepseek-ai/dsh-api-remotes": "workspace:^",
     "@deepseek-ai/dsh-api-session-controller": "workspace:^",
     "@deepseek-ai/dsh-browser-use": "workspace:^",
@@ -85,6 +86,7 @@
   },
   "devDependencies": {
     "@deepseek-ai/dsh-attachment": "workspace:^",
+    "@deepseek-ai/dsh-agent": "workspace:^",
     "@deepseek-ai/dsh-api-remotes": "workspace:^",
     "@deepseek-ai/dsh-api-session-controller": "workspace:^",
     "@deepseek-ai/dsh-browser-use": "workspace:^",

@@ -20,7 +20,7 @@ flowchart LR
 
 ## 确定性冒烟测试
 
-确定性模式使用两个环回、兼容 OpenAI 的端点：一个让主智能体固定选择 `browser_use_task`，另一个返回基于坐标的点击动作，然后返回 `done`。Playwright 仍会启动真实 Chromium，插件仍会捕获并保存真实截图，判定器也仍会独立读取测试页面保存的状态。
+确定性模式使用两个环回、兼容 OpenAI 的端点：一个让主智能体固定选择 `browser_use_task`，另一个返回基于坐标的点击动作，然后返回 `done`。Playwright 仍会启动真实 Chromium，插件仍会捕获并保存真实截图，判定器也仍会独立读取测试页面保存的状态。由于 SDK profile 没有交互式审批响应方，该模式只在隔离、动作固定的测试页面内有意把 `confirmDestructiveActions` 和 `confirmEveryMutation` 都设为 `false`。伪提供方、显式环回允许列表、移除继承凭据、重置测试页面和独立判定器共同构成可信测试边界；不要把这些覆盖复制到一般自动化环境。生产配置仍默认开启两层确认，并由独立测试覆盖。
 
 在本目录运行：
 
@@ -29,24 +29,37 @@ npm test
 npm run smoke -- --harness-root /path/to/deepseek-harness
 ```
 
+评测套件包含 8 个文件、19 项测试。发布门禁会在允许环回监听的环境中运行，19 项全部通过，然后再单独运行确定性的“用户提示词到浏览器结果”冒烟测试。
+
 冒烟用例必须同时满足以下检查：
 
 - SDK 传输完成，且智能体记录 `completed` 回合；
 - 调用了要求的 `browser_use_task`，且没有使用禁止的后备工具；
 - 测试页面报告订单 `A-1042` 从 `Pending` 变为 `Reviewed`；
-- 任务工具无错误并报告完成；
+- 任务工具报告其要求的后置条件已经在新鲜、原子的 Host 侧完成快照上通过，而不只是模型自行声明 `done`；
+- 工具调用中包含任务后置条件，且验证状态为 `verified`；
 - 至少存在一个每步截图附件；
 - 耗时不超过用例预算；以及
 - 当独立判定器失败时，任务级 `completed` 结果绝不会通过。
 
-每次运行都会在 `reports/` 下写入脱敏 JSON 报告和便于阅读的 Markdown 摘要。报告包含提示词、模型路由、Harness 与插件 Git 状态、补丁哈希、设置文件 SHA-256、各项检查、受限工具轨迹、截图附件元数据和耗时；不包含环境变量、API 密钥、截图字节或文件判定器原文。确定性子进程还会先移除继承的凭据与代理变量，再接收固定的伪密钥。生成的报告已被 Git 忽略。
+每次运行都会在 `reports/` 下写入脱敏 JSON 报告和便于阅读的 Markdown 摘要。报告包含提示词、模型路由、Harness 与插件 Git 状态、补丁哈希、设置文件 SHA-256、各项检查、受限工具轨迹、截图附件元数据和耗时；不包含环境变量、API 密钥、截图字节或文件判定器原文。面向用户的任务历史还会把每个 `type` 动作的文本替换为字符数占位符；这不会遮盖截图像素里本来可见的文字。确定性子进程会先移除继承的凭据与代理变量，再接收固定的伪密钥。生成的报告已被 Git 忽略。
 
 ## 真实提供方评测
 
-真实模式有意不提供覆盖 GUI 模型或 GUI 智能体设置的命令行参数。请先用目标 `DSH_HOME` 运行兼容的 Harness Web profile，再在**插件配置**页面中可视化配置两张卡：
+真实模式有意不提供覆盖 GUI 模型或 GUI 智能体设置的命令行参数。请先在兼容的 Harness 工作区挂载四项服务，并从 Harness 根目录运行：
+
+```bash
+plugin_root=/absolute/path/to/deepseek-harness-macos-use
+export DSH_HOME="$(mktemp -d /private/tmp/dsh-macos-profile.XXXXXX)"
+node apps/cli/lib/bin.js --profile web --patch "$plugin_root/integration/macos-use.cordis.patch.yml" --dump-config
+node apps/cli/lib/bin.js --profile web --patch "$plugin_root/integration/macos-use.cordis.patch.yml"
+```
+
+预检必须显示 `macos-use`、`browser-use`、`gui-model` 与 `tool-macos-use`。挂载补丁包含的可调智能体键为零。请使用这个精确的 `DSH_HOME`，在**插件配置**页面中可视化配置两张卡：
 
 - **GUI 模型**：凭据引用、兼容 OpenAI 的基础 URL、模型和输出 token 上限；
-- **GUI 智能体**：步骤和超时限制、浏览器可见性、安全控制，以及**显示每步截图**。
+- **GUI 智能体**：步骤和超时限制、浏览器可见性、显式浏览器域名与 macOS 应用授权、安全控制，
+  以及**显示每步截图**。**每个 GUI 变更动作都确认**默认开启。授权留空会按设计禁用对应能力。
 
 评测时使用完全相同的 Harness home：
 
@@ -82,6 +95,7 @@ node src/cli.mjs \
         "requiredTools": ["browser_use_task"],
         "forbiddenTools": ["bash", "computer_run_applescript"],
         "taskCompleted": true,
+        "taskVerification": "verified",
         "stepScreenshots": "present",
         "maxDurationMs": 120000,
         "oracle": {
@@ -100,8 +114,8 @@ node src/cli.mjs \
 
 ## 证据边界
 
-确定性冒烟测试证明了提示词运行器、当前 Harness 组合、真实 Playwright 操作路径、截图捕获／存储元数据和独立评分。它不证明第三方主模型或 GUI 模型的质量与兼容性。
+完整门禁能够运行时，确定性冒烟测试旨在证明提示词运行器、当前 Harness 组合、真实 Playwright 操作路径、原子任务后置条件验证、截图捕获／存储元数据，以及由另一套独立判定器完成的评分。模型自己选择的后置条件不足以证明完整用户结果，因此评测器还会强制要求外部判定器通过。无法确定或无效的提供方动作必须停止任务并让用例失败，不能依靠猜测继续。该冒烟测试不证明第三方主模型或 GUI 模型的质量与兼容性。
 
 真实运行证明所选模型组合在这些受控用例上的表现，不能建立对任意网站或任意 macOS 应用的可靠性结论。SDK 能观察为每步输出准备的图片附件，但不会渲染 Harness Web 客户端；当要证明图片确实在对话中可见时，应继续使用现有的浏览器／UI 验证路径。
 
-SDK profile 没有交互式审批界面。请通过 Web UI 评测审批提示、拒绝和紧急停止行为，不要为了本运行器而降低安全设置。
+SDK profile 没有交互式审批界面，因此生产默认值会让其中的每个变更动作失败关闭。只有具备等效、可信的安全或审批边界时，才应运行会产生变更的 SDK 评测；这个隔离、动作固定的测试页面会有意关闭两层确认。该例外属于可信测试边界，不是推荐的生产设置，也不是语义效果保证。默认审批、拒绝、紧急停止和内联截图由独立测试覆盖；发布工作流还会在 Chromium 中渲染真实的配置页和任务输出组件。原生动作／截图 E2E 仍需要一次全新、已解锁的 macOS 会话。

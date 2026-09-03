@@ -8,6 +8,8 @@
   "include": [
     "src/client/**/*.ts",
     "src/client/**/*.tsx",
+    "src/progress.ts",
+    "src/progress-remote.ts",
     "src/css-modules.d.ts"
   ],
   "references": [

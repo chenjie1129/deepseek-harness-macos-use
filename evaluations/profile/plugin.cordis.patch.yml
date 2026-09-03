@@ -10,9 +10,6 @@
 
     - id: gui-model
       name: '@deepseek-ai/dsh-gui-model'
-      config:
-        baseURL: http://127.0.0.1
-        model: configure-in-plugin-page
 
     - id: tool-macos-use
       name: '@deepseek-ai/dsh-tool-macos-use'

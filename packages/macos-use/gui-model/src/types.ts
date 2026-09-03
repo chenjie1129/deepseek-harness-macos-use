@@ -5,10 +5,12 @@
 
 /** Discriminates {@link GuiModelError} causes. */
 export type GuiModelErrorCode =
+  | 'GUI_MODEL_NOT_CONFIGURED'
   | 'GUI_MODEL_REQUEST_FAILED'
+  | 'GUI_MODEL_RESPONSE_TOO_LARGE'
   | 'GUI_MODEL_MALFORMED_RESPONSE'
 
-/** Raised by {@link GuiModelService.nextAction} on a failed request or an unparsable/invalid action. */
+/** Raised by {@link GuiModelService.nextAction} on missing configuration, a failed request, or an invalid action. */
 export class GuiModelError extends Error {
   constructor(message: string, readonly code: GuiModelErrorCode) {
     super(message)

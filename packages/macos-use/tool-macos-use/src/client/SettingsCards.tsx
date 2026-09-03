@@ -14,7 +14,7 @@ export type GuiModelCardProps = CardRuntimeProps & InjectFace<GuiModelCardFace>
 /** Render every GUI vision-model endpoint and credential setting. */
 export function GuiModelCard(props: GuiModelCardProps) {
   const state = props.useGuiModelCard(snapshot => snapshot)
-  const disabled = !state.writable
+  const disabled = !state.writable || state.saving
   return (
     <SettingsCard
       t={props.t}
@@ -31,8 +31,9 @@ export function GuiModelCard(props: GuiModelCardProps) {
         hint="guiModel.apiKeyHint"
         state={state.apiKey}
         configured={state.apiKeyConfigured}
-        disabled={!state.apiKeyWritable}
+        disabled={!state.apiKeyWritable || state.saving}
         onEdit={(text) => { props.edit('apiKey', text) }}
+        onRemove={props.removeKey}
       />
       <ValueField
         id="plugin-config-gui-model-credential-ref"
@@ -85,7 +86,7 @@ export type GuiAgentCardProps = CardRuntimeProps & InjectFace<GuiAgentCardFace>
 /** Render every GUI-agent reliability, safety, browser, and screenshot setting. */
 export function GuiAgentCard(props: GuiAgentCardProps) {
   const state = props.useGuiAgentCard(snapshot => snapshot)
-  const disabled = !state.writable
+  const disabled = !state.writable || state.saving
   const value = (
     id: string,
     label: Parameters<typeof ValueField>[0]['label'],
@@ -109,8 +110,8 @@ export function GuiAgentCard(props: GuiAgentCardProps) {
     label: Parameters<typeof SwitchField>[0]['label'],
     hint: Parameters<typeof SwitchField>[0]['hint'],
     field: keyof Pick<typeof state,
-      'showStepScreenshots' | 'browserHeadless' | 'confirmAppleScript'
-      | 'confirmDestructiveActions' | 'singleActiveTask'>,
+      'showStepScreenshots' | 'browserHeadless'
+      | 'browserAllowPrivateNetwork' | 'confirmDestructiveActions' | 'confirmEveryMutation' | 'singleActiveTask'>,
   ) => (
     <SwitchField
       id={id}
@@ -127,7 +128,10 @@ export function GuiAgentCard(props: GuiAgentCardProps) {
     id: string,
     label: Parameters<typeof TextAreaField>[0]['label'],
     hint: Parameters<typeof TextAreaField>[0]['hint'],
-    field: keyof Pick<typeof state, 'allowedApps' | 'deniedApps' | 'excludedScreenshotApps'>,
+    field: keyof Pick<typeof state,
+      'allowedApps' | 'deniedApps' | 'excludedScreenshotApps'
+      | 'browserAllowedDomains' | 'browserDeniedDomains'
+      | 'readAppGrants' | 'controlAppGrants' | 'deniedAppIdentities'>,
   ) => (
     <TextAreaField
       id={id}
@@ -154,12 +158,19 @@ export function GuiAgentCard(props: GuiAgentCardProps) {
       {value('plugin-config-gui-agent-task-timeout', 'guiAgent.taskTimeoutMs', 'guiAgent.taskTimeoutMsHint', 'taskTimeoutMs')}
       {value('plugin-config-gui-agent-command-timeout', 'guiAgent.commandTimeoutMs', 'guiAgent.commandTimeoutMsHint', 'commandTimeoutMs')}
       {value('plugin-config-gui-agent-elements', 'guiAgent.maxElements', 'guiAgent.maxElementsHint', 'maxElementsPerSnapshot')}
+      <h4 className={css.groupTitle}>{props.t('guiAgent.browser')}</h4>
       {toggle('plugin-config-gui-agent-browser-headless', 'guiAgent.browserHeadless', 'guiAgent.browserHeadlessHint', 'browserHeadless')}
+      {list('plugin-config-gui-agent-browser-allowed-domains', 'guiAgent.browserAllowedDomains', 'guiAgent.browserAllowedDomainsHint', 'browserAllowedDomains')}
+      {list('plugin-config-gui-agent-browser-denied-domains', 'guiAgent.browserDeniedDomains', 'guiAgent.browserDeniedDomainsHint', 'browserDeniedDomains')}
+      {toggle('plugin-config-gui-agent-browser-private-network', 'guiAgent.browserAllowPrivateNetwork', 'guiAgent.browserAllowPrivateNetworkHint', 'browserAllowPrivateNetwork')}
       <h4 className={css.groupTitle}>{props.t('guiAgent.safety')}</h4>
+      {list('plugin-config-gui-agent-read-grants', 'guiAgent.readAppGrants', 'guiAgent.readAppGrantsHint', 'readAppGrants')}
+      {list('plugin-config-gui-agent-control-grants', 'guiAgent.controlAppGrants', 'guiAgent.controlAppGrantsHint', 'controlAppGrants')}
+      {list('plugin-config-gui-agent-denied-identities', 'guiAgent.deniedAppIdentities', 'guiAgent.deniedAppIdentitiesHint', 'deniedAppIdentities')}
       {list('plugin-config-gui-agent-allowed-apps', 'guiAgent.allowedApps', 'guiAgent.allowedAppsHint', 'allowedApps')}
       {list('plugin-config-gui-agent-denied-apps', 'guiAgent.deniedApps', 'guiAgent.deniedAppsHint', 'deniedApps')}
-      {toggle('plugin-config-gui-agent-confirm-applescript', 'guiAgent.confirmAppleScript', 'guiAgent.confirmAppleScriptHint', 'confirmAppleScript')}
       {toggle('plugin-config-gui-agent-confirm-destructive', 'guiAgent.confirmDestructive', 'guiAgent.confirmDestructiveHint', 'confirmDestructiveActions')}
+      {toggle('plugin-config-gui-agent-confirm-every-mutation', 'guiAgent.confirmEveryMutation', 'guiAgent.confirmEveryMutationHint', 'confirmEveryMutation')}
       {toggle('plugin-config-gui-agent-single-task', 'guiAgent.singleTask', 'guiAgent.singleTaskHint', 'singleActiveTask')}
       <h4 className={css.groupTitle}>{props.t('guiAgent.privacy')}</h4>
       {toggle('plugin-config-gui-agent-step-screenshots', 'guiAgent.showStepScreenshots', 'guiAgent.showStepScreenshotsHint', 'showStepScreenshots')}
@@ -172,7 +183,7 @@ export function GuiAgentCard(props: GuiAgentCardProps) {
         <button
           type="button"
           className={css.dangerButton}
-          disabled={disabled || state.aborting}
+          disabled={!state.writable || state.aborting}
           onClick={props.abort}
         >
           {props.t(state.aborting ? 'guiAgent.aborting' : 'guiAgent.abortButton')}

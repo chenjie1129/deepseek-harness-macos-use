@@ -1,6 +1,6 @@
 diff --git a/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.i18n.yaml b/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.i18n.yaml
 new file mode 100644
-index 0000000000000000000000000000000000000000..fc9e6c15aa037ff4ebda2f48e6fe5bfe6e4369e8
+index 0000000000..fc9e6c15aa
 --- /dev/null
 +++ b/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.i18n.yaml
 @@ -0,0 +1,6 @@
@@ -12,7 +12,7 @@ index 0000000000000000000000000000000000000000..fc9e6c15aa037ff4ebda2f48e6fe5bfe
 +2026-08-29-tool-result-metadata-images.zh.md: 4818ece9d2b3bf4c2c2f579c2d2b606545b39dc1
 diff --git a/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.md b/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..b33ba92e810a497029b73c2468f738989eb68000
+index 0000000000..b33ba92e81
 --- /dev/null
 +++ b/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.md
 @@ -0,0 +1,25 @@
@@ -43,7 +43,7 @@ index 0000000000000000000000000000000000000000..b33ba92e810a497029b73c2468f73898
 +An authorized session reader can load and export images used only by a tool's client presentation. GUI step screenshots add attachment objects and metadata to durable history when enabled, but they do not add images to the driving model request. Any producer that places image blocks in `presentationMeta` must use the standard attachment-reference shape.
 diff --git a/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.zh.md b/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.zh.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..4818ece9d2b3bf4c2c2f579c2d2b606545b39dc1
+index 0000000000..4818ece9d2
 --- /dev/null
 +++ b/.agents/notes/implemented/bug-fix/2026-08-29-tool-result-metadata-images.zh.md
 @@ -0,0 +1,25 @@
@@ -73,7 +73,7 @@ index 0000000000000000000000000000000000000000..4818ece9d2b3bf4c2c2f579c2d2b6065
 +
 +获得授权的会话读取方可以加载并导出只用于工具客户端展示的图片。启用时，GUI 步骤截图会向持久历史添加附件对象与元数据，但不会向驱动模型请求添加图片。任何把图片块放入 `presentationMeta` 的生产者都必须使用标准附件引用形状。
 diff --git a/THIRD_PARTY_NOTICES.md b/THIRD_PARTY_NOTICES.md
-index 616dcd19097a5137a50a3a00a1aa403c73a2f26a..cc79a89eaf7011cf4931d2f3ed78d400d93ff724 100644
+index 616dcd1909..cc79a89eaf 100644
 --- a/THIRD_PARTY_NOTICES.md
 +++ b/THIRD_PARTY_NOTICES.md
 @@ -93,6 +93,7 @@ External packages that a workspace package resolves at runtime. The tier covers
@@ -93,7 +93,7 @@ index 616dcd19097a5137a50a3a00a1aa403c73a2f26a..cc79a89eaf7011cf4931d2f3ed78d400
  | [`smol-toml`](https://github.com/squirrelchat/smol-toml) | BSD-3-Clause |
  | [`spdx-expression-parse`](https://github.com/jslicense/spdx-expression-parse.js) | MIT |
 diff --git a/apps/cli/package.json b/apps/cli/package.json
-index 8f82b8fdf77bf9ad0dc67c20e3b7ce51fca142e2..57d7faf962a3b012a9172f34238350d188bf4f6b 100644
+index 8f82b8fdf7..57d7faf962 100644
 --- a/apps/cli/package.json
 +++ b/apps/cli/package.json
 @@ -46,6 +46,9 @@
@@ -115,7 +115,7 @@ index 8f82b8fdf77bf9ad0dc67c20e3b7ce51fca142e2..57d7faf962a3b012a9172f34238350d1
      "@deepseek-ai/dsh-tool-web": "workspace:^",
      "@deepseek-ai/dsh-tool-workflow": "workspace:^",
 diff --git a/docs/capability-seams.i18n.yaml b/docs/capability-seams.i18n.yaml
-index e004cf0452fca550863da40d67fd2c47a88b5bce..5d109636c122735a813b2f8e945d8d59d31ced30 100644
+index e004cf0452..0deae8bb58 100644
 --- a/docs/capability-seams.i18n.yaml
 +++ b/docs/capability-seams.i18n.yaml
 @@ -2,5 +2,5 @@
@@ -124,14 +124,14 @@ index e004cf0452fca550863da40d67fd2c47a88b5bce..5d109636c122735a813b2f8e945d8d59
  #   pnpm run verify-translation-pairing --write docs/capability-seams.md
 -capability-seams.md: 5c3ba40df35f40e211de2bf90037f998eeb5a15d
 -capability-seams.zh.md: 47402e1b6d9514a77e8fff6c4f0d0a8bbb34586d
-+capability-seams.md: 5ad6c7890187857b0b92f59948a13d3724fbb146
-+capability-seams.zh.md: 4ddd295e04428e0d73d377e88b987b62c4f0b51d
++capability-seams.md: 372499d0c04d55d3ed79c29e6a8c9c4de7785765
++capability-seams.zh.md: 48f6ace02b566595ab1e49ae98612bd95a4c5644
 diff --git a/docs/capability-seams.md b/docs/capability-seams.md
-index 5c3ba40df35f40e211de2bf90037f998eeb5a15d..5ad6c7890187857b0b92f59948a13d3724fbb146 100644
+index 5c3ba40df3..372499d0c0 100644
 --- a/docs/capability-seams.md
 +++ b/docs/capability-seams.md
 @@ -7,6 +7,13 @@ A service can be a core spine service, a swappable capability seam, or a bundle/
- 
+
  ```mermaid
  flowchart LR
 +  pkg_browser_use["browser-use"]
@@ -193,21 +193,21 @@ index 5c3ba40df35f40e211de2bf90037f998eeb5a15d..5ad6c7890187857b0b92f59948a13d37
    svc_sandbox --> pkg_terminal_bash
    svc_sandboxPolicy --> pkg_bash_sandbox
 @@ -463,6 +476,9 @@ flowchart LR
- 
+
  | ctx key | Role | Owner | Implementations | Direct consumers | Companion plugins | Note |
  | --- | --- | --- | --- | --- | --- | --- |
-+| `ctx.browserUse` | `seam` | [`browser-use`](../packages/macos-use/browser-use) | [`browser-use`](../packages/macos-use/browser-use) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | One lazy Playwright browser page supplies selector and screenshot-coordinate actions; the model-facing consumer owns task policy and presentation. |
++| `ctx.browserUse` | `seam` | [`browser-use`](../packages/macos-use/browser-use) | [`browser-use`](../packages/macos-use/browser-use) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | One lazy, isolated Playwright BrowserContext and page per Harness Agent supplies selector and screenshot-coordinate actions; the model-facing consumer owns task policy and presentation. |
 +| `ctx.guiModel` | `seam` | [`gui-model`](../packages/macos-use/gui-model) | [`gui-model`](../packages/macos-use/gui-model) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | The provider makes one OpenAI-compatible vision request per autonomous step and returns one validated action outside the driving Session model request. |
-+| `ctx.macosUse` | `seam` | [`macos-use`](../packages/macos-use/macos-use) | [`macos-use`](../packages/macos-use/macos-use) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | One native provider owns screenshots, Accessibility state, window and application discovery, pointer and keyboard actions, and AppleScript under live application policy. |
++| `ctx.macosUse` | `seam` | [`macos-use`](../packages/macos-use/macos-use) | [`macos-use`](../packages/macos-use/macos-use) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | One native provider owns screenshots, Accessibility state, window and application discovery, pointer and keyboard actions, and generated guarded JXA under live application policy; it never executes caller-supplied AppleScript. |
  | `ctx.attachments` | `seam` | [`attachment`](../packages/attachment/attachment) | [`attachment-local`](../packages/attachment/attachment-local) | [`api-session-controller`](../packages/api/session-controller), [`tool-fs`](../packages/fs/tool-fs), [`llm-pi-ai`](../packages/llm/llm-pi-ai), [`llm-deepseek`](../packages/llm/llm-deepseek) | - | The host commits accepted images before session events; provider adapters resolve authorized durable references into provider-native content. |
  | `ctx.llm` | `seam` | [`llm`](../packages/llm/llm) | [`llm-deepseek`](../packages/llm/llm-deepseek), [`llm-pi-ai`](../packages/llm/llm-pi-ai), [`llm-replay`](../packages/test-support/llm-replay) | [`agent-loop`](../packages/core/agent-loop), [`compaction-basic`](../packages/compaction/compaction-basic) | - | Adapters register provider implementations; the loop and compaction call the provider-neutral stream service. |
  | `ctx.deepseekLlmApiExtensions` | `seam` | [`deepseek-llm-api-extensions`](../packages/llm/deepseek-llm-api-extensions) | [`session-log-deepseek`](../packages/session/session-log-deepseek), [`plugin-package-inventory-deepseek`](../packages/llm/plugin-package-inventory-deepseek) | [`llm-deepseek`](../packages/llm/llm-deepseek) | - | Plugins prepare independent top-level fields; the official adapter merges them and commits their delivery state after HTTP acceptance. |
 diff --git a/docs/capability-seams.zh.md b/docs/capability-seams.zh.md
-index 47402e1b6d9514a77e8fff6c4f0d0a8bbb34586d..4ddd295e04428e0d73d377e88b987b62c4f0b51d 100644
+index 47402e1b6d..48f6ace02b 100644
 --- a/docs/capability-seams.zh.md
 +++ b/docs/capability-seams.zh.md
 @@ -9,6 +9,13 @@
- 
+
  ```mermaid
  flowchart LR
 +  pkg_browser_use["browser-use"]
@@ -269,17 +269,17 @@ index 47402e1b6d9514a77e8fff6c4f0d0a8bbb34586d..4ddd295e04428e0d73d377e88b987b62
    svc_sandbox --> pkg_terminal_bash
    svc_sandboxPolicy --> pkg_bash_sandbox
 @@ -465,6 +478,9 @@ flowchart LR
- 
+
  | ctx 键 | 角色 | 所属包 | 实现 | 直接消费方 | 配套插件 | 说明 |
  | --- | --- | --- | --- | --- | --- | --- |
-+| `ctx.browserUse` | `seam` | [`browser-use`](../packages/macos-use/browser-use) | [`browser-use`](../packages/macos-use/browser-use) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | 一个延迟启动的 Playwright 浏览器页面提供选择器与截图坐标操作；面向模型的消费方负责任务策略与展示。 |
++| `ctx.browserUse` | `seam` | [`browser-use`](../packages/macos-use/browser-use) | [`browser-use`](../packages/macos-use/browser-use) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | 每个 Harness Agent 拥有一个延迟启动、相互隔离的 Playwright BrowserContext 和页面，用于提供选择器与截图坐标操作；面向模型的消费方负责任务策略与展示。 |
 +| `ctx.guiModel` | `seam` | [`gui-model`](../packages/macos-use/gui-model) | [`gui-model`](../packages/macos-use/gui-model) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | 提供方每个自主步骤发起一次 OpenAI 兼容视觉请求，并在驱动 Session 模型请求之外返回一个经过校验的动作。 |
-+| `ctx.macosUse` | `seam` | [`macos-use`](../packages/macos-use/macos-use) | [`macos-use`](../packages/macos-use/macos-use) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | 一个原生提供方在实时应用策略下负责截图、辅助功能状态、窗口与应用发现、指针与键盘操作以及 AppleScript。 |
++| `ctx.macosUse` | `seam` | [`macos-use`](../packages/macos-use/macos-use) | [`macos-use`](../packages/macos-use/macos-use) | [`tool-macos-use`](../packages/macos-use/tool-macos-use) | - | 一个原生提供方在实时应用策略下负责截图、辅助功能状态、窗口与应用发现、指针与键盘操作，以及生成的受保护 JXA；它绝不执行调用方提供的 AppleScript。 |
  | `ctx.attachments` | `seam` | [`attachment`](../packages/attachment/attachment) | [`attachment-local`](../packages/attachment/attachment-local) | [`api-session-controller`](../packages/api/session-controller), [`tool-fs`](../packages/fs/tool-fs), [`llm-pi-ai`](../packages/llm/llm-pi-ai), [`llm-deepseek`](../packages/llm/llm-deepseek) | - | 宿主会在会话事件之前提交已接受的图片；提供方适配器将已授权的持久引用解析为提供方原生内容。 |
  | `ctx.llm` | `seam` | [`llm`](../packages/llm/llm) | [`llm-deepseek`](../packages/llm/llm-deepseek), [`llm-pi-ai`](../packages/llm/llm-pi-ai), [`llm-replay`](../packages/test-support/llm-replay) | [`agent-loop`](../packages/core/agent-loop), [`compaction-basic`](../packages/compaction/compaction-basic) | - | 适配器注册提供方实现；agent loop（智能体循环）与压缩功能调用提供方无关的流服务。 |
  | `ctx.deepseekLlmApiExtensions` | `seam` | [`deepseek-llm-api-extensions`](../packages/llm/deepseek-llm-api-extensions) | [`session-log-deepseek`](../packages/session/session-log-deepseek), [`plugin-package-inventory-deepseek`](../packages/llm/plugin-package-inventory-deepseek) | [`llm-deepseek`](../packages/llm/llm-deepseek) | - | 插件准备彼此独立的顶层字段；官方适配器会合并这些字段，并在 HTTP 接受后提交其交付状态。 |
 diff --git a/docs/config-catalog.i18n.yaml b/docs/config-catalog.i18n.yaml
-index 23fd30b2285c8ec25eebc0a42787f912bbdcb586..aac4b6a08958509d2f63dda8e8ea6932d9a6d46c 100644
+index 23fd30b228..98c16f2ea0 100644
 --- a/docs/config-catalog.i18n.yaml
 +++ b/docs/config-catalog.i18n.yaml
 @@ -2,5 +2,5 @@
@@ -288,16 +288,16 @@ index 23fd30b2285c8ec25eebc0a42787f912bbdcb586..aac4b6a08958509d2f63dda8e8ea6932
  #   pnpm run verify-translation-pairing --write docs/config-catalog.md
 -config-catalog.md: 7e4e4b626161fb8468da48d07dabe51b626c94d0
 -config-catalog.zh.md: 2e48ea06cb4179db78b946e55f289dd1d7bc71e1
-+config-catalog.md: f3d6df8d89d02d2a46ad8a8c9aca2f4e3f194eca
-+config-catalog.zh.md: 91d2b71077b33f8a34043c14b996c30644b82fe0
++config-catalog.md: 99a130f8e8004ed1b34b15665f2634f3701a7a6c
++config-catalog.zh.md: 44c4049ef2b8282f14481511a38fc1138a1706bf
 diff --git a/docs/config-catalog.md b/docs/config-catalog.md
-index 7e4e4b626161fb8468da48d07dabe51b626c94d0..f3d6df8d89d02d2a46ad8a8c9aca2f4e3f194eca 100644
+index 7e4e4b6261..99a130f8e8 100644
 --- a/docs/config-catalog.md
 +++ b/docs/config-catalog.md
 @@ -404,6 +404,20 @@ Depends on: [`LocalConfig`](#deepseek-aidsh-bash-local)
- 
+
  Source: [`packages/shell/bash-sandbox/src/index.ts:35`](../packages/shell/bash-sandbox/src/index.ts)
- 
+
 +<a id="deepseek-aidsh-browser-use"></a>
 +
 +## `@deepseek-ai/dsh-browser-use`
@@ -310,15 +310,15 @@ index 7e4e4b626161fb8468da48d07dabe51b626c94d0..f3d6df8d89d02d2a46ad8a8c9aca2f4e
 +}
 +```
 +
-+Source: [`packages/macos-use/browser-use/src/index.ts:50`](../packages/macos-use/browser-use/src/index.ts)
++Source: [`packages/macos-use/browser-use/src/index.ts:67`](../packages/macos-use/browser-use/src/index.ts)
 +
  <a id="deepseek-aidsh-client-connection"></a>
- 
+
  ## `@deepseek-ai/dsh-client-connection`
-@@ -789,6 +803,28 @@ export interface Config {
- 
+@@ -789,6 +803,26 @@ export interface Config {
+
  Source: [`packages/goal/goal/src/index.ts:116`](../packages/goal/goal/src/index.ts)
- 
+
 +<a id="deepseek-aidsh-gui-model"></a>
 +
 +## `@deepseek-ai/dsh-gui-model`
@@ -326,14 +326,12 @@ index 7e4e4b626161fb8468da48d07dabe51b626c94d0..f3d6df8d89d02d2a46ad8a8c9aca2f4e
 +```ts config-catalog
 +/** Config for the GUI-grounding vision model seam. */
 +export interface Config {
-+  /** Literal API key; prefer {@link apiKeyEnv} so no secret enters configuration files. */
-+  apiKey?: string
 +  /** Credential reference resolved for each request; defaults to `GUI_MODEL_API_KEY`. */
 +  apiKeyEnv?: string
-+  /** Endpoint base; `/chat/completions` is appended. No default — every provider's base URL differs. */
-+  baseURL: string
++  /** Endpoint base; `/chat/completions` is appended. Configure visually before the first task. */
++  baseURL?: string
 +  /** Vision-capable model name sent as the request's `model` field. */
-+  model: string
++  model?: string
 +  /** `max_tokens` cap on the response. Defaults to 512 — one action's worth of JSON. */
 +  maxOutputTokens?: number
 +}
@@ -342,12 +340,12 @@ index 7e4e4b626161fb8468da48d07dabe51b626c94d0..f3d6df8d89d02d2a46ad8a8c9aca2f4e
 +Source: [`packages/macos-use/gui-model/src/index.ts:38`](../packages/macos-use/gui-model/src/index.ts)
 +
  <a id="deepseek-aidsh-headless"></a>
- 
+
  ## `@deepseek-ai/dsh-headless`
-@@ -1436,6 +1472,22 @@ export interface LspLocalServerConfig {
- 
+@@ -1436,6 +1470,22 @@ export interface LspLocalServerConfig {
+
  Source: [`packages/lsp/lsp-stdio/src/index.ts:82`](../packages/lsp/lsp-stdio/src/index.ts)
- 
+
 +<a id="deepseek-aidsh-macos-use"></a>
 +
 +## `@deepseek-ai/dsh-macos-use`
@@ -362,15 +360,15 @@ index 7e4e4b626161fb8468da48d07dabe51b626c94d0..f3d6df8d89d02d2a46ad8a8c9aca2f4e
 +}
 +```
 +
-+Source: [`packages/macos-use/macos-use/src/index.ts:86`](../packages/macos-use/macos-use/src/index.ts)
++Source: [`packages/macos-use/macos-use/src/index.ts:163`](../packages/macos-use/macos-use/src/index.ts)
 +
  <a id="deepseek-aidsh-mcp-client"></a>
- 
+
  ## `@deepseek-ai/dsh-mcp-client`
-@@ -2826,6 +2878,46 @@ export interface Config {
- 
+@@ -2826,6 +2876,58 @@ export interface Config {
+
  Source: [`packages/lsp/tool-lsp/src/index.ts:58`](../packages/lsp/tool-lsp/src/index.ts)
- 
+
 +<a id="deepseek-aidsh-tool-macos-use"></a>
 +
 +## `@deepseek-ai/dsh-tool-macos-use`
@@ -388,20 +386,32 @@ index 7e4e4b626161fb8468da48d07dabe51b626c94d0..f3d6df8d89d02d2a46ad8a8c9aca2f4e
 +  commandTimeoutMs?: number
 +  /** Maximum Accessibility elements returned by one semantic snapshot. */
 +  maxElementsPerSnapshot?: number
-+  /** Store and render the screenshot that grounded each autonomous step. */
++  /** Store and render fresh visual evidence for each autonomous step. */
 +  showStepScreenshots?: boolean
 +  /** Launch the managed Chromium page without visible browser chrome. */
 +  browserHeadless?: boolean
-+  /** Comma/newline list restricting desktop control; empty permits every app not denied. */
++  /** Comma/newline list of exact or parent-domain browser grants; empty denies network navigation. */
++  browserAllowedDomains?: string
++  /** Comma/newline list of exact or parent-domain browser denials. */
++  browserDeniedDomains?: string
++  /** Permit the managed browser to navigate to loopback, link-local, and private-network targets. */
++  browserAllowPrivateNetwork?: boolean
++  /** Legacy comma/newline name grants; empty grants no app when precise grants are also empty. */
 +  allowedApps?: string
 +  /** Comma/newline list of applications desktop actions must never control. */
 +  deniedApps?: string
-+  /** Comma/newline list whose windows are masked in full-screen captures and reject exact capture. */
++  /** Newline list of precise app identities allowed for discovery/capture. */
++  readAppGrants?: string
++  /** Newline list of precise app identities allowed for control. */
++  controlAppGrants?: string
++  /** Newline list of precise app identities denied for both read and control. */
++  deniedAppIdentities?: string
++  /** Comma/newline list whose foreground display-coordinate and exact-window captures fail closed. */
 +  excludedScreenshotApps?: string
-+  /** Require one-shot confirmation before arbitrary AppleScript. */
-+  confirmAppleScript?: boolean
-+  /** Require one-shot confirmation before drag, destructive keys, or destructive task intent. */
++  /** Enable a heuristic one-shot prompt for risky drags, keys, and task wording; not a semantic effect boundary. */
 +  confirmDestructiveActions?: boolean
++  /** Require one-shot approval before every model-selected or direct GUI mutation. */
++  confirmEveryMutation?: boolean
 +  /** Reject a new GUI tool while an autonomous GUI task is active. */
 +  singleActiveTask?: boolean
 +  /** Monotonic visual abort request; operational, not rendered as a value field. */
@@ -409,19 +419,19 @@ index 7e4e4b626161fb8468da48d07dabe51b626c94d0..f3d6df8d89d02d2a46ad8a8c9aca2f4e
 +}
 +```
 +
-+Source: [`packages/macos-use/tool-macos-use/src/settings.ts:31`](../packages/macos-use/tool-macos-use/src/settings.ts)
++Source: [`packages/macos-use/tool-macos-use/src/settings.ts:38`](../packages/macos-use/tool-macos-use/src/settings.ts)
 +
  <a id="deepseek-aidsh-tool-pwsh"></a>
- 
+
  ## `@deepseek-ai/dsh-tool-pwsh`
 diff --git a/docs/config-catalog.zh.md b/docs/config-catalog.zh.md
-index 2e48ea06cb4179db78b946e55f289dd1d7bc71e1..91d2b71077b33f8a34043c14b996c30644b82fe0 100644
+index 2e48ea06cb..44c4049ef2 100644
 --- a/docs/config-catalog.zh.md
 +++ b/docs/config-catalog.zh.md
 @@ -406,6 +406,20 @@ export type Config = LocalConfig
- 
+
  来源：[`packages/shell/bash-sandbox/src/index.ts:35`](../packages/shell/bash-sandbox/src/index.ts)
- 
+
 +<a id="deepseek-aidsh-browser-use"></a>
 +
 +## `@deepseek-ai/dsh-browser-use`
@@ -434,15 +444,15 @@ index 2e48ea06cb4179db78b946e55f289dd1d7bc71e1..91d2b71077b33f8a34043c14b996c306
 +}
 +```
 +
-+来源：[`packages/macos-use/browser-use/src/index.ts:50`](../packages/macos-use/browser-use/src/index.ts)
++来源：[`packages/macos-use/browser-use/src/index.ts:67`](../packages/macos-use/browser-use/src/index.ts)
 +
  <a id="deepseek-aidsh-client-connection"></a>
- 
+
  ## `@deepseek-ai/dsh-client-connection`
-@@ -791,6 +805,28 @@ export interface Config {
- 
+@@ -791,6 +805,26 @@ export interface Config {
+
  来源：[`packages/goal/goal/src/index.ts:116`](../packages/goal/goal/src/index.ts)
- 
+
 +<a id="deepseek-aidsh-gui-model"></a>
 +
 +## `@deepseek-ai/dsh-gui-model`
@@ -450,14 +460,12 @@ index 2e48ea06cb4179db78b946e55f289dd1d7bc71e1..91d2b71077b33f8a34043c14b996c306
 +```ts config-catalog
 +/** Config for the GUI-grounding vision model seam. */
 +export interface Config {
-+  /** Literal API key; prefer {@link apiKeyEnv} so no secret enters configuration files. */
-+  apiKey?: string
 +  /** Credential reference resolved for each request; defaults to `GUI_MODEL_API_KEY`. */
 +  apiKeyEnv?: string
-+  /** Endpoint base; `/chat/completions` is appended. No default — every provider's base URL differs. */
-+  baseURL: string
++  /** Endpoint base; `/chat/completions` is appended. Configure visually before the first task. */
++  baseURL?: string
 +  /** Vision-capable model name sent as the request's `model` field. */
-+  model: string
++  model?: string
 +  /** `max_tokens` cap on the response. Defaults to 512 — one action's worth of JSON. */
 +  maxOutputTokens?: number
 +}
@@ -466,12 +474,12 @@ index 2e48ea06cb4179db78b946e55f289dd1d7bc71e1..91d2b71077b33f8a34043c14b996c306
 +来源：[`packages/macos-use/gui-model/src/index.ts:38`](../packages/macos-use/gui-model/src/index.ts)
 +
  <a id="deepseek-aidsh-headless"></a>
- 
+
  ## `@deepseek-ai/dsh-headless`
-@@ -1438,6 +1474,22 @@ export interface LspLocalServerConfig {
- 
+@@ -1438,6 +1472,22 @@ export interface LspLocalServerConfig {
+
  来源：[`packages/lsp/lsp-stdio/src/index.ts:82`](../packages/lsp/lsp-stdio/src/index.ts)
- 
+
 +<a id="deepseek-aidsh-macos-use"></a>
 +
 +## `@deepseek-ai/dsh-macos-use`
@@ -486,15 +494,15 @@ index 2e48ea06cb4179db78b946e55f289dd1d7bc71e1..91d2b71077b33f8a34043c14b996c306
 +}
 +```
 +
-+来源：[`packages/macos-use/macos-use/src/index.ts:86`](../packages/macos-use/macos-use/src/index.ts)
++来源：[`packages/macos-use/macos-use/src/index.ts:163`](../packages/macos-use/macos-use/src/index.ts)
 +
  <a id="deepseek-aidsh-mcp-client"></a>
- 
+
  ## `@deepseek-ai/dsh-mcp-client`
-@@ -2828,6 +2880,46 @@ export interface Config {
- 
+@@ -2828,6 +2878,58 @@ export interface Config {
+
  来源：[`packages/lsp/tool-lsp/src/index.ts:58`](../packages/lsp/tool-lsp/src/index.ts)
- 
+
 +<a id="deepseek-aidsh-tool-macos-use"></a>
 +
 +## `@deepseek-ai/dsh-tool-macos-use`
@@ -512,20 +520,32 @@ index 2e48ea06cb4179db78b946e55f289dd1d7bc71e1..91d2b71077b33f8a34043c14b996c306
 +  commandTimeoutMs?: number
 +  /** Maximum Accessibility elements returned by one semantic snapshot. */
 +  maxElementsPerSnapshot?: number
-+  /** Store and render the screenshot that grounded each autonomous step. */
++  /** Store and render fresh visual evidence for each autonomous step. */
 +  showStepScreenshots?: boolean
 +  /** Launch the managed Chromium page without visible browser chrome. */
 +  browserHeadless?: boolean
-+  /** Comma/newline list restricting desktop control; empty permits every app not denied. */
++  /** Comma/newline list of exact or parent-domain browser grants; empty denies network navigation. */
++  browserAllowedDomains?: string
++  /** Comma/newline list of exact or parent-domain browser denials. */
++  browserDeniedDomains?: string
++  /** Permit the managed browser to navigate to loopback, link-local, and private-network targets. */
++  browserAllowPrivateNetwork?: boolean
++  /** Legacy comma/newline name grants; empty grants no app when precise grants are also empty. */
 +  allowedApps?: string
 +  /** Comma/newline list of applications desktop actions must never control. */
 +  deniedApps?: string
-+  /** Comma/newline list whose windows are masked in full-screen captures and reject exact capture. */
++  /** Newline list of precise app identities allowed for discovery/capture. */
++  readAppGrants?: string
++  /** Newline list of precise app identities allowed for control. */
++  controlAppGrants?: string
++  /** Newline list of precise app identities denied for both read and control. */
++  deniedAppIdentities?: string
++  /** Comma/newline list whose foreground display-coordinate and exact-window captures fail closed. */
 +  excludedScreenshotApps?: string
-+  /** Require one-shot confirmation before arbitrary AppleScript. */
-+  confirmAppleScript?: boolean
-+  /** Require one-shot confirmation before drag, destructive keys, or destructive task intent. */
++  /** Enable a heuristic one-shot prompt for risky drags, keys, and task wording; not a semantic effect boundary. */
 +  confirmDestructiveActions?: boolean
++  /** Require one-shot approval before every model-selected or direct GUI mutation. */
++  confirmEveryMutation?: boolean
 +  /** Reject a new GUI tool while an autonomous GUI task is active. */
 +  singleActiveTask?: boolean
 +  /** Monotonic visual abort request; operational, not rendered as a value field. */
@@ -533,13 +553,13 @@ index 2e48ea06cb4179db78b946e55f289dd1d7bc71e1..91d2b71077b33f8a34043c14b996c306
 +}
 +```
 +
-+来源：[`packages/macos-use/tool-macos-use/src/settings.ts:31`](../packages/macos-use/tool-macos-use/src/settings.ts)
++来源：[`packages/macos-use/tool-macos-use/src/settings.ts:38`](../packages/macos-use/tool-macos-use/src/settings.ts)
 +
  <a id="deepseek-aidsh-tool-pwsh"></a>
- 
+
  ## `@deepseek-ai/dsh-tool-pwsh`
 diff --git a/docs/event-producer-consumer.i18n.yaml b/docs/event-producer-consumer.i18n.yaml
-index 7883982b1b05aafa14cbaa87a0ab24c23dedc4e1..9901ee1c69c2186005c3b25dd0b6a295adb1cc2b 100644
+index 7883982b1b..35e02fe4ba 100644
 --- a/docs/event-producer-consumer.i18n.yaml
 +++ b/docs/event-producer-consumer.i18n.yaml
 @@ -2,5 +2,5 @@
@@ -548,36 +568,78 @@ index 7883982b1b05aafa14cbaa87a0ab24c23dedc4e1..9901ee1c69c2186005c3b25dd0b6a295
  #   pnpm run verify-translation-pairing --write docs/event-producer-consumer.md
 -event-producer-consumer.md: 8c3a8a3f0e19f50e5a3164e2f5f4ac0a4e1046eb
 -event-producer-consumer.zh.md: 65b8fba3dd5b9654ffbd037dded15abe85c5885c
-+event-producer-consumer.md: ebb042ad3be702d3dee43ea152e648037511de90
-+event-producer-consumer.zh.md: 1d52300ad3d2442dc9e596509918d9da0cbf0d23
++event-producer-consumer.md: 7c0ad933da11acce5627cd751f5175c4d5a9377c
++event-producer-consumer.zh.md: 328d4a6ea107167a89a20b564e4a852899500295
 diff --git a/docs/event-producer-consumer.md b/docs/event-producer-consumer.md
-index 8c3a8a3f0e19f50e5a3164e2f5f4ac0a4e1046eb..ebb042ad3be702d3dee43ea152e648037511de90 100644
+index 8c3a8a3f0e..7c0ad933da 100644
 --- a/docs/event-producer-consumer.md
 +++ b/docs/event-producer-consumer.md
-@@ -61,7 +61,7 @@ This matrix shows which packages dispatch each harness-owned event and which pac
+@@ -10,7 +10,7 @@ This matrix shows which packages dispatch each harness-owned event and which pac
+ | `agent-loop/config-start-failed` | `emit` | [`packages/core/agent-loop/src/index.ts:183`](../packages/core/agent-loop/src/index.ts) | [`agent-loop`](../packages/core/agent-loop) (`events.dispatch`) | - |
+ | `agent-preset/selected` | `emit` | [`packages/preset/agent-presets/src/types.ts:92`](../packages/preset/agent-presets/src/types.ts) | [`agent-presets`](../packages/preset/agent-presets) (`emit`) | `remotes` |
+ | `agent/created` | `emit` | [`packages/core/agent/src/runtime-types.ts:166`](../packages/core/agent/src/runtime-types.ts) | [`agent`](../packages/core/agent) (`events.dispatch`) | [`agent-presets`](../packages/preset/agent-presets), [`file-reference-local`](../packages/context/file-reference-local), [`goal-round-driver`](../packages/goal/goal-round-driver), [`schedule`](../packages/schedule/schedule), `tool-agent-team`, [`tool-subagent`](../packages/subagent/tool-subagent) |
+-| `agent/disposed` | `emit` | [`packages/core/agent/src/runtime-types.ts:175`](../packages/core/agent/src/runtime-types.ts) | [`agent`](../packages/core/agent) (`events.dispatch`) | [`agent-loop`](../packages/core/agent-loop), [`file-reference-local`](../packages/context/file-reference-local), [`goal-round-driver`](../packages/goal/goal-round-driver), [`subagent`](../packages/subagent/subagent), `tool-agent-team`, [`tool-subagent`](../packages/subagent/tool-subagent) |
++| `agent/disposed` | `emit` | [`packages/core/agent/src/runtime-types.ts:175`](../packages/core/agent/src/runtime-types.ts) | [`agent`](../packages/core/agent) (`events.dispatch`) | [`agent-loop`](../packages/core/agent-loop), [`browser-use`](../packages/macos-use/browser-use), [`file-reference-local`](../packages/context/file-reference-local), [`goal-round-driver`](../packages/goal/goal-round-driver), [`macos-use`](../packages/macos-use/macos-use), [`subagent`](../packages/subagent/subagent), `tool-agent-team`, [`tool-macos-use`](../packages/macos-use/tool-macos-use), [`tool-subagent`](../packages/subagent/tool-subagent) |
+ | `agent/error` | `emit` | [`packages/core/agent/src/runtime-types.ts:297`](../packages/core/agent/src/runtime-types.ts) | [`agent-loop`](../packages/core/agent-loop) (`emit`) | [`acp`](../packages/acp/acp), [`goal-round-driver`](../packages/goal/goal-round-driver), `session-controller`, [`session-telemetry`](../packages/session/session-telemetry) |
+ | `agent/inbox/claimed` | `emit` | [`packages/core/agent/src/runtime-types.ts:204`](../packages/core/agent/src/runtime-types.ts) | [`agent-loop`](../packages/core/agent-loop) (`emit`) | [`acp`](../packages/acp/acp), [`goal-round-driver`](../packages/goal/goal-round-driver), [`subagent`](../packages/subagent/subagent), [`tool-jobs`](../packages/jobs/tool-jobs) |
+ | `agent/inbox/discarded` | `emit` | [`packages/core/agent/src/runtime-types.ts:212`](../packages/core/agent/src/runtime-types.ts) | [`agent-loop`](../packages/core/agent-loop) (`emit`) | [`goal-round-driver`](../packages/goal/goal-round-driver), [`subagent`](../packages/subagent/subagent) |
+@@ -26,7 +26,7 @@ This matrix shows which packages dispatch each harness-owned event and which pac
+ | `api-session/error` | `emit` | [`packages/api/session-controller/src/types.ts:544`](../packages/api/session-controller/src/types.ts) | `session-controller` (`emit`) | `remotes` |
+ | `api-session/removed` | `emit` | [`packages/api/session-controller/src/types.ts:523`](../packages/api/session-controller/src/types.ts) | `session-controller` (`emit`) | `remotes` |
+ | `api-session/status` | `emit` | [`packages/api/session-controller/src/types.ts:530`](../packages/api/session-controller/src/types.ts) | `session-controller` (`emit`) | `remotes` |
+-| `approval/request` | `waterfall` | [`packages/interaction/user-approval/src/types.ts:85`](../packages/interaction/user-approval/src/types.ts) | [`user-approval`](../packages/interaction/user-approval) (`waterfall`) | [`acp`](../packages/acp/acp), `remotes` |
++| `approval/request` | `waterfall` | [`packages/interaction/user-approval/src/types.ts:85`](../packages/interaction/user-approval/src/types.ts) | [`user-approval`](../packages/interaction/user-approval) (`waterfall`) | [`acp`](../packages/acp/acp), `remotes`, [`tool-macos-use`](../packages/macos-use/tool-macos-use) |
+ | `authorization/settled` | `emit` | [`packages/credentials/authorization/src/index.ts:57`](../packages/credentials/authorization/src/index.ts) | [`authorization`](../packages/credentials/authorization) (`events.dispatch`) | [`authorization`](../packages/credentials/authorization) |
+ | `commands/change` | `emit` | [`packages/interaction/commands/src/types.ts:80`](../packages/interaction/commands/src/types.ts) | [`commands`](../packages/interaction/commands) (`events.dispatch`) | `remotes` |
+ | `cordis/dynamic-package` | `emit` | [`packages/extensions/cordis-host-runner/src/types.ts:379`](../packages/extensions/cordis-host-runner/src/types.ts) | [`cordis-host-runner`](../packages/extensions/cordis-host-runner) (`emit`) | `remotes` |
+@@ -61,9 +61,9 @@ This matrix shows which packages dispatch each harness-owned event and which pac
  | `tools/change` | `emit` | [`packages/core/tools/src/index.ts:207`](../packages/core/tools/src/index.ts) | [`agent-presets`](../packages/preset/agent-presets) (`emit`), [`tools`](../packages/core/tools) (`emit`) | [`tool-subagent`](../packages/subagent/tool-subagent) |
  | `tools/execute` | `waterfall` | [`packages/core/tools/src/index.ts:163`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`session-checkpoint-policy`](../packages/session/session-checkpoint-policy), `timeout-policy` |
  | `tools/post-execute` | `waterfall` | [`packages/core/tools/src/index.ts:175`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`hooks-claude-code`](../packages/hooks/hooks-claude-code), [`hooks-codex`](../packages/hooks/hooks-codex), [`repeat-tool-reminder`](../packages/guard/repeat-tool-reminder), [`spill-policy`](../packages/spill/spill-policy), [`tool-fs-search`](../packages/fs/tool-fs-search) |
 -| `tools/pre-execute` | `waterfall` | [`packages/core/tools/src/index.ts:152`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`hooks-claude-code`](../packages/hooks/hooks-claude-code), [`hooks-codex`](../packages/hooks/hooks-codex), [`tool-jobs`](../packages/jobs/tool-jobs) |
 +| `tools/pre-execute` | `waterfall` | [`packages/core/tools/src/index.ts:152`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`hooks-claude-code`](../packages/hooks/hooks-claude-code), [`hooks-codex`](../packages/hooks/hooks-codex), [`tool-jobs`](../packages/jobs/tool-jobs), [`tool-macos-use`](../packages/macos-use/tool-macos-use) |
  | `tools/ptc-dispatch-log` | `waterfall` | [`packages/core/tools/src/index.ts:189`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`spill-policy`](../packages/spill/spill-policy) |
- | `tools/result` | `emit` | [`packages/core/tools/src/index.ts:197`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`events.dispatch`) | [`agent-instructions`](../packages/context/agent-instructions), [`subagent-in-process-driver`](../packages/subagent/subagent-in-process-driver) |
+-| `tools/result` | `emit` | [`packages/core/tools/src/index.ts:197`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`events.dispatch`) | [`agent-instructions`](../packages/context/agent-instructions), [`subagent-in-process-driver`](../packages/subagent/subagent-in-process-driver) |
++| `tools/result` | `emit` | [`packages/core/tools/src/index.ts:197`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`events.dispatch`) | [`agent-instructions`](../packages/context/agent-instructions), [`subagent-in-process-driver`](../packages/subagent/subagent-in-process-driver), [`tool-macos-use`](../packages/macos-use/tool-macos-use) |
  | `user-questions/request` | `waterfall` | [`packages/interaction/user-questions/src/types.ts:85`](../packages/interaction/user-questions/src/types.ts) | [`user-questions`](../packages/interaction/user-questions) (`waterfall`) | `remotes` |
+ | `webserver/index-inject` | `emit` | [`packages/host/webserver/src/index.ts:34`](../packages/host/webserver/src/index.ts) | `webserver` (`emit`) | `inspector`, `modules` |
+ | `workflow/agent-end` | `emit` | [`packages/workflow/workflow/src/index.ts:79`](../packages/workflow/workflow/src/index.ts) | [`workflow`](../packages/workflow/workflow) (`events.dispatch`) | [`tool-workflow`](../packages/workflow/tool-workflow), [`workflow`](../packages/workflow/workflow) |
 diff --git a/docs/event-producer-consumer.zh.md b/docs/event-producer-consumer.zh.md
-index 65b8fba3dd5b9654ffbd037dded15abe85c5885c..1d52300ad3d2442dc9e596509918d9da0cbf0d23 100644
+index 65b8fba3dd..328d4a6ea1 100644
 --- a/docs/event-producer-consumer.zh.md
 +++ b/docs/event-producer-consumer.zh.md
-@@ -63,7 +63,7 @@
+@@ -12,7 +12,7 @@
+ | `agent-loop/config-start-failed` | `emit` | [`packages/core/agent-loop/src/index.ts:183`](../packages/core/agent-loop/src/index.ts) | [`agent-loop`](../packages/core/agent-loop) (`events.dispatch`) | - |
+ | `agent-preset/selected` | `emit` | [`packages/preset/agent-presets/src/types.ts:92`](../packages/preset/agent-presets/src/types.ts) | [`agent-presets`](../packages/preset/agent-presets) (`emit`) | `remotes` |
+ | `agent/created` | `emit` | [`packages/core/agent/src/runtime-types.ts:166`](../packages/core/agent/src/runtime-types.ts) | [`agent`](../packages/core/agent) (`events.dispatch`) | [`agent-presets`](../packages/preset/agent-presets), [`file-reference-local`](../packages/context/file-reference-local), [`goal-round-driver`](../packages/goal/goal-round-driver), [`schedule`](../packages/schedule/schedule), `tool-agent-team`, [`tool-subagent`](../packages/subagent/tool-subagent) |
+-| `agent/disposed` | `emit` | [`packages/core/agent/src/runtime-types.ts:175`](../packages/core/agent/src/runtime-types.ts) | [`agent`](../packages/core/agent) (`events.dispatch`) | [`agent-loop`](../packages/core/agent-loop), [`file-reference-local`](../packages/context/file-reference-local), [`goal-round-driver`](../packages/goal/goal-round-driver), [`subagent`](../packages/subagent/subagent), `tool-agent-team`, [`tool-subagent`](../packages/subagent/tool-subagent) |
++| `agent/disposed` | `emit` | [`packages/core/agent/src/runtime-types.ts:175`](../packages/core/agent/src/runtime-types.ts) | [`agent`](../packages/core/agent) (`events.dispatch`) | [`agent-loop`](../packages/core/agent-loop), [`browser-use`](../packages/macos-use/browser-use), [`file-reference-local`](../packages/context/file-reference-local), [`goal-round-driver`](../packages/goal/goal-round-driver), [`macos-use`](../packages/macos-use/macos-use), [`subagent`](../packages/subagent/subagent), `tool-agent-team`, [`tool-macos-use`](../packages/macos-use/tool-macos-use), [`tool-subagent`](../packages/subagent/tool-subagent) |
+ | `agent/error` | `emit` | [`packages/core/agent/src/runtime-types.ts:297`](../packages/core/agent/src/runtime-types.ts) | [`agent-loop`](../packages/core/agent-loop) (`emit`) | [`acp`](../packages/acp/acp), [`goal-round-driver`](../packages/goal/goal-round-driver), `session-controller`, [`session-telemetry`](../packages/session/session-telemetry) |
+ | `agent/inbox/claimed` | `emit` | [`packages/core/agent/src/runtime-types.ts:204`](../packages/core/agent/src/runtime-types.ts) | [`agent-loop`](../packages/core/agent-loop) (`emit`) | [`acp`](../packages/acp/acp), [`goal-round-driver`](../packages/goal/goal-round-driver), [`subagent`](../packages/subagent/subagent), [`tool-jobs`](../packages/jobs/tool-jobs) |
+ | `agent/inbox/discarded` | `emit` | [`packages/core/agent/src/runtime-types.ts:212`](../packages/core/agent/src/runtime-types.ts) | [`agent-loop`](../packages/core/agent-loop) (`emit`) | [`goal-round-driver`](../packages/goal/goal-round-driver), [`subagent`](../packages/subagent/subagent) |
+@@ -28,7 +28,7 @@
+ | `api-session/error` | `emit` | [`packages/api/session-controller/src/types.ts:544`](../packages/api/session-controller/src/types.ts) | `session-controller` (`emit`) | `remotes` |
+ | `api-session/removed` | `emit` | [`packages/api/session-controller/src/types.ts:523`](../packages/api/session-controller/src/types.ts) | `session-controller` (`emit`) | `remotes` |
+ | `api-session/status` | `emit` | [`packages/api/session-controller/src/types.ts:530`](../packages/api/session-controller/src/types.ts) | `session-controller` (`emit`) | `remotes` |
+-| `approval/request` | `waterfall` | [`packages/interaction/user-approval/src/types.ts:85`](../packages/interaction/user-approval/src/types.ts) | [`user-approval`](../packages/interaction/user-approval) (`waterfall`) | [`acp`](../packages/acp/acp), `remotes` |
++| `approval/request` | `waterfall` | [`packages/interaction/user-approval/src/types.ts:85`](../packages/interaction/user-approval/src/types.ts) | [`user-approval`](../packages/interaction/user-approval) (`waterfall`) | [`acp`](../packages/acp/acp), `remotes`, [`tool-macos-use`](../packages/macos-use/tool-macos-use) |
+ | `authorization/settled` | `emit` | [`packages/credentials/authorization/src/index.ts:57`](../packages/credentials/authorization/src/index.ts) | [`authorization`](../packages/credentials/authorization) (`events.dispatch`) | [`authorization`](../packages/credentials/authorization) |
+ | `commands/change` | `emit` | [`packages/interaction/commands/src/types.ts:80`](../packages/interaction/commands/src/types.ts) | [`commands`](../packages/interaction/commands) (`events.dispatch`) | `remotes` |
+ | `cordis/dynamic-package` | `emit` | [`packages/extensions/cordis-host-runner/src/types.ts:379`](../packages/extensions/cordis-host-runner/src/types.ts) | [`cordis-host-runner`](../packages/extensions/cordis-host-runner) (`emit`) | `remotes` |
+@@ -63,9 +63,9 @@
  | `tools/change` | `emit` | [`packages/core/tools/src/index.ts:207`](../packages/core/tools/src/index.ts) | [`agent-presets`](../packages/preset/agent-presets) (`emit`), [`tools`](../packages/core/tools) (`emit`) | [`tool-subagent`](../packages/subagent/tool-subagent) |
  | `tools/execute` | `waterfall` | [`packages/core/tools/src/index.ts:163`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`session-checkpoint-policy`](../packages/session/session-checkpoint-policy), `timeout-policy` |
  | `tools/post-execute` | `waterfall` | [`packages/core/tools/src/index.ts:175`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`hooks-claude-code`](../packages/hooks/hooks-claude-code), [`hooks-codex`](../packages/hooks/hooks-codex), [`repeat-tool-reminder`](../packages/guard/repeat-tool-reminder), [`spill-policy`](../packages/spill/spill-policy), [`tool-fs-search`](../packages/fs/tool-fs-search) |
 -| `tools/pre-execute` | `waterfall` | [`packages/core/tools/src/index.ts:152`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`hooks-claude-code`](../packages/hooks/hooks-claude-code), [`hooks-codex`](../packages/hooks/hooks-codex), [`tool-jobs`](../packages/jobs/tool-jobs) |
 +| `tools/pre-execute` | `waterfall` | [`packages/core/tools/src/index.ts:152`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`hooks-claude-code`](../packages/hooks/hooks-claude-code), [`hooks-codex`](../packages/hooks/hooks-codex), [`tool-jobs`](../packages/jobs/tool-jobs), [`tool-macos-use`](../packages/macos-use/tool-macos-use) |
  | `tools/ptc-dispatch-log` | `waterfall` | [`packages/core/tools/src/index.ts:189`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`waterfall`) | [`spill-policy`](../packages/spill/spill-policy) |
- | `tools/result` | `emit` | [`packages/core/tools/src/index.ts:197`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`events.dispatch`) | [`agent-instructions`](../packages/context/agent-instructions), [`subagent-in-process-driver`](../packages/subagent/subagent-in-process-driver) |
+-| `tools/result` | `emit` | [`packages/core/tools/src/index.ts:197`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`events.dispatch`) | [`agent-instructions`](../packages/context/agent-instructions), [`subagent-in-process-driver`](../packages/subagent/subagent-in-process-driver) |
++| `tools/result` | `emit` | [`packages/core/tools/src/index.ts:197`](../packages/core/tools/src/index.ts) | [`tools`](../packages/core/tools) (`events.dispatch`) | [`agent-instructions`](../packages/context/agent-instructions), [`subagent-in-process-driver`](../packages/subagent/subagent-in-process-driver), [`tool-macos-use`](../packages/macos-use/tool-macos-use) |
  | `user-questions/request` | `waterfall` | [`packages/interaction/user-questions/src/types.ts:85`](../packages/interaction/user-questions/src/types.ts) | [`user-questions`](../packages/interaction/user-questions) (`waterfall`) | `remotes` |
+ | `webserver/index-inject` | `emit` | [`packages/host/webserver/src/index.ts:34`](../packages/host/webserver/src/index.ts) | `webserver` (`emit`) | `inspector`, `modules` |
+ | `workflow/agent-end` | `emit` | [`packages/workflow/workflow/src/index.ts:79`](../packages/workflow/workflow/src/index.ts) | [`workflow`](../packages/workflow/workflow) (`events.dispatch`) | [`tool-workflow`](../packages/workflow/tool-workflow), [`workflow`](../packages/workflow/workflow) |
 diff --git a/docs/subsystems/tools.i18n.yaml b/docs/subsystems/tools.i18n.yaml
-index d448297059c54a4368e868a518714ff7642b3a2c..3df6f747cdf305344f2af6f754e741d473a2ddd6 100644
+index d448297059..3847fb5290 100644
 --- a/docs/subsystems/tools.i18n.yaml
 +++ b/docs/subsystems/tools.i18n.yaml
 @@ -2,5 +2,5 @@
@@ -586,16 +648,16 @@ index d448297059c54a4368e868a518714ff7642b3a2c..3df6f747cdf305344f2af6f754e741d4
  #   pnpm run verify-translation-pairing --write docs/subsystems/tools.md
 -tools.md: 9939e8ab9fff9fa5bd23fd370e07f6296a608824
 -tools.zh.md: 52e812a35d6932a5ed00a86a3d3fe71460b26cd4
-+tools.md: 6053dedce967c8c69e97e38438de03280f7ec375
-+tools.zh.md: c3b89e9b906750ee6d94e8a31433d7b1e0b78029
++tools.md: 886f0d6f672663f37c3bcda45ac3eb7ce3658b9b
++tools.zh.md: 3bb50199e38226bd6c1a89468467628a13dc0a12
 diff --git a/docs/subsystems/tools.md b/docs/subsystems/tools.md
-index 9939e8ab9fff9fa5bd23fd370e07f6296a608824..6053dedce967c8c69e97e38438de03280f7ec375 100644
+index 9939e8ab9f..886f0d6f67 100644
 --- a/docs/subsystems/tools.md
 +++ b/docs/subsystems/tools.md
-@@ -475,6 +475,240 @@ The full presentation field docs live in [`packages/core/tools/src/presentation.
- 
+@@ -475,6 +475,339 @@ The full presentation field docs live in [`packages/core/tools/src/presentation.
+
  Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnpm run verify-cordis-catalog` in doc-sync; regenerate with `pnpm run gen-cordis-catalog`) — the language sides differ only in locale-specific paired document paths. Signature blocks use a `ts cordis-catalog` fence and keep the original source JSDoc; dispatch modes are defined in the [primer](../cordis-primer.md#dispatch-modes), and the framework-inherited `ctx` API lives in [cordis-api/inherited.md](../cordis-api/inherited.md).
- 
+
 +<a id="ctxbrowseruse--browseruseservice"></a>
 +
 +### `ctx.browserUse` — `BrowserUseService`
@@ -609,6 +671,12 @@ index 9939e8ab9fff9fa5bd23fd370e07f6296a608824..6053dedce967c8c69e97e38438de0328
 + * @param headless - whether the next Chromium instance has visible chrome.
 + */
 +configureHeadless(headless: boolean): void
++
++/**
++ * Apply all browser controls from the Plugin Configuration page.
++ * @param settings - complete live browser policy and launch-mode projection.
++ */
++configure(settings: BrowserUseRuntimeSettings): void
 +
 +/**
 + * Navigate the active tab, launching the browser first if needed.
@@ -637,7 +705,7 @@ index 9939e8ab9fff9fa5bd23fd370e07f6296a608824..6053dedce967c8c69e97e38438de0328
 + * @param signal - rejects before dispatch when already aborted.
 + * @returns the element's inner text.
 + */
-+async extractText(request: ExtractTextRequest = {}, signal?: AbortSignal): Promise<string>
++async extractText(request: ExtractTextRequest, signal?: AbortSignal): Promise<string>
 +
 +/**
 + * Click at absolute pixel coordinates within the current viewport.
@@ -661,6 +729,13 @@ index 9939e8ab9fff9fa5bd23fd370e07f6296a608824..6053dedce967c8c69e97e38438de0328
 +async dragAt(request: DragAtRequest, signal?: AbortSignal): Promise<void>
 +
 +/**
++ * Scroll once within the current viewport, bound to a fresh screenshot observation.
++ * @param request - direction, bounded amount, owner, and fresh observation token.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async scroll(request: BrowserScrollRequest, signal?: AbortSignal): Promise<void>
++
++/**
 + * Type literal text into the currently focused element.
 + * @param request - text to type.
 + * @param signal - rejects before dispatch when already aborted.
@@ -676,10 +751,25 @@ index 9939e8ab9fff9fa5bd23fd370e07f6296a608824..6053dedce967c8c69e97e38438de0328
 +
 +/**
 + * Capture the current viewport.
++ * @param request - Agent owner whose isolated page should be captured.
 + * @param signal - rejects before dispatch when already aborted.
 + * @returns base64-encoded PNG bytes.
 + */
-+async screenshot(signal?: AbortSignal): Promise<BrowserScreenshotResult>
++async screenshot(request: BrowserScreenshotRequest, signal?: AbortSignal): Promise<BrowserScreenshotResult>
++
++/**
++ * Return a bounded, fresh semantic postcondition snapshot of the current page.
++ * @param request - owner, optional selector, and text-size bound.
++ * @param signal - rejects before dispatch when already aborted.
++ * @returns the current URL, title, and bounded visible text.
++ */
++async pageState(request: BrowserPageStateRequest, signal?: AbortSignal): Promise<BrowserPageState>
++
++/**
++ * Retire one exact Agent's isolated browser state on trusted lifecycle disposal.
++ * @param ownerId - byte-exact trusted Agent/session identity.
++ */
++async releaseOwner(ownerId: string): Promise<void>
 +```
 +
 +Source: [`packages/macos-use/browser-use/src/index.ts`](../../packages/macos-use/browser-use/src/index.ts)
@@ -708,7 +798,7 @@ index 9939e8ab9fff9fa5bd23fd370e07f6296a608824..6053dedce967c8c69e97e38438de0328
 +
 +### `ctx.macosUse` — `MacosUseService`
 +
-+macOS desktop-control service. Registered as `ctx.macosUse` (one instance per context). Every action shells out through `ctx.subprocess` — never `node:child_process` directly — to `osascript`, `screencapture`, or `open`. GUI automation and screen capture require the host process to hold Accessibility and Screen Recording permission respectively in System Settings; macOS prompts for both on first use and denies silently (an empty capture, a script that compiles but has no visible effect) until granted.
++macOS desktop-control service. Registered as `ctx.macosUse` (one instance per context). Every action shells out through `ctx.subprocess` — never `node:child_process` directly — to bounded native inspection, capture, and input commands. GUI automation and screen capture require the host process to hold Accessibility and Screen Recording permission respectively in System Settings; macOS prompts for both on first use and denies silently (an empty capture, a script that compiles but has no visible effect) until granted.
 +
 +```ts cordis-catalog
 +/**
@@ -718,11 +808,14 @@ index 9939e8ab9fff9fa5bd23fd370e07f6296a608824..6053dedce967c8c69e97e38438de0328
 +configure(settings: MacosUseRuntimeSettings): void
 +
 +/**
-+ * Capture the full screen.
++ * Capture an authorized foreground window on a black main-display canvas.
++ * No full-display raster is created: `screencapture` receives only the exact
++ * authorized CoreGraphics window id, and every other display pixel is synthesized black.
 + * @param signal - aborts the capture.
-+ * @returns the capture as base64-encoded PNG bytes.
++ * @param ownerId - trusted agent/session identity that owns the resulting observation token.
++ * @returns include-only PNG bytes, exact display geometry, and a fresh owner-bound observation token.
 + */
-+async screenshot(signal?: AbortSignal): Promise<ScreenshotResult>
++async screenshot(signal?: AbortSignal, ownerId?: string): Promise<ScreenObservationResult>
 +
 +/**
 + * List running foreground-capable apps after applying the allow/deny policy.
@@ -739,70 +832,88 @@ index 9939e8ab9fff9fa5bd23fd370e07f6296a608824..6053dedce967c8c69e97e38438de0328
 +async listWindows(signal?: AbortSignal): Promise<readonly MacosWindow[]>
 +
 +/**
++ * Read a fresh completion snapshot through one foreground-stability-fenced
++ * native query, then apply the visual read policy to every returned identity.
++ * @param signal - aborts the native completion-state query.
++ * @returns the stable readable foreground identity and readable window list.
++ */
++async completionState(signal?: AbortSignal): Promise<MacosCompletionState>
++
++/**
 + * Capture one exact window by CoreGraphics window id or application/title selector.
 + * @param target - selector resolving one permitted, non-sensitive window.
 + * @param signal - aborts discovery or capture.
++ * @param ownerId - trusted agent/session identity that owns the resulting observation token.
 + * @returns PNG bytes paired with the exact resolved window metadata.
 + */
-+async screenshotWindow(target: WindowTarget, signal?: AbortSignal): Promise<ScreenshotResult & { window: MacosWindow }>
++async screenshotWindow( target: WindowTarget, signal?: AbortSignal, ownerId?: string, ): Promise<ScreenshotResult & { window: MacosWindow }>
 +
 +/**
 + * Capture one exact window and flatten its Accessibility controls.
 + * @param request - window selector and optional element budget.
 + * @param signal - aborts capture or Accessibility enumeration.
++ * @param ownerId - trusted agent/session identity that owns the resulting observation token.
 + * @returns exact window pixels, metadata, and bounded semantic elements.
 + */
-+async windowState(request: WindowStateRequest, signal?: AbortSignal): Promise<WindowStateResult>
++async windowState( request: WindowStateRequest, signal?: AbortSignal, ownerId?: string, ): Promise<WindowStateResult>
 +
 +/**
-+ * Click, double-click, or right-click at absolute screen coordinates.
-+ * @param request - target point, button, and held modifiers.
++ * Click, double-click, or right-click using coordinates from the bound observation.
++ * @param request - PNG pixels for a display-coordinate observation, or global macOS points for an exact-window observation.
 + * @param signal - aborts the click.
++ * @param ownerId - trusted agent/session identity that must own the fresh observation in `request`.
 + */
-+async click(request: ClickRequest, signal?: AbortSignal): Promise<void>
++async click(request: ClickRequest, signal?: AbortSignal, ownerId?: string): Promise<void>
 +
 +/**
-+ * Move the pointer without clicking.
-+ * @param request - absolute destination in macOS point space.
++ * Move the pointer without clicking using coordinates from the bound observation.
++ * @param request - PNG pixels for a display-coordinate observation, or global macOS points for an exact-window observation.
 + * @param signal - aborts the pointer action.
++ * @param ownerId - trusted agent/session identity that must own the fresh observation in `request`.
 + */
-+async move(request: MoveRequest, signal?: AbortSignal): Promise<void>
++async move(request: MoveRequest, signal?: AbortSignal, ownerId?: string): Promise<void>
 +
 +/**
-+ * Drag from one absolute screen coordinate to another.
-+ * @param request - start, destination, and optional bounded duration.
++ * Drag between two coordinates from the bound observation.
++ * @param request - PNG pixels for a display-coordinate observation, or global macOS points for an exact-window
++ * observation, plus an optional bounded duration.
 + * @param signal - aborts the pointer action.
++ * @param ownerId - trusted agent/session identity that must own the fresh observation in `request`.
 + */
-+async drag(request: DragRequest, signal?: AbortSignal): Promise<void>
++async drag(request: DragRequest, signal?: AbortSignal, ownerId?: string): Promise<void>
 +
 +/**
 + * Type literal text via keystroke events into the currently focused element.
 + * @param request - the text to type.
 + * @param signal - aborts the keystrokes.
++ * @param ownerId - trusted agent/session identity that must own the fresh observation in `request`.
 + */
-+async type(request: TypeTextRequest, signal?: AbortSignal): Promise<void>
++async type(request: TypeTextRequest, signal?: AbortSignal, ownerId?: string): Promise<void>
 +
 +/**
 + * Press a single key or modifier combo.
 + * @param request - a combo like `"return"`, `"cmd+shift+t"`, or `"a"`.
 + * @param signal - aborts the keystroke.
++ * @param ownerId - trusted agent/session identity that must own the fresh observation in `request`.
 + */
-+async key(request: KeyPressRequest, signal?: AbortSignal): Promise<void>
++async key(request: KeyPressRequest, signal?: AbortSignal, ownerId?: string): Promise<void>
 +
 +/**
 + * Scroll by repeating an arrow/page key a bounded number of times — System Events exposes no scroll-wheel
 + * event, so this is an approximation, not a trackpad-accurate scroll delta.
 + * @param request - direction and step count.
 + * @param signal - aborts the scroll.
++ * @param ownerId - trusted agent/session identity that must own the fresh observation in `request`.
 + */
-+async scroll(request: ScrollRequest, signal?: AbortSignal): Promise<void>
++async scroll(request: ScrollRequest, signal?: AbortSignal, ownerId?: string): Promise<void>
 +
 +/**
-+ * Launch or activate an application by name.
-+ * @param request - the application name as `open -a` resolves it.
++ * Launch or activate one uniquely resolved application bundle.
++ * @param request - exact application name, bundle identifier, or both.
 + * @param signal - aborts the launch.
++ * @returns the exact frontmost process observed after launch.
 + */
-+async openApp(request: OpenAppRequest, signal?: AbortSignal): Promise<void>
++async openApp(request: OpenAppRequest, signal?: AbortSignal): Promise<FrontmostProcess>
 +
 +/**
 + * Bring one exact window to the foreground.
@@ -813,12 +924,12 @@ index 9939e8ab9fff9fa5bd23fd370e07f6296a608824..6053dedce967c8c69e97e38438de0328
 +async focusWindow(target: WindowTarget, signal?: AbortSignal): Promise<MacosWindow>
 +
 +/**
-+ * Run caller-supplied AppleScript.
-+ * @param request - complete AppleScript source, or its shorthand string form.
-+ * @param signal - aborts the script.
-+ * @returns the script's stdout, trimmed.
++ * Reject caller-supplied AppleScript because arbitrary source cannot be constrained to app grants.
++ * @param _request - untrusted source that is intentionally never dispatched.
++ * @param _signal - unused signal retained for API compatibility.
++ * @returns a rejected promise with `MACOS_USE_APP_BLOCKED`.
 + */
-+async runAppleScript(request: RunAppleScriptRequest | string, signal?: AbortSignal): Promise<string>
++runAppleScript(_request: RunAppleScriptRequest | string, _signal?: AbortSignal): Promise<string>
 +
 +/**
 + * Resolve the frontmost application.
@@ -826,21 +937,71 @@ index 9939e8ab9fff9fa5bd23fd370e07f6296a608824..6053dedce967c8c69e97e38438de0328
 + * @returns the frontmost process's name.
 + */
 +async frontmostApp(signal?: AbortSignal): Promise<string>
++
++/**
++ * Resolve the current frontmost application with a stable process identity.
++ * @param signal - aborts the lookup.
++ * @returns the permitted frontmost process name, bundle identifier, and process id.
++ */
++async frontmostProcess(signal?: AbortSignal): Promise<FrontmostProcess>
++
++/**
++ * Revalidate an exact observed window immediately before an action. Window
++ * disappearance, id reuse, process replacement, title change, or geometry
++ * change is reported as a stale target rather than silently retargeting.
++ * @param target - owner-bound observation token and exact original window identity.
++ * @param signal - aborts native window discovery.
++ * @param ownerId - trusted agent/session identity that must own the observation.
++ * @returns the freshly revalidated exact window.
++ */
++async revalidateWindow( target: ObservedWindowTarget, signal?: AbortSignal, ownerId?: string, ): Promise<MacosWindow>
++
++/**
++ * Consume an exact-window observation after a same-Mac approval prompt,
++ * restore only that previously observed window, verify its decoded pixels
++ * are unchanged, and mint a fresh owner-bound observation for the caller's
++ * normal semantic revalidation. A changed/replaced window fails closed.
++ * @param target - owner-bound exact window observation captured before approval.
++ * @param signal - aborts restoration before native dispatch.
++ * @param ownerId - trusted agent/session identity that owns the observation.
++ * @returns a fresh one-action target for the same exact window.
++ */
++async reactivateWindowObservation( target: ObservedWindowTarget, signal?: AbortSignal, ownerId?: string, ): Promise<ObservedWindowTarget>
++
++/**
++ * Consume a display-coordinate observation captured immediately before an
++ * outer same-Mac task approval and restore that exact unchanged target before
++ * the autonomous loop takes its first model-facing screenshot. This grants
++ * no action or receipt authority; the loop must observe and decide afresh.
++ * @param observationId - owner-bound screen observation captured before approval.
++ * @param signal - aborts restoration before native dispatch.
++ * @param ownerId - trusted agent/session identity that owns the observation.
++ */
++async reactivateScreenObservation( observationId: string, signal?: AbortSignal, ownerId?: string, ): Promise<void>
++
++/**
++ * Capture fresh evidence immediately after a control action.
++ * @param target - optional exact consumed target whose post-action state should be captured.
++ * @param signal - aborts evidence capture.
++ * @param ownerId - trusted agent/session identity that performed the action.
++ * @returns fresh screenshot evidence labelled as present, missing, or intentionally unscoped.
++ */
++async actionReceipt( target?: ObservedWindowTarget, signal?: AbortSignal, ownerId?: string, ): Promise<MacosActionReceipt>
 +```
 +
 +Source: [`packages/macos-use/macos-use/src/index.ts`](../../packages/macos-use/macos-use/src/index.ts)
 +
  <a id="ctxtools--toolruntime"></a>
- 
+
  ### `ctx.tools` — `ToolRuntime`
 diff --git a/docs/subsystems/tools.zh.md b/docs/subsystems/tools.zh.md
-index 52e812a35d6932a5ed00a86a3d3fe71460b26cd4..c3b89e9b906750ee6d94e8a31433d7b1e0b78029 100644
+index 52e812a35d..3bb50199e3 100644
 --- a/docs/subsystems/tools.zh.md
 +++ b/docs/subsystems/tools.zh.md
-@@ -475,6 +475,240 @@ type ObjectJsonSchema = JsonSchemaNode & { type: 'object' }
- 
+@@ -475,6 +475,339 @@ type ObjectJsonSchema = JsonSchemaNode & { type: 'object' }
+
  Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnpm run verify-cordis-catalog` in doc-sync; regenerate with `pnpm run gen-cordis-catalog`) — the language sides differ only in locale-specific paired document paths. Signature blocks use a `ts cordis-catalog` fence and keep the original source JSDoc; dispatch modes are defined in the [primer](../cordis-primer.zh.md#dispatch-modes), and the framework-inherited `ctx` API lives in [cordis-api/inherited.md](../cordis-api/inherited.md).
- 
+
 +<a id="ctxbrowseruse--browseruseservice"></a>
 +
 +### `ctx.browserUse` — `BrowserUseService`
@@ -854,6 +1015,12 @@ index 52e812a35d6932a5ed00a86a3d3fe71460b26cd4..c3b89e9b906750ee6d94e8a31433d7b1
 + * @param headless - whether the next Chromium instance has visible chrome.
 + */
 +configureHeadless(headless: boolean): void
++
++/**
++ * Apply all browser controls from the Plugin Configuration page.
++ * @param settings - complete live browser policy and launch-mode projection.
++ */
++configure(settings: BrowserUseRuntimeSettings): void
 +
 +/**
 + * Navigate the active tab, launching the browser first if needed.
@@ -882,7 +1049,7 @@ index 52e812a35d6932a5ed00a86a3d3fe71460b26cd4..c3b89e9b906750ee6d94e8a31433d7b1
 + * @param signal - rejects before dispatch when already aborted.
 + * @returns the element's inner text.
 + */
-+async extractText(request: ExtractTextRequest = {}, signal?: AbortSignal): Promise<string>
++async extractText(request: ExtractTextRequest, signal?: AbortSignal): Promise<string>
 +
 +/**
 + * Click at absolute pixel coordinates within the current viewport.
@@ -906,6 +1073,13 @@ index 52e812a35d6932a5ed00a86a3d3fe71460b26cd4..c3b89e9b906750ee6d94e8a31433d7b1
 +async dragAt(request: DragAtRequest, signal?: AbortSignal): Promise<void>
 +
 +/**
++ * Scroll once within the current viewport, bound to a fresh screenshot observation.
++ * @param request - direction, bounded amount, owner, and fresh observation token.
++ * @param signal - rejects before dispatch when already aborted.
++ */
++async scroll(request: BrowserScrollRequest, signal?: AbortSignal): Promise<void>
++
++/**
 + * Type literal text into the currently focused element.
 + * @param request - text to type.
 + * @param signal - rejects before dispatch when already aborted.
@@ -921,10 +1095,25 @@ index 52e812a35d6932a5ed00a86a3d3fe71460b26cd4..c3b89e9b906750ee6d94e8a31433d7b1
 +
 +/**
 + * Capture the current viewport.
++ * @param request - Agent owner whose isolated page should be captured.
 + * @param signal - rejects before dispatch when already aborted.
 + * @returns base64-encoded PNG bytes.
 + */
-+async screenshot(signal?: AbortSignal): Promise<BrowserScreenshotResult>
++async screenshot(request: BrowserScreenshotRequest, signal?: AbortSignal): Promise<BrowserScreenshotResult>
++
++/**
++ * Return a bounded, fresh semantic postcondition snapshot of the current page.
++ * @param request - owner, optional selector, and text-size bound.
++ * @param signal - rejects before dispatch when already aborted.
++ * @returns the current URL, title, and bounded visible text.
++ */
++async pageState(request: BrowserPageStateRequest, signal?: AbortSignal): Promise<BrowserPageState>
++
++/**
++ * Retire one exact Agent's isolated browser state on trusted lifecycle disposal.
++ * @param ownerId - byte-exact trusted Agent/session identity.
++ */
++async releaseOwner(ownerId: string): Promise<void>
 +```
 +
 +Source: [`packages/macos-use/browser-use/src/index.ts`](../../packages/macos-use/browser-use/src/index.ts)
@@ -953,7 +1142,7 @@ index 52e812a35d6932a5ed00a86a3d3fe71460b26cd4..c3b89e9b906750ee6d94e8a31433d7b1
 +
 +### `ctx.macosUse` — `MacosUseService`
 +
-+macOS desktop-control service. Registered as `ctx.macosUse` (one instance per context). Every action shells out through `ctx.subprocess` — never `node:child_process` directly — to `osascript`, `screencapture`, or `open`. GUI automation and screen capture require the host process to hold Accessibility and Screen Recording permission respectively in System Settings; macOS prompts for both on first use and denies silently (an empty capture, a script that compiles but has no visible effect) until granted.
++macOS desktop-control service. Registered as `ctx.macosUse` (one instance per context). Every action shells out through `ctx.subprocess` — never `node:child_process` directly — to bounded native inspection, capture, and input commands. GUI automation and screen capture require the host process to hold Accessibility and Screen Recording permission respectively in System Settings; macOS prompts for both on first use and denies silently (an empty capture, a script that compiles but has no visible effect) until granted.
 +
 +```ts cordis-catalog
 +/**
@@ -963,11 +1152,14 @@ index 52e812a35d6932a5ed00a86a3d3fe71460b26cd4..c3b89e9b906750ee6d94e8a31433d7b1
 +configure(settings: MacosUseRuntimeSettings): void
 +
 +/**
-+ * Capture the full screen.
++ * Capture an authorized foreground window on a black main-display canvas.
++ * No full-display raster is created: `screencapture` receives only the exact
++ * authorized CoreGraphics window id, and every other display pixel is synthesized black.
 + * @param signal - aborts the capture.
-+ * @returns the capture as base64-encoded PNG bytes.
++ * @param ownerId - trusted agent/session identity that owns the resulting observation token.
++ * @returns include-only PNG bytes, exact display geometry, and a fresh owner-bound observation token.
 + */
-+async screenshot(signal?: AbortSignal): Promise<ScreenshotResult>
++async screenshot(signal?: AbortSignal, ownerId?: string): Promise<ScreenObservationResult>
 +
 +/**
 + * List running foreground-capable apps after applying the allow/deny policy.
@@ -984,70 +1176,88 @@ index 52e812a35d6932a5ed00a86a3d3fe71460b26cd4..c3b89e9b906750ee6d94e8a31433d7b1
 +async listWindows(signal?: AbortSignal): Promise<readonly MacosWindow[]>
 +
 +/**
++ * Read a fresh completion snapshot through one foreground-stability-fenced
++ * native query, then apply the visual read policy to every returned identity.
++ * @param signal - aborts the native completion-state query.
++ * @returns the stable readable foreground identity and readable window list.
++ */
++async completionState(signal?: AbortSignal): Promise<MacosCompletionState>
++
++/**
 + * Capture one exact window by CoreGraphics window id or application/title selector.
 + * @param target - selector resolving one permitted, non-sensitive window.
 + * @param signal - aborts discovery or capture.
++ * @param ownerId - trusted agent/session identity that owns the resulting observation token.
 + * @returns PNG bytes paired with the exact resolved window metadata.
 + */
-+async screenshotWindow(target: WindowTarget, signal?: AbortSignal): Promise<ScreenshotResult & { window: MacosWindow }>
++async screenshotWindow( target: WindowTarget, signal?: AbortSignal, ownerId?: string, ): Promise<ScreenshotResult & { window: MacosWindow }>
 +
 +/**
 + * Capture one exact window and flatten its Accessibility controls.
 + * @param request - window selector and optional element budget.
 + * @param signal - aborts capture or Accessibility enumeration.
++ * @param ownerId - trusted agent/session identity that owns the resulting observation token.
 + * @returns exact window pixels, metadata, and bounded semantic elements.
 + */
-+async windowState(request: WindowStateRequest, signal?: AbortSignal): Promise<WindowStateResult>
++async windowState( request: WindowStateRequest, signal?: AbortSignal, ownerId?: string, ): Promise<WindowStateResult>
 +
 +/**
-+ * Click, double-click, or right-click at absolute screen coordinates.
-+ * @param request - target point, button, and held modifiers.
++ * Click, double-click, or right-click using coordinates from the bound observation.
++ * @param request - PNG pixels for a display-coordinate observation, or global macOS points for an exact-window observation.
 + * @param signal - aborts the click.
++ * @param ownerId - trusted agent/session identity that must own the fresh observation in `request`.
 + */
-+async click(request: ClickRequest, signal?: AbortSignal): Promise<void>
++async click(request: ClickRequest, signal?: AbortSignal, ownerId?: string): Promise<void>
 +
 +/**
-+ * Move the pointer without clicking.
-+ * @param request - absolute destination in macOS point space.
++ * Move the pointer without clicking using coordinates from the bound observation.
++ * @param request - PNG pixels for a display-coordinate observation, or global macOS points for an exact-window observation.
 + * @param signal - aborts the pointer action.
++ * @param ownerId - trusted agent/session identity that must own the fresh observation in `request`.
 + */
-+async move(request: MoveRequest, signal?: AbortSignal): Promise<void>
++async move(request: MoveRequest, signal?: AbortSignal, ownerId?: string): Promise<void>
 +
 +/**
-+ * Drag from one absolute screen coordinate to another.
-+ * @param request - start, destination, and optional bounded duration.
++ * Drag between two coordinates from the bound observation.
++ * @param request - PNG pixels for a display-coordinate observation, or global macOS points for an exact-window
++ * observation, plus an optional bounded duration.
 + * @param signal - aborts the pointer action.
++ * @param ownerId - trusted agent/session identity that must own the fresh observation in `request`.
 + */
-+async drag(request: DragRequest, signal?: AbortSignal): Promise<void>
++async drag(request: DragRequest, signal?: AbortSignal, ownerId?: string): Promise<void>
 +
 +/**
 + * Type literal text via keystroke events into the currently focused element.
 + * @param request - the text to type.
 + * @param signal - aborts the keystrokes.
++ * @param ownerId - trusted agent/session identity that must own the fresh observation in `request`.
 + */
-+async type(request: TypeTextRequest, signal?: AbortSignal): Promise<void>
++async type(request: TypeTextRequest, signal?: AbortSignal, ownerId?: string): Promise<void>
 +
 +/**
 + * Press a single key or modifier combo.
 + * @param request - a combo like `"return"`, `"cmd+shift+t"`, or `"a"`.
 + * @param signal - aborts the keystroke.
++ * @param ownerId - trusted agent/session identity that must own the fresh observation in `request`.
 + */
-+async key(request: KeyPressRequest, signal?: AbortSignal): Promise<void>
++async key(request: KeyPressRequest, signal?: AbortSignal, ownerId?: string): Promise<void>
 +
 +/**
 + * Scroll by repeating an arrow/page key a bounded number of times — System Events exposes no scroll-wheel
 + * event, so this is an approximation, not a trackpad-accurate scroll delta.
 + * @param request - direction and step count.
 + * @param signal - aborts the scroll.
++ * @param ownerId - trusted agent/session identity that must own the fresh observation in `request`.
 + */
-+async scroll(request: ScrollRequest, signal?: AbortSignal): Promise<void>
++async scroll(request: ScrollRequest, signal?: AbortSignal, ownerId?: string): Promise<void>
 +
 +/**
-+ * Launch or activate an application by name.
-+ * @param request - the application name as `open -a` resolves it.
++ * Launch or activate one uniquely resolved application bundle.
++ * @param request - exact application name, bundle identifier, or both.
 + * @param signal - aborts the launch.
++ * @returns the exact frontmost process observed after launch.
 + */
-+async openApp(request: OpenAppRequest, signal?: AbortSignal): Promise<void>
++async openApp(request: OpenAppRequest, signal?: AbortSignal): Promise<FrontmostProcess>
 +
 +/**
 + * Bring one exact window to the foreground.
@@ -1058,12 +1268,12 @@ index 52e812a35d6932a5ed00a86a3d3fe71460b26cd4..c3b89e9b906750ee6d94e8a31433d7b1
 +async focusWindow(target: WindowTarget, signal?: AbortSignal): Promise<MacosWindow>
 +
 +/**
-+ * Run caller-supplied AppleScript.
-+ * @param request - complete AppleScript source, or its shorthand string form.
-+ * @param signal - aborts the script.
-+ * @returns the script's stdout, trimmed.
++ * Reject caller-supplied AppleScript because arbitrary source cannot be constrained to app grants.
++ * @param _request - untrusted source that is intentionally never dispatched.
++ * @param _signal - unused signal retained for API compatibility.
++ * @returns a rejected promise with `MACOS_USE_APP_BLOCKED`.
 + */
-+async runAppleScript(request: RunAppleScriptRequest | string, signal?: AbortSignal): Promise<string>
++runAppleScript(_request: RunAppleScriptRequest | string, _signal?: AbortSignal): Promise<string>
 +
 +/**
 + * Resolve the frontmost application.
@@ -1071,15 +1281,65 @@ index 52e812a35d6932a5ed00a86a3d3fe71460b26cd4..c3b89e9b906750ee6d94e8a31433d7b1
 + * @returns the frontmost process's name.
 + */
 +async frontmostApp(signal?: AbortSignal): Promise<string>
++
++/**
++ * Resolve the current frontmost application with a stable process identity.
++ * @param signal - aborts the lookup.
++ * @returns the permitted frontmost process name, bundle identifier, and process id.
++ */
++async frontmostProcess(signal?: AbortSignal): Promise<FrontmostProcess>
++
++/**
++ * Revalidate an exact observed window immediately before an action. Window
++ * disappearance, id reuse, process replacement, title change, or geometry
++ * change is reported as a stale target rather than silently retargeting.
++ * @param target - owner-bound observation token and exact original window identity.
++ * @param signal - aborts native window discovery.
++ * @param ownerId - trusted agent/session identity that must own the observation.
++ * @returns the freshly revalidated exact window.
++ */
++async revalidateWindow( target: ObservedWindowTarget, signal?: AbortSignal, ownerId?: string, ): Promise<MacosWindow>
++
++/**
++ * Consume an exact-window observation after a same-Mac approval prompt,
++ * restore only that previously observed window, verify its decoded pixels
++ * are unchanged, and mint a fresh owner-bound observation for the caller's
++ * normal semantic revalidation. A changed/replaced window fails closed.
++ * @param target - owner-bound exact window observation captured before approval.
++ * @param signal - aborts restoration before native dispatch.
++ * @param ownerId - trusted agent/session identity that owns the observation.
++ * @returns a fresh one-action target for the same exact window.
++ */
++async reactivateWindowObservation( target: ObservedWindowTarget, signal?: AbortSignal, ownerId?: string, ): Promise<ObservedWindowTarget>
++
++/**
++ * Consume a display-coordinate observation captured immediately before an
++ * outer same-Mac task approval and restore that exact unchanged target before
++ * the autonomous loop takes its first model-facing screenshot. This grants
++ * no action or receipt authority; the loop must observe and decide afresh.
++ * @param observationId - owner-bound screen observation captured before approval.
++ * @param signal - aborts restoration before native dispatch.
++ * @param ownerId - trusted agent/session identity that owns the observation.
++ */
++async reactivateScreenObservation( observationId: string, signal?: AbortSignal, ownerId?: string, ): Promise<void>
++
++/**
++ * Capture fresh evidence immediately after a control action.
++ * @param target - optional exact consumed target whose post-action state should be captured.
++ * @param signal - aborts evidence capture.
++ * @param ownerId - trusted agent/session identity that performed the action.
++ * @returns fresh screenshot evidence labelled as present, missing, or intentionally unscoped.
++ */
++async actionReceipt( target?: ObservedWindowTarget, signal?: AbortSignal, ownerId?: string, ): Promise<MacosActionReceipt>
 +```
 +
 +Source: [`packages/macos-use/macos-use/src/index.ts`](../../packages/macos-use/macos-use/src/index.ts)
 +
  <a id="ctxtools--toolruntime"></a>
- 
+
  ### `ctx.tools` — `ToolRuntime`
 diff --git a/docs/tool-catalog.i18n.yaml b/docs/tool-catalog.i18n.yaml
-index 392f4488029f3fcdb4f03c85cef0af911522c738..7265804725d4a9de38ba7a2009b1fd6cd145a033 100644
+index 392f448802..87f39b09e9 100644
 --- a/docs/tool-catalog.i18n.yaml
 +++ b/docs/tool-catalog.i18n.yaml
 @@ -2,5 +2,5 @@
@@ -1088,24 +1348,24 @@ index 392f4488029f3fcdb4f03c85cef0af911522c738..7265804725d4a9de38ba7a2009b1fd6c
  #   pnpm run verify-translation-pairing --write docs/tool-catalog.md
 -tool-catalog.md: 91ff093e79cc05a2c08b5aa1130378440cd963f3
 -tool-catalog.zh.md: 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803
-+tool-catalog.md: 1f310b861919e39dab2bce76e83bcc03d2d62126
-+tool-catalog.zh.md: 634e149c59fd38d7474e8973fe246b643dd2f507
++tool-catalog.md: 7b40c133953dde1a75892675d54f9ec05ff00b76
++tool-catalog.zh.md: e109445544a124005b86f93b67991b8279b647a6
 diff --git a/docs/tool-catalog.md b/docs/tool-catalog.md
-index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03d2d62126 100644
+index 91ff093e79..7b40c13395 100644
 --- a/docs/tool-catalog.md
 +++ b/docs/tool-catalog.md
 @@ -30,6 +30,7 @@ This table connects model-visible tool names to the plugin package and service s
  | `@deepseek-ai/dsh-tool-goal` | `create_goal`, `get_goal`, `update_goal` | `ctx.tools`, `ctx.agents`, `ctx.goals`, `ctx.systemPrompt`, `a calling Agent in an authorized open turn` | `tool/call`, `goal/change for mutations`, `tool/result` | - | create, edit, pause, and resume require direct-human root authority; complete and blocked also accept the exact current goal round. The default blocked lower bound is three admitted rounds. |
  | `@deepseek-ai/dsh-schedule` | `schedule_create`, `schedule_delete`, `schedule_list` | `ctx.tools`, `ctx.sessions`, `Session persistence`, `a future live root Agent` | `tool/call`, `schedule/change create or delete`, `tool/result` | - | Registered only inside live root Agent scopes created after the opt-in Schedule plugin loads. Version 1 accepts after_seconds, explicit absolute at, and bounded fixed-rate every_seconds, and discloses session-local delivery; management reads and mutations require the shared Session persistence barrier. |
  | `@deepseek-ai/dsh-tool-lsp` | `lsp` | `ctx.tools`, `ctx.lsp`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | The lsp tool keeps provider selection and language-server subprocesses behind ctx.lsp, so its model-visible schema stays stable across providers. Requires a registered provider (e.g. `@deepseek-ai/dsh-lsp-stdio`) at runtime; without one, a query returns the structured `LSP_UNAVAILABLE` error rather than changing the schema. |
-+| `@deepseek-ai/dsh-tool-macos-use` | `browser_click`, `browser_extract_text`, `browser_fill`, `browser_navigate`, `browser_screenshot`, `browser_use_task`, `computer_abort`, `computer_click`, `computer_drag`, `computer_focus_window`, `computer_get_window_state`, `computer_key`, `computer_list_apps`, `computer_list_windows`, `computer_move`, `computer_open_app`, `computer_run_applescript`, `computer_screenshot`, `computer_screenshot_window`, `computer_scroll`, `computer_type`, `computer_use_task` | `ctx.tools`, `ctx.macosUse`, `ctx.guiModel`, `ctx.browserUse`, `ctx.attachments` | `tool/call`, `durable screenshot attachments`, `tool/result with optional UI-only step-image metadata` | - | Primitive desktop and browser tools execute directly against their capability seams. computer_use_task and browser_use_task call the separately configured GUI vision model once per step. Enabled step screenshots are durable tool-result metadata rendered only by the client; the driving model receives the textual task result. |
++| `@deepseek-ai/dsh-tool-macos-use` | `browser_click`, `browser_extract_text`, `browser_fill`, `browser_navigate`, `browser_screenshot`, `browser_use_task`, `computer_abort`, `computer_click`, `computer_drag`, `computer_focus_window`, `computer_get_window_state`, `computer_key`, `computer_list_apps`, `computer_list_windows`, `computer_move`, `computer_open_app`, `computer_screenshot`, `computer_screenshot_window`, `computer_scroll`, `computer_type`, `computer_use_task` | `ctx.tools`, `ctx.macosUse`, `ctx.guiModel`, `ctx.browserUse`, `ctx.attachments` | `tool/call`, `durable screenshot attachments`, `tool/result with optional UI-only step-image metadata` | - | Primitive desktop and browser tools execute directly against their capability seams. computer_use_task and browser_use_task call the separately configured GUI vision model once per step. Enabled step screenshots are durable tool-result metadata rendered only by the client; the driving model receives the textual task result. |
  | `@deepseek-ai/dsh-tool-ralph` | `ralph` | `ctx.tools`, `ctx.workflowEngine`, `ctx.subagents`, `ctx.systemPrompt`, `a calling Agent (exec.agent parents every fresh round)` | `tool/call`, `tool/result`, `workflow and child session events during execution` | - | A fixed foreground workflow starts one fresh structured child per round; the model selects only the immutable objective and an optional round cap. |
  | `@deepseek-ai/dsh-tool-skill` | `skill` | `ctx.tools`, `ctx.agents`, `ctx.skills` | `tool/call`, `tool/result`, `user/message replacement catalogs via agent.inject()` | - | - |
  | `@deepseek-ai/dsh-tool-session-query` | `session_event_read`, `session_event_search`, `session_event_trace`, `session_search`, `session_trace` | `ctx.tools`, `ctx.systemPrompt`, `ctx.sessionQuery`, `a calling Agent for workspace authority` | `tool/call`, `tool/result` | - | The five read-only tools hide provider cursors and authorize every result from the immutable calling agent session. The package is opt-in; compositions that need enforced deadlines or bounded inline output also mount the generic timeout or spill policies. |
-@@ -1242,6 +1243,523 @@ Source: [`packages/lsp/tool-lsp/src/index.ts`](../packages/lsp/tool-lsp/src/inde
- 
+@@ -1242,6 +1243,592 @@ Source: [`packages/lsp/tool-lsp/src/index.ts`](../packages/lsp/tool-lsp/src/inde
+
  The lsp tool keeps provider selection and language-server subprocesses behind ctx.lsp, so its model-visible schema stays stable across providers. Requires a registered provider (e.g. `@deepseek-ai/dsh-lsp-stdio`) at runtime; without one, a query returns the structured `LSP_UNAVAILABLE` error rather than changing the schema.
- 
+
 +<a id="deepseek-aidsh-tool-macos-use"></a>
 +
 +## `@deepseek-ai/dsh-tool-macos-use`
@@ -1227,7 +1487,38 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +    },
 +    "max_steps": {
 +      "type": "integer",
-+      "description": "Step budget before giving up. Defaults to 20 unless changed visually."
++      "description": "Step budget from 1 to 100 before giving up. Defaults to 20 unless changed visually."
++    },
++    "postcondition": {
++      "type": "object",
++      "description": "Optional host-verified completion criteria. An empty object is rejected.",
++      "additionalProperties": false,
++      "properties": {
++        "url_equals": {
++          "type": "string",
++          "description": "Exact expected page URL."
++        },
++        "url_contains": {
++          "type": "string",
++          "description": "Case-sensitive substring required in the page URL."
++        },
++        "title_equals": {
++          "type": "string",
++          "description": "Exact expected page title."
++        },
++        "title_contains": {
++          "type": "string",
++          "description": "Case-sensitive substring required in the page title."
++        },
++        "text_contains": {
++          "type": "string",
++          "description": "Case-sensitive substring required in body or selector text."
++        },
++        "selector": {
++          "type": "string",
++          "description": "Selector that must resolve; text_contains applies to it when supplied."
++        }
++      }
 +    }
 +  },
 +  "required": [
@@ -1240,7 +1531,7 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +
 +### `computer_abort`
 +
-+Immediately cancel every active computer_use_task/browser_use_task owned by this plugin instance.
++Immediately cancel active computer_use_task/browser_use_task calls owned by this same agent only. It cannot stop another agent; the visual Emergency Stop is explicitly global.
 +
 +```json
 +{
@@ -1253,7 +1544,7 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +
 +### `computer_click`
 +
-+Click, double-click, or right-click using either an opaque element token from computer_get_window_state or absolute macOS screen coordinates.
++Click, double-click, or right-click using either an opaque element token from computer_get_window_state or pixel coordinates from a fresh computer_screenshot.
 +
 +```json
 +{
@@ -1265,11 +1556,15 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +    },
 +    "x": {
 +      "type": "number",
-+      "description": "Absolute screen x coordinate when element is omitted."
++      "description": "Screenshot pixel x coordinate when element is omitted."
 +    },
 +    "y": {
 +      "type": "number",
-+      "description": "Absolute screen y coordinate when element is omitted."
++      "description": "Screenshot pixel y coordinate when element is omitted."
++    },
++    "observation_id": {
++      "type": "string",
++      "description": "Required with x/y. One-action token returned by the immediately preceding computer_screenshot."
 +    },
 +    "button": {
 +      "type": "string",
@@ -1291,7 +1586,7 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +
 +### `computer_drag`
 +
-+Drag from a semantic element token or coordinate to an absolute destination. Human confirmation is on by default.
++Drag from a semantic element token or fresh screenshot pixel coordinate. With an element token, the destination is a global macOS point; with raw coordinates, it is a screenshot pixel. Heuristic human confirmation is on by default.
 +
 +```json
 +{
@@ -1303,19 +1598,23 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +    },
 +    "x": {
 +      "type": "number",
-+      "description": "Absolute start x when element is omitted."
++      "description": "Screenshot pixel start x when element is omitted."
 +    },
 +    "y": {
 +      "type": "number",
-+      "description": "Absolute start y when element is omitted."
++      "description": "Screenshot pixel start y when element is omitted."
++    },
++    "observation_id": {
++      "type": "string",
++      "description": "Required with x/y. One-action token returned by the immediately preceding computer_screenshot."
 +    },
 +    "to_x": {
 +      "type": "number",
-+      "description": "Absolute destination x."
++      "description": "Global macOS point x with element; screenshot pixel x otherwise."
 +    },
 +    "to_y": {
 +      "type": "number",
-+      "description": "Absolute destination y."
++      "description": "Global macOS point y with element; screenshot pixel y otherwise."
 +    },
 +    "duration_ms": {
 +      "type": "integer",
@@ -1394,10 +1693,15 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +    "combo": {
 +      "type": "string",
 +      "description": "Key or \"+\"-joined modifier combo."
++    },
++    "observation_id": {
++      "type": "string",
++      "description": "One-action token returned by the immediately preceding computer_screenshot."
 +    }
 +  },
 +  "required": [
-+    "combo"
++    "combo",
++    "observation_id"
 +  ]
 +}
 +```
@@ -1432,7 +1736,7 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +
 +### `computer_move`
 +
-+Move the macOS pointer to a semantic element token or absolute screen coordinate without clicking.
++Move the macOS pointer to a semantic element token or fresh screenshot pixel coordinate without clicking.
 +
 +```json
 +{
@@ -1444,11 +1748,15 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +    },
 +    "x": {
 +      "type": "number",
-+      "description": "Absolute screen x when element is omitted."
++      "description": "Screenshot pixel x when element is omitted."
 +    },
 +    "y": {
 +      "type": "number",
-+      "description": "Absolute screen y when element is omitted."
++      "description": "Screenshot pixel y when element is omitted."
++    },
++    "observation_id": {
++      "type": "string",
++      "description": "Required with x/y. One-action token returned by the immediately preceding computer_screenshot."
 +    }
 +  }
 +}
@@ -1458,7 +1766,7 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +
 +### `computer_open_app`
 +
-+Launch or bring to the front a macOS application by name, e.g. "Safari", "Notes".
++Launch or bring to the front one uniquely resolved installed macOS application by exact display name.
 +
 +```json
 +{
@@ -1466,7 +1774,7 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +  "properties": {
 +    "name": {
 +      "type": "string",
-+      "description": "Application name as `open -a` resolves it."
++      "description": "Exact installed application display name; ambiguous matches fail closed."
 +    }
 +  },
 +  "required": [
@@ -1477,30 +1785,9 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +
 +Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
 +
-+### `computer_run_applescript`
-+
-+Run arbitrary AppleScript via `osascript` for macOS automation the other computer_* tools do not cover directly (e.g. reading window titles, controlling a specific application's own scripting dictionary).
-+
-+```json
-+{
-+  "type": "object",
-+  "properties": {
-+    "script": {
-+      "type": "string",
-+      "description": "Complete AppleScript source."
-+    }
-+  },
-+  "required": [
-+    "script"
-+  ]
-+}
-+```
-+
-+Source: [`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
-+
 +### `computer_screenshot`
 +
-+Capture the current macOS screen. Windows owned by apps in the visual screenshot-exclusion list are redacted.
++Capture only the exact authorized foreground window on an otherwise black main-display coordinate canvas and return a one-action observation token. An excluded or unreadable foreground target fails closed. Pass observationId as observation_id to the next focus-dependent coordinate, typing, key, or scroll action.
 +
 +```json
 +{
@@ -1561,6 +1848,10 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +    "element": {
 +      "type": "string",
 +      "description": "Optional token to focus before scrolling."
++    },
++    "observation_id": {
++      "type": "string",
++      "description": "Required when element is omitted. One-action token from the immediately preceding computer_screenshot."
 +    }
 +  },
 +  "required": [
@@ -1586,6 +1877,10 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +    "element": {
 +      "type": "string",
 +      "description": "Optional token from computer_get_window_state to focus before typing."
++    },
++    "observation_id": {
++      "type": "string",
++      "description": "Required when element is omitted. One-action token from the immediately preceding computer_screenshot."
 +    }
 +  },
 +  "required": [
@@ -1610,7 +1905,41 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +    },
 +    "max_steps": {
 +      "type": "integer",
-+      "description": "Step budget before giving up. Defaults to 20 unless changed visually."
++      "description": "Step budget from 1 to 100 before giving up. Defaults to 20 unless changed visually."
++    },
++    "postcondition": {
++      "type": "object",
++      "description": "Optional host-verified completion criteria. An empty object is rejected.",
++      "additionalProperties": false,
++      "properties": {
++        "frontmost_app": {
++          "type": "string",
++          "description": "Expected frontmost application name (case/punctuation-insensitive)."
++        },
++        "frontmost_pid": {
++          "type": "integer",
++          "description": "Expected frontmost process id."
++        },
++        "window": {
++          "type": "object",
++          "description": "A visible window that must match every supplied field.",
++          "additionalProperties": false,
++          "properties": {
++            "id": {
++              "type": "integer"
++            },
++            "app": {
++              "type": "string"
++            },
++            "title": {
++              "type": "string"
++            },
++            "title_contains": {
++              "type": "string"
++            }
++          }
++        }
++      }
 +    }
 +  },
 +  "required": [
@@ -1624,24 +1953,24 @@ index 91ff093e79cc05a2c08b5aa1130378440cd963f3..1f310b861919e39dab2bce76e83bcc03
 +Primitive desktop and browser tools execute directly against their capability seams. computer_use_task and browser_use_task call the separately configured GUI vision model once per step. Enabled step screenshots are durable tool-result metadata rendered only by the client; the driving model receives the textual task result.
 +
  <a id="deepseek-aidsh-tool-ralph"></a>
- 
+
  ## `@deepseek-ai/dsh-tool-ralph`
 diff --git a/docs/tool-catalog.zh.md b/docs/tool-catalog.zh.md
-index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b643dd2f507 100644
+index 35daf5a7c6..e109445544 100644
 --- a/docs/tool-catalog.zh.md
 +++ b/docs/tool-catalog.zh.md
 @@ -34,6 +34,7 @@
  | `@deepseek-ai/dsh-tool-goal` | `create_goal`、`get_goal`、`update_goal` | `ctx.tools`、`ctx.agents`、`ctx.goals`、`ctx.systemPrompt`、`a calling Agent in an authorized open turn` | `tool/call`、`goal/change for mutations`、`tool/result` | - | create、edit、pause 和 resume 要求直接来自人类的根权限；complete 和 blocked 也接受确切的当前 Goal Round。blocked 的默认下限是 3 个获准的 Round。 |
  | `@deepseek-ai/dsh-schedule` | `schedule_create`、`schedule_delete`、`schedule_list` | `ctx.tools`、`ctx.sessions`、Session 持久化、未来创建的 live 根 Agent | `tool/call`、`schedule/change create or delete`、`tool/result` | - | 仅在选择启用的 Schedule 插件加载后创建的 live 根 Agent scope 内注册。版本 1 接受 after_seconds、显式绝对 at 和有界固定速率 every_seconds，并披露 session-local 交付；管理读取与变更必须通过共享的 Session 持久化 barrier。 |
  | `@deepseek-ai/dsh-tool-lsp` | `lsp` | `ctx.tools`、`ctx.lsp`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | lsp 工具将提供方选择和语言服务器子进程置于 ctx.lsp 之后，因此其模型可见 schema 在更换提供方时保持稳定。运行时要求已注册提供方，例如 `@deepseek-ai/dsh-lsp-stdio`；如果没有提供方，查询会返回结构化 `LSP_UNAVAILABLE` 错误，而不会改变 schema。 |
-+| `@deepseek-ai/dsh-tool-macos-use` | `browser_click`、`browser_extract_text`、`browser_fill`、`browser_navigate`、`browser_screenshot`、`browser_use_task`、`computer_abort`、`computer_click`、`computer_drag`、`computer_focus_window`、`computer_get_window_state`、`computer_key`、`computer_list_apps`、`computer_list_windows`、`computer_move`、`computer_open_app`、`computer_run_applescript`、`computer_screenshot`、`computer_screenshot_window`、`computer_scroll`、`computer_type`、`computer_use_task` | `ctx.tools`、`ctx.macosUse`、`ctx.guiModel`、`ctx.browserUse`、`ctx.attachments` | `tool/call`、持久截图附件、带可选仅 UI 步骤图片元数据的 `tool/result` | - | 基础桌面与浏览器工具直接通过其能力 seam 执行。computer_use_task 和 browser_use_task 每个步骤都会调用一次单独配置的 GUI 视觉模型。启用的步骤截图是持久工具结果元数据，仅由客户端渲染；驱动模型接收文本任务结果。 |
++| `@deepseek-ai/dsh-tool-macos-use` | `browser_click`、`browser_extract_text`、`browser_fill`、`browser_navigate`、`browser_screenshot`、`browser_use_task`、`computer_abort`、`computer_click`、`computer_drag`、`computer_focus_window`、`computer_get_window_state`、`computer_key`、`computer_list_apps`、`computer_list_windows`、`computer_move`、`computer_open_app`、`computer_screenshot`、`computer_screenshot_window`、`computer_scroll`、`computer_type`、`computer_use_task` | `ctx.tools`、`ctx.macosUse`、`ctx.guiModel`、`ctx.browserUse`、`ctx.attachments` | `tool/call`、持久截图附件、带可选仅 UI 步骤图片元数据的 `tool/result` | - | 基础桌面与浏览器工具直接通过其能力 seam 执行。computer_use_task 和 browser_use_task 每个步骤都会调用一次单独配置的 GUI 视觉模型。启用的步骤截图是持久工具结果元数据，仅由客户端渲染；驱动模型接收文本任务结果。 |
  | `@deepseek-ai/dsh-tool-ralph` | `ralph` | `ctx.tools`、`ctx.workflowEngine`、`ctx.subagents`、`ctx.systemPrompt`、`a calling Agent (exec.agent parents every fresh round)` | `tool/call`、`tool/result`、`workflow and child session events during execution` | - | 固定的前台工作流会在每个 Round 启动一个全新的结构化子级；模型只能选择不可变目标和可选的 Round 上限。 |
  | `@deepseek-ai/dsh-tool-skill` | `skill` | `ctx.tools`、`ctx.agents`、`ctx.skills` | `tool/call`、`tool/result`、`user/message replacement catalogs via agent.inject()` | - | - |
  | `@deepseek-ai/dsh-tool-session-query` | `session_event_read`、`session_event_search`、`session_event_trace`、`session_search`、`session_trace` | `ctx.tools`、`ctx.systemPrompt`、`ctx.sessionQuery`、`a calling Agent for workspace authority` | `tool/call`、`tool/result` | - | 这 5 个只读工具会隐藏提供方游标，并根据不可变的调用 agent 会话为每个结果授权。该包需要选择启用；需要强制截止时间或限制行内输出的组合还会挂载通用超时或 spill 策略。 |
-@@ -1248,6 +1249,523 @@ create、edit、pause 和 resume 要求直接来自人类的根权限；complete
- 
+@@ -1248,6 +1249,592 @@ create、edit、pause 和 resume 要求直接来自人类的根权限；complete
+
  lsp 工具将提供方选择和语言服务器子进程置于 ctx.lsp 之后，因此其模型可见 schema 在更换提供方时保持稳定。运行时要求已注册提供方，例如 `@deepseek-ai/dsh-lsp-stdio`；如果没有提供方，查询会返回结构化 `LSP_UNAVAILABLE` 错误，而不会改变 schema。
- 
+
 +<a id="deepseek-aidsh-tool-macos-use"></a>
 +
 +## `@deepseek-ai/dsh-tool-macos-use`
@@ -1763,7 +2092,38 @@ index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b64
 +    },
 +    "max_steps": {
 +      "type": "integer",
-+      "description": "Step budget before giving up. Defaults to 20 unless changed visually."
++      "description": "Step budget from 1 to 100 before giving up. Defaults to 20 unless changed visually."
++    },
++    "postcondition": {
++      "type": "object",
++      "description": "Optional host-verified completion criteria. An empty object is rejected.",
++      "additionalProperties": false,
++      "properties": {
++        "url_equals": {
++          "type": "string",
++          "description": "Exact expected page URL."
++        },
++        "url_contains": {
++          "type": "string",
++          "description": "Case-sensitive substring required in the page URL."
++        },
++        "title_equals": {
++          "type": "string",
++          "description": "Exact expected page title."
++        },
++        "title_contains": {
++          "type": "string",
++          "description": "Case-sensitive substring required in the page title."
++        },
++        "text_contains": {
++          "type": "string",
++          "description": "Case-sensitive substring required in body or selector text."
++        },
++        "selector": {
++          "type": "string",
++          "description": "Selector that must resolve; text_contains applies to it when supplied."
++        }
++      }
 +    }
 +  },
 +  "required": [
@@ -1801,11 +2161,15 @@ index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b64
 +    },
 +    "x": {
 +      "type": "number",
-+      "description": "Absolute screen x coordinate when element is omitted."
++      "description": "Screenshot pixel x coordinate when element is omitted."
 +    },
 +    "y": {
 +      "type": "number",
-+      "description": "Absolute screen y coordinate when element is omitted."
++      "description": "Screenshot pixel y coordinate when element is omitted."
++    },
++    "observation_id": {
++      "type": "string",
++      "description": "Required with x/y. One-action token returned by the immediately preceding computer_screenshot."
 +    },
 +    "button": {
 +      "type": "string",
@@ -1839,19 +2203,23 @@ index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b64
 +    },
 +    "x": {
 +      "type": "number",
-+      "description": "Absolute start x when element is omitted."
++      "description": "Screenshot pixel start x when element is omitted."
 +    },
 +    "y": {
 +      "type": "number",
-+      "description": "Absolute start y when element is omitted."
++      "description": "Screenshot pixel start y when element is omitted."
++    },
++    "observation_id": {
++      "type": "string",
++      "description": "Required with x/y. One-action token returned by the immediately preceding computer_screenshot."
 +    },
 +    "to_x": {
 +      "type": "number",
-+      "description": "Absolute destination x."
++      "description": "Global macOS point x with element; screenshot pixel x otherwise."
 +    },
 +    "to_y": {
 +      "type": "number",
-+      "description": "Absolute destination y."
++      "description": "Global macOS point y with element; screenshot pixel y otherwise."
 +    },
 +    "duration_ms": {
 +      "type": "integer",
@@ -1930,10 +2298,15 @@ index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b64
 +    "combo": {
 +      "type": "string",
 +      "description": "Key or \"+\"-joined modifier combo."
++    },
++    "observation_id": {
++      "type": "string",
++      "description": "One-action token returned by the immediately preceding computer_screenshot."
 +    }
 +  },
 +  "required": [
-+    "combo"
++    "combo",
++    "observation_id"
 +  ]
 +}
 +```
@@ -1980,11 +2353,15 @@ index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b64
 +    },
 +    "x": {
 +      "type": "number",
-+      "description": "Absolute screen x when element is omitted."
++      "description": "Screenshot pixel x when element is omitted."
 +    },
 +    "y": {
 +      "type": "number",
-+      "description": "Absolute screen y when element is omitted."
++      "description": "Screenshot pixel y when element is omitted."
++    },
++    "observation_id": {
++      "type": "string",
++      "description": "Required with x/y. One-action token returned by the immediately preceding computer_screenshot."
 +    }
 +  }
 +}
@@ -1994,7 +2371,7 @@ index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b64
 +
 +### `computer_open_app`
 +
-+根据名称启动 macOS 应用或将其置于前台，例如 "Safari" 或 "Notes"。
++按已安装应用的精确显示名称，启动唯一解析的 macOS 应用或将其置于前台。
 +
 +```json
 +{
@@ -2002,7 +2379,7 @@ index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b64
 +  "properties": {
 +    "name": {
 +      "type": "string",
-+      "description": "Application name as `open -a` resolves it."
++      "description": "Exact installed application display name; ambiguous matches fail closed."
 +    }
 +  },
 +  "required": [
@@ -2013,30 +2390,9 @@ index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b64
 +
 +来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
 +
-+### `computer_run_applescript`
-+
-+通过 `osascript` 运行任意 AppleScript，以完成其他 computer_* 工具未直接覆盖的 macOS 自动化，例如读取窗口标题或控制特定应用自身的脚本字典。
-+
-+```json
-+{
-+  "type": "object",
-+  "properties": {
-+    "script": {
-+      "type": "string",
-+      "description": "Complete AppleScript source."
-+    }
-+  },
-+  "required": [
-+    "script"
-+  ]
-+}
-+```
-+
-+来源：[`packages/macos-use/tool-macos-use/src/index.ts`](../packages/macos-use/tool-macos-use/src/index.ts)
-+
 +### `computer_screenshot`
 +
-+捕获当前 macOS 屏幕。属于视觉截图排除列表中应用的窗口会被遮盖。
++仅捕获已获授权的最前台窗口，并将它置于其余区域全黑的主显示器坐标画布上，然后返回一次性操作观察令牌。如果最前台目标被排除或无法读取，则失败关闭。将 observationId 作为 observation_id 传给下一次依赖焦点的坐标、输入、按键或滚动操作。
 +
 +```json
 +{
@@ -2097,6 +2453,10 @@ index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b64
 +    "element": {
 +      "type": "string",
 +      "description": "Optional token to focus before scrolling."
++    },
++    "observation_id": {
++      "type": "string",
++      "description": "Required when element is omitted. One-action token from the immediately preceding computer_screenshot."
 +    }
 +  },
 +  "required": [
@@ -2122,6 +2482,10 @@ index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b64
 +    "element": {
 +      "type": "string",
 +      "description": "Optional token from computer_get_window_state to focus before typing."
++    },
++    "observation_id": {
++      "type": "string",
++      "description": "Required when element is omitted. One-action token from the immediately preceding computer_screenshot."
 +    }
 +  },
 +  "required": [
@@ -2146,7 +2510,41 @@ index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b64
 +    },
 +    "max_steps": {
 +      "type": "integer",
-+      "description": "Step budget before giving up. Defaults to 20 unless changed visually."
++      "description": "Step budget from 1 to 100 before giving up. Defaults to 20 unless changed visually."
++    },
++    "postcondition": {
++      "type": "object",
++      "description": "Optional host-verified completion criteria. An empty object is rejected.",
++      "additionalProperties": false,
++      "properties": {
++        "frontmost_app": {
++          "type": "string",
++          "description": "Expected frontmost application name (case/punctuation-insensitive)."
++        },
++        "frontmost_pid": {
++          "type": "integer",
++          "description": "Expected frontmost process id."
++        },
++        "window": {
++          "type": "object",
++          "description": "A visible window that must match every supplied field.",
++          "additionalProperties": false,
++          "properties": {
++            "id": {
++              "type": "integer"
++            },
++            "app": {
++              "type": "string"
++            },
++            "title": {
++              "type": "string"
++            },
++            "title_contains": {
++              "type": "string"
++            }
++          }
++        }
++      }
 +    }
 +  },
 +  "required": [
@@ -2160,10 +2558,32 @@ index 35daf5a7c6b1c27975721c0b9d8ddfe71eaeb803..634e149c59fd38d7474e8973fe246b64
 +基础桌面与浏览器工具直接通过其能力 seam 执行。computer_use_task 和 browser_use_task 每个步骤都会调用一次单独配置的 GUI 视觉模型。启用的步骤截图是持久工具结果元数据，仅由客户端渲染；驱动模型接收文本任务结果。
 +
  <a id="deepseek-aidsh-tool-ralph"></a>
- 
+
  ## `@deepseek-ai/dsh-tool-ralph`
+diff --git a/integration/macos-use.cordis.patch.yml b/integration/macos-use.cordis.patch.yml
+new file mode 100644
+index 0000000000..27fe80920a
+--- /dev/null
++++ b/integration/macos-use.cordis.patch.yml
+@@ -0,0 +1,16 @@
++# Mount the macOS computer-use plugin into a normal Harness profile. Configure
++# every adjustable GUI Model and GUI Agent setting visually on the Plugin
++# Configuration page after the profile starts.
++
++- insert:
++    - id: macos-use
++      name: '@deepseek-ai/dsh-macos-use'
++
++    - id: browser-use
++      name: '@deepseek-ai/dsh-browser-use'
++
++    - id: gui-model
++      name: '@deepseek-ai/dsh-gui-model'
++
++    - id: tool-macos-use
++      name: '@deepseek-ai/dsh-tool-macos-use'
 diff --git a/packages/api/session-controller/src/commands.ts b/packages/api/session-controller/src/commands.ts
-index 48c41f3aa143d420890a4ad244d5b7b75b7d3eb4..4b809ea243005bd0fdfb0e40baa99352b0ec0eb2 100644
+index 48c41f3aa1..4b809ea243 100644
 --- a/packages/api/session-controller/src/commands.ts
 +++ b/packages/api/session-controller/src/commands.ts
 @@ -552,12 +552,15 @@ function imageInEvent(
@@ -2183,12 +2603,12 @@ index 48c41f3aa143d420890a4ad244d5b7b75b7d3eb4..4b809ea243005bd0fdfb0e40baa99352
    if (message !== undefined) return message
    for (const inserted of data.inserted ?? []) {
 diff --git a/packages/api/session-controller/tests/commands-queue-attachment.host.spec.ts b/packages/api/session-controller/tests/commands-queue-attachment.host.spec.ts
-index 2ea8744bd1b9e8e8ca78fe1e4ae63ccc01e54fd9..374696543a816e94d11778d9ee5c2ba023d1e812 100644
+index 2ea8744bd1..374696543a 100644
 --- a/packages/api/session-controller/tests/commands-queue-attachment.host.spec.ts
 +++ b/packages/api/session-controller/tests/commands-queue-attachment.host.spec.ts
 @@ -154,8 +154,9 @@ async function persistedController(
  }
- 
+
  describe('Session attachment authorization', () => {
 -  it('finds references in direct, message, inserted, nested, and streamed content', async () => {
 +  it('finds references in direct, presentation, message, inserted, nested, and streamed content', async () => {
@@ -2208,7 +2628,7 @@ index 2ea8744bd1b9e8e8ca78fe1e4ae63ccc01e54fd9..374696543a816e94d11778d9ee5c2ba0
 @@ -190,11 +192,11 @@ describe('Session attachment authorization', () => {
      const readImage = vi.fn((ref: ImageAttachmentRef) => Promise.resolve({ ref, data: Uint8Array.of(1) }))
      const { ctx, controller, sessionId } = await persistedController(events, readImage)
- 
+
 -    for (const ref of [nested, message, inserted, streamed]) {
 +    for (const ref of [nested, presentation, message, inserted, streamed]) {
        await expect(controller.attachment({ sessionId, attachmentId: ref.attachmentId }))
@@ -2218,9 +2638,9 @@ index 2ea8744bd1b9e8e8ca78fe1e4ae63ccc01e54fd9..374696543a816e94d11778d9ee5c2ba0
 +    expect(readImage).toHaveBeenCalledTimes(5)
      await ctx.fiber.dispose()
    })
- 
+
 diff --git a/packages/extensions/cordis-client-runner/src/client/slot-catalog.ts b/packages/extensions/cordis-client-runner/src/client/slot-catalog.ts
-index cb8f1a7ebceef364e316ce2b0a10066a9a832237..6e513b53b3f38a1da5a125f09d7841ada052ec99 100644
+index cb8f1a7ebc..6e513b53b3 100644
 --- a/packages/extensions/cordis-client-runner/src/client/slot-catalog.ts
 +++ b/packages/extensions/cordis-client-runner/src/client/slot-catalog.ts
 @@ -1726,6 +1726,8 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
@@ -2251,10 +2671,10 @@ index cb8f1a7ebceef364e316ce2b0a10066a9a832237..6e513b53b3f38a1da5a125f09d7841ad
      replaceRisk: 'shadows-shipped-ui',
      example: 'return {\n  inject: [\'slots\'],\n  apply(ctx) {\n    ctx.slots.inject(\'tool.call.toolview\', () => ctx.slots.register(\n      { name: \'tool.call.toolview\', key: \'<one key the owner dispatches>\' },\n      () => React.createElement(\'div\', null, \'hello\'),\n    ))\n  },\n}',
 diff --git a/packages/extensions/tool-cordis/src/api-catalog.ts b/packages/extensions/tool-cordis/src/api-catalog.ts
-index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119af5a4d3e6 100644
+index 8edd7adb9d..a5dd023457 100644
 --- a/packages/extensions/tool-cordis/src/api-catalog.ts
 +++ b/packages/extensions/tool-cordis/src/api-catalog.ts
-@@ -542,6 +542,70 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
+@@ -542,6 +542,91 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
        },
      ],
    },
@@ -2267,6 +2687,11 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
 +        signature: 'configureHeadless(headless: boolean): void',
 +        description: 'Apply the visually managed launch mode. An existing browser is retired; the next action launches a fresh instance with the new value.',
 +        parameters: [{ name: 'headless', description: 'whether the next Chromium instance has visible chrome.' }],
++      },
++      {
++        signature: 'configure(settings: BrowserUseRuntimeSettings): void',
++        description: 'Apply all browser controls from the Plugin Configuration page.',
++        parameters: [{ name: 'settings', description: 'complete live browser policy and launch-mode projection.' }],
 +      },
 +      {
 +        signature: 'async navigate(request: NavigateRequest, signal?: AbortSignal): Promise<void>',
@@ -2284,7 +2709,7 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
 +        parameters: [{ name: 'request', description: 'selector and literal replacement text.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
 +      },
 +      {
-+        signature: 'async extractText(request: ExtractTextRequest = {}, signal?: AbortSignal): Promise<string>',
++        signature: 'async extractText(request: ExtractTextRequest, signal?: AbortSignal): Promise<string>',
 +        description: 'Read the first matching element, or the whole page body when the selector is omitted.',
 +        parameters: [{ name: 'request', description: 'optional selector.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
 +        returns: 'the element\'s inner text.',
@@ -2305,6 +2730,11 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
 +        parameters: [{ name: 'request', description: 'start and destination points in viewport pixels.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
 +      },
 +      {
++        signature: 'async scroll(request: BrowserScrollRequest, signal?: AbortSignal): Promise<void>',
++        description: 'Scroll once within the current viewport, bound to a fresh screenshot observation.',
++        parameters: [{ name: 'request', description: 'direction, bounded amount, owner, and fresh observation token.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
++      },
++      {
 +        signature: 'async type(request: TypeTextRequest, signal?: AbortSignal): Promise<void>',
 +        description: 'Type literal text into the currently focused element.',
 +        parameters: [{ name: 'request', description: 'text to type.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
@@ -2315,17 +2745,28 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
 +        parameters: [{ name: 'request', description: 'key or combo such as `"Enter"` or `"Control+A"`.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
 +      },
 +      {
-+        signature: 'async screenshot(signal?: AbortSignal): Promise<BrowserScreenshotResult>',
++        signature: 'async screenshot(request: BrowserScreenshotRequest, signal?: AbortSignal): Promise<BrowserScreenshotResult>',
 +        description: 'Capture the current viewport.',
-+        parameters: [{ name: 'signal', description: 'rejects before dispatch when already aborted.' }],
++        parameters: [{ name: 'request', description: 'Agent owner whose isolated page should be captured.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
 +        returns: 'base64-encoded PNG bytes.',
++      },
++      {
++        signature: 'async pageState(request: BrowserPageStateRequest, signal?: AbortSignal): Promise<BrowserPageState>',
++        description: 'Return a bounded, fresh semantic postcondition snapshot of the current page.',
++        parameters: [{ name: 'request', description: 'owner, optional selector, and text-size bound.' }, { name: 'signal', description: 'rejects before dispatch when already aborted.' }],
++        returns: 'the current URL, title, and bounded visible text.',
++      },
++      {
++        signature: 'async releaseOwner(ownerId: string): Promise<void>',
++        description: 'Retire one exact Agent\'s isolated browser state on trusted lifecycle disposal.',
++        parameters: [{ name: 'ownerId', description: 'byte-exact trusted Agent/session identity.' }],
 +      },
 +    ],
 +  },
    {
      key: 'clientModules',
      summary: 'The web plugin table service: incremental `dsh.client` scan + wire composition + bundle route + index injection rows.',
-@@ -997,6 +1061,20 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
+@@ -997,6 +1082,20 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
        },
      ],
    },
@@ -2346,14 +2787,14 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
    {
      key: 'inspector',
      summary: 'Shared Host/Client service façade over the realm\'s source publisher.',
-@@ -1199,6 +1277,101 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
+@@ -1199,6 +1298,137 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
        },
      ],
    },
 +  {
 +    key: 'macosUse',
 +    summary: 'macOS desktop-control service.',
-+    description: 'macOS desktop-control service. Registered as `ctx.macosUse` (one instance per context). Every action shells out through `ctx.subprocess` — never `node:child_process` directly — to `osascript`, `screencapture`, or `open`. GUI automation and screen capture require the host process to hold Accessibility and Screen Recording permission respectively in System Settings; macOS prompts for both on first use and denies silently (an empty capture, a script that compiles but has no visible effect) until granted.',
++    description: 'macOS desktop-control service. Registered as `ctx.macosUse` (one instance per context). Every action shells out through `ctx.subprocess` — never `node:child_process` directly — to bounded native inspection, capture, and input commands. GUI automation and screen capture require the host process to hold Accessibility and Screen Recording permission respectively in System Settings; macOS prompts for both on first use and denies silently (an empty capture, a script that compiles but has no visible effect) until granted.',
 +    methods: [
 +      {
 +        signature: 'configure(settings: MacosUseRuntimeSettings): void',
@@ -2361,10 +2802,10 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
 +        parameters: [{ name: 'settings', description: 'complete policy projection from the tool plugin\'s visual section.' }],
 +      },
 +      {
-+        signature: 'async screenshot(signal?: AbortSignal): Promise<ScreenshotResult>',
-+        description: 'Capture the full screen.',
-+        parameters: [{ name: 'signal', description: 'aborts the capture.' }],
-+        returns: 'the capture as base64-encoded PNG bytes.',
++        signature: 'async screenshot(signal?: AbortSignal, ownerId?: string): Promise<ScreenObservationResult>',
++        description: 'Capture an authorized foreground window on a black main-display canvas. No full-display raster is created: `screencapture` receives only the exact authorized CoreGraphics window id, and every other display pixel is synthesized black.',
++        parameters: [{ name: 'signal', description: 'aborts the capture.' }, { name: 'ownerId', description: 'trusted agent/session identity that owns the resulting observation token.' }],
++        returns: 'include-only PNG bytes, exact display geometry, and a fresh owner-bound observation token.',
 +      },
 +      {
 +        signature: 'async listApps(signal?: AbortSignal): Promise<readonly MacosApplication[]>',
@@ -2379,51 +2820,58 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
 +        returns: 'permitted layer-zero windows and their point-space bounds.',
 +      },
 +      {
-+        signature: 'async screenshotWindow(target: WindowTarget, signal?: AbortSignal): Promise<ScreenshotResult & { window: MacosWindow }>',
++        signature: 'async completionState(signal?: AbortSignal): Promise<MacosCompletionState>',
++        description: 'Read a fresh completion snapshot through one foreground-stability-fenced native query, then apply the visual read policy to every returned identity.',
++        parameters: [{ name: 'signal', description: 'aborts the native completion-state query.' }],
++        returns: 'the stable readable foreground identity and readable window list.',
++      },
++      {
++        signature: 'async screenshotWindow( target: WindowTarget, signal?: AbortSignal, ownerId?: string, ): Promise<ScreenshotResult & { window: MacosWindow }>',
 +        description: 'Capture one exact window by CoreGraphics window id or application/title selector.',
-+        parameters: [{ name: 'target', description: 'selector resolving one permitted, non-sensitive window.' }, { name: 'signal', description: 'aborts discovery or capture.' }],
++        parameters: [{ name: 'target', description: 'selector resolving one permitted, non-sensitive window.' }, { name: 'signal', description: 'aborts discovery or capture.' }, { name: 'ownerId', description: 'trusted agent/session identity that owns the resulting observation token.' }],
 +        returns: 'PNG bytes paired with the exact resolved window metadata.',
 +      },
 +      {
-+        signature: 'async windowState(request: WindowStateRequest, signal?: AbortSignal): Promise<WindowStateResult>',
++        signature: 'async windowState( request: WindowStateRequest, signal?: AbortSignal, ownerId?: string, ): Promise<WindowStateResult>',
 +        description: 'Capture one exact window and flatten its Accessibility controls.',
-+        parameters: [{ name: 'request', description: 'window selector and optional element budget.' }, { name: 'signal', description: 'aborts capture or Accessibility enumeration.' }],
++        parameters: [{ name: 'request', description: 'window selector and optional element budget.' }, { name: 'signal', description: 'aborts capture or Accessibility enumeration.' }, { name: 'ownerId', description: 'trusted agent/session identity that owns the resulting observation token.' }],
 +        returns: 'exact window pixels, metadata, and bounded semantic elements.',
 +      },
 +      {
-+        signature: 'async click(request: ClickRequest, signal?: AbortSignal): Promise<void>',
-+        description: 'Click, double-click, or right-click at absolute screen coordinates.',
-+        parameters: [{ name: 'request', description: 'target point, button, and held modifiers.' }, { name: 'signal', description: 'aborts the click.' }],
++        signature: 'async click(request: ClickRequest, signal?: AbortSignal, ownerId?: string): Promise<void>',
++        description: 'Click, double-click, or right-click using coordinates from the bound observation.',
++        parameters: [{ name: 'request', description: 'PNG pixels for a display-coordinate observation, or global macOS points for an exact-window observation.' }, { name: 'signal', description: 'aborts the click.' }, { name: 'ownerId', description: 'trusted agent/session identity that must own the fresh observation in `request`.' }],
 +      },
 +      {
-+        signature: 'async move(request: MoveRequest, signal?: AbortSignal): Promise<void>',
-+        description: 'Move the pointer without clicking.',
-+        parameters: [{ name: 'request', description: 'absolute destination in macOS point space.' }, { name: 'signal', description: 'aborts the pointer action.' }],
++        signature: 'async move(request: MoveRequest, signal?: AbortSignal, ownerId?: string): Promise<void>',
++        description: 'Move the pointer without clicking using coordinates from the bound observation.',
++        parameters: [{ name: 'request', description: 'PNG pixels for a display-coordinate observation, or global macOS points for an exact-window observation.' }, { name: 'signal', description: 'aborts the pointer action.' }, { name: 'ownerId', description: 'trusted agent/session identity that must own the fresh observation in `request`.' }],
 +      },
 +      {
-+        signature: 'async drag(request: DragRequest, signal?: AbortSignal): Promise<void>',
-+        description: 'Drag from one absolute screen coordinate to another.',
-+        parameters: [{ name: 'request', description: 'start, destination, and optional bounded duration.' }, { name: 'signal', description: 'aborts the pointer action.' }],
++        signature: 'async drag(request: DragRequest, signal?: AbortSignal, ownerId?: string): Promise<void>',
++        description: 'Drag between two coordinates from the bound observation.',
++        parameters: [{ name: 'request', description: 'PNG pixels for a display-coordinate observation, or global macOS points for an exact-window observation, plus an optional bounded duration.' }, { name: 'signal', description: 'aborts the pointer action.' }, { name: 'ownerId', description: 'trusted agent/session identity that must own the fresh observation in `request`.' }],
 +      },
 +      {
-+        signature: 'async type(request: TypeTextRequest, signal?: AbortSignal): Promise<void>',
++        signature: 'async type(request: TypeTextRequest, signal?: AbortSignal, ownerId?: string): Promise<void>',
 +        description: 'Type literal text via keystroke events into the currently focused element.',
-+        parameters: [{ name: 'request', description: 'the text to type.' }, { name: 'signal', description: 'aborts the keystrokes.' }],
++        parameters: [{ name: 'request', description: 'the text to type.' }, { name: 'signal', description: 'aborts the keystrokes.' }, { name: 'ownerId', description: 'trusted agent/session identity that must own the fresh observation in `request`.' }],
 +      },
 +      {
-+        signature: 'async key(request: KeyPressRequest, signal?: AbortSignal): Promise<void>',
++        signature: 'async key(request: KeyPressRequest, signal?: AbortSignal, ownerId?: string): Promise<void>',
 +        description: 'Press a single key or modifier combo.',
-+        parameters: [{ name: 'request', description: 'a combo like `"return"`, `"cmd+shift+t"`, or `"a"`.' }, { name: 'signal', description: 'aborts the keystroke.' }],
++        parameters: [{ name: 'request', description: 'a combo like `"return"`, `"cmd+shift+t"`, or `"a"`.' }, { name: 'signal', description: 'aborts the keystroke.' }, { name: 'ownerId', description: 'trusted agent/session identity that must own the fresh observation in `request`.' }],
 +      },
 +      {
-+        signature: 'async scroll(request: ScrollRequest, signal?: AbortSignal): Promise<void>',
++        signature: 'async scroll(request: ScrollRequest, signal?: AbortSignal, ownerId?: string): Promise<void>',
 +        description: 'Scroll by repeating an arrow/page key a bounded number of times — System Events exposes no scroll-wheel event, so this is an approximation, not a trackpad-accurate scroll delta.',
-+        parameters: [{ name: 'request', description: 'direction and step count.' }, { name: 'signal', description: 'aborts the scroll.' }],
++        parameters: [{ name: 'request', description: 'direction and step count.' }, { name: 'signal', description: 'aborts the scroll.' }, { name: 'ownerId', description: 'trusted agent/session identity that must own the fresh observation in `request`.' }],
 +      },
 +      {
-+        signature: 'async openApp(request: OpenAppRequest, signal?: AbortSignal): Promise<void>',
-+        description: 'Launch or activate an application by name.',
-+        parameters: [{ name: 'request', description: 'the application name as `open -a` resolves it.' }, { name: 'signal', description: 'aborts the launch.' }],
++        signature: 'async openApp(request: OpenAppRequest, signal?: AbortSignal): Promise<FrontmostProcess>',
++        description: 'Launch or activate one uniquely resolved application bundle.',
++        parameters: [{ name: 'request', description: 'exact application name, bundle identifier, or both.' }, { name: 'signal', description: 'aborts the launch.' }],
++        returns: 'the exact frontmost process observed after launch.',
 +      },
 +      {
 +        signature: 'async focusWindow(target: WindowTarget, signal?: AbortSignal): Promise<MacosWindow>',
@@ -2432,10 +2880,10 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
 +        returns: 'metadata for the window the action targeted.',
 +      },
 +      {
-+        signature: 'async runAppleScript(request: RunAppleScriptRequest | string, signal?: AbortSignal): Promise<string>',
-+        description: 'Run caller-supplied AppleScript.',
-+        parameters: [{ name: 'request', description: 'complete AppleScript source, or its shorthand string form.' }, { name: 'signal', description: 'aborts the script.' }],
-+        returns: 'the script\'s stdout, trimmed.',
++        signature: 'runAppleScript(_request: RunAppleScriptRequest | string, _signal?: AbortSignal): Promise<string>',
++        description: 'Reject caller-supplied AppleScript because arbitrary source cannot be constrained to app grants.',
++        parameters: [{ name: '_request', description: 'untrusted source that is intentionally never dispatched.' }, { name: '_signal', description: 'unused signal retained for API compatibility.' }],
++        returns: 'a rejected promise with `MACOS_USE_APP_BLOCKED`.',
 +      },
 +      {
 +        signature: 'async frontmostApp(signal?: AbortSignal): Promise<string>',
@@ -2443,13 +2891,42 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
 +        parameters: [{ name: 'signal', description: 'aborts the lookup.' }],
 +        returns: 'the frontmost process\'s name.',
 +      },
++      {
++        signature: 'async frontmostProcess(signal?: AbortSignal): Promise<FrontmostProcess>',
++        description: 'Resolve the current frontmost application with a stable process identity.',
++        parameters: [{ name: 'signal', description: 'aborts the lookup.' }],
++        returns: 'the permitted frontmost process name, bundle identifier, and process id.',
++      },
++      {
++        signature: 'async revalidateWindow( target: ObservedWindowTarget, signal?: AbortSignal, ownerId?: string, ): Promise<MacosWindow>',
++        description: 'Revalidate an exact observed window immediately before an action. Window disappearance, id reuse, process replacement, title change, or geometry change is reported as a stale target rather than silently retargeting.',
++        parameters: [{ name: 'target', description: 'owner-bound observation token and exact original window identity.' }, { name: 'signal', description: 'aborts native window discovery.' }, { name: 'ownerId', description: 'trusted agent/session identity that must own the observation.' }],
++        returns: 'the freshly revalidated exact window.',
++      },
++      {
++        signature: 'async reactivateWindowObservation( target: ObservedWindowTarget, signal?: AbortSignal, ownerId?: string, ): Promise<ObservedWindowTarget>',
++        description: 'Consume an exact-window observation after a same-Mac approval prompt, restore only that previously observed window, verify its decoded pixels are unchanged, and mint a fresh owner-bound observation for the caller\'s normal semantic revalidation. A changed/replaced window fails closed.',
++        parameters: [{ name: 'target', description: 'owner-bound exact window observation captured before approval.' }, { name: 'signal', description: 'aborts restoration before native dispatch.' }, { name: 'ownerId', description: 'trusted agent/session identity that owns the observation.' }],
++        returns: 'a fresh one-action target for the same exact window.',
++      },
++      {
++        signature: 'async reactivateScreenObservation( observationId: string, signal?: AbortSignal, ownerId?: string, ): Promise<void>',
++        description: 'Consume a display-coordinate observation captured immediately before an outer same-Mac task approval and restore that exact unchanged target before the autonomous loop takes its first model-facing screenshot. This grants no action or receipt authority; the loop must observe and decide afresh.',
++        parameters: [{ name: 'observationId', description: 'owner-bound screen observation captured before approval.' }, { name: 'signal', description: 'aborts restoration before native dispatch.' }, { name: 'ownerId', description: 'trusted agent/session identity that owns the observation.' }],
++      },
++      {
++        signature: 'async actionReceipt( target?: ObservedWindowTarget, signal?: AbortSignal, ownerId?: string, ): Promise<MacosActionReceipt>',
++        description: 'Capture fresh evidence immediately after a control action.',
++        parameters: [{ name: 'target', description: 'optional exact consumed target whose post-action state should be captured.' }, { name: 'signal', description: 'aborts evidence capture.' }, { name: 'ownerId', description: 'trusted agent/session identity that performed the action.' }],
++        returns: 'fresh screenshot evidence labelled as present, missing, or intentionally unscoped.',
++      },
 +    ],
 +  },
    {
      key: 'messageFeedback',
      summary: 'Storage-domain sidecar service.',
-@@ -3382,6 +3555,10 @@ export const EVENT_API: readonly EventApiEntry[] = [
- 
+@@ -3382,6 +3612,10 @@ export const EVENT_API: readonly EventApiEntry[] = [
+
  /** Shapes of every exported type the Service and Event signatures reference (transitively), sorted by name. */
  export const TYPE_API: readonly TypeApiEntry[] = [
 +  {
@@ -2459,13 +2936,37 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
    {
      name: 'AdapterRegistrationHandle',
      declaration: 'export interface AdapterRegistrationHandle {\n    (): void;\n    replace(providers: string[]): void;\n}',
-@@ -3590,10 +3767,26 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+@@ -3590,10 +3824,50 @@ export const TYPE_API: readonly TypeApiEntry[] = [
      name: 'Branded',
      declaration: 'export type Branded<B extends string> = string & {\n    readonly [BRAND]: B;\n};',
    },
 +  {
++    name: 'BrowserOwnerScope',
++    declaration: 'export interface BrowserOwnerScope {\n    ownerId: string;\n}',
++  },
++  {
++    name: 'BrowserPageState',
++    declaration: 'export interface BrowserPageState {\n    url: string;\n    title: string;\n    text: string;\n}',
++  },
++  {
++    name: 'BrowserPageStateRequest',
++    declaration: 'export interface BrowserPageStateRequest extends BrowserOwnerScope {\n    selector?: string;\n    maxTextChars?: number;\n}',
++  },
++  {
++    name: 'BrowserScreenshotRequest',
++    declaration: 'export type BrowserScreenshotRequest = BrowserOwnerScope;',
++  },
++  {
 +    name: 'BrowserScreenshotResult',
-+    declaration: 'export interface BrowserScreenshotResult {\n    pngBase64: string;\n}',
++    declaration: 'export interface BrowserScreenshotResult {\n    pngBase64: string;\n    observationId: string;\n    url: string;\n}',
++  },
++  {
++    name: 'BrowserScrollRequest',
++    declaration: 'export interface BrowserScrollRequest extends BrowserOwnerScope {\n    direction: \'up\' | \'down\' | \'left\' | \'right\';\n    amount?: number;\n    observationId: string;\n}',
++  },
++  {
++    name: 'BrowserUseRuntimeSettings',
++    declaration: 'export interface BrowserUseRuntimeSettings {\n    headless: boolean;\n    allowedDomains: readonly string[];\n    deniedDomains: readonly string[];\n    allowPrivateNetwork: boolean;\n}',
 +  },
    {
      name: 'ChunkRowEvent',
@@ -2473,57 +2974,68 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
    },
 +  {
 +    name: 'ClickAtRequest',
-+    declaration: 'export interface ClickAtRequest {\n    x: number;\n    y: number;\n    doubleClick?: boolean;\n}',
++    declaration: 'export interface ClickAtRequest extends BrowserOwnerScope {\n    x: number;\n    y: number;\n    doubleClick?: boolean;\n    observationId: string;\n}',
 +  },
 +  {
 +    name: 'ClickRequest',
-+    declaration: 'export interface ClickRequest {\n    x: number;\n    y: number;\n    button?: MouseButton;\n    doubleClick?: boolean;\n    modifiers?: readonly KeyModifier[];\n}',
++    declaration: 'export interface ClickRequest {\n    x: number;\n    y: number;\n    button?: MouseButton;\n    doubleClick?: boolean;\n    modifiers?: readonly KeyModifier[];\n    target?: ObservedWindowTarget;\n    observationId?: string;\n    restoreObservedFocus?: boolean;\n}',
 +  },
 +  {
 +    name: 'ClickSelectorRequest',
-+    declaration: 'export interface ClickSelectorRequest {\n    selector: string;\n}',
++    declaration: 'export interface ClickSelectorRequest extends BrowserOwnerScope {\n    selector: string;\n}',
 +  },
    {
      name: 'ClientArtifactBaseline',
      declaration: 'export interface ClientArtifactBaseline {\n    readonly path: string;\n    readonly mtimeMs: number;\n    readonly size: number;\n}',
-@@ -3930,6 +4123,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+@@ -3930,6 +4204,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
      name: 'DomainTableSpec',
      declaration: 'export interface DomainTableSpec<K extends string = string, V = unknown> {\n    readonly valueSchema: ZodType<V>;\n    readonly __key?: K;\n}',
    },
 +  {
 +    name: 'DragAtRequest',
-+    declaration: 'export interface DragAtRequest {\n    x: number;\n    y: number;\n    toX: number;\n    toY: number;\n}',
++    declaration: 'export interface DragAtRequest extends BrowserOwnerScope {\n    x: number;\n    y: number;\n    toX: number;\n    toY: number;\n    observationId: string;\n}',
 +  },
 +  {
 +    name: 'DragRequest',
-+    declaration: 'export interface DragRequest {\n    x: number;\n    y: number;\n    toX: number;\n    toY: number;\n    durationMs?: number;\n}',
++    declaration: 'export interface DragRequest {\n    x: number;\n    y: number;\n    toX: number;\n    toY: number;\n    durationMs?: number;\n    target?: ObservedWindowTarget;\n    observationId?: string;\n    restoreObservedFocus?: boolean;\n}',
 +  },
    {
      name: 'DshEnvironment',
      declaration: 'export type DshEnvironment = Readonly<Record<DshEnvironmentKey, string>>;',
-@@ -3966,6 +4167,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+@@ -3966,6 +4248,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
      name: 'EpochHeader',
      declaration: 'export interface EpochHeader {\n    config: LlmCallConfig;\n    adapterDefaults?: LlmCallConfigAdapterDefaults;\n    system?: string;\n    tools?: ToolSchema[];\n}',
    },
 +  {
 +    name: 'ExtractTextRequest',
-+    declaration: 'export interface ExtractTextRequest {\n    selector?: string;\n}',
++    declaration: 'export interface ExtractTextRequest extends BrowserOwnerScope {\n    selector?: string;\n    maxTextChars?: number;\n}',
 +  },
    {
      name: 'FileDiff',
      declaration: 'export interface FileDiff {\n    path: string;\n    oldText: string | null;\n    newText: string;\n}',
-@@ -3978,6 +4183,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+@@ -3978,6 +4264,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
      name: 'FileReferenceCandidate',
      declaration: 'export interface FileReferenceCandidate {\n    path: string;\n    kind: \'file\' | \'directory\';\n}',
    },
 +  {
 +    name: 'FillSelectorRequest',
-+    declaration: 'export interface FillSelectorRequest {\n    selector: string;\n    text: string;\n}',
++    declaration: 'export interface FillSelectorRequest extends BrowserOwnerScope {\n    selector: string;\n    text: string;\n}',
 +  },
    {
      name: 'FinishReason',
      declaration: 'export type FinishReason = FinishReasonMap[keyof FinishReasonMap];',
-@@ -4082,6 +4291,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+@@ -3986,6 +4276,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+     name: 'FinishReasonMap',
+     declaration: 'export interface FinishReasonMap {\n    \'stop\': {\n        kind: \'stop\';\n    };\n    \'tool-calls\': {\n        kind: \'tool-calls\';\n    };\n    \'max-tokens\': {\n        kind: \'max-tokens\';\n    };\n    \'aborted\': {\n        kind: \'aborted\';\n        failure: LlmFailure;\n    };\n    \'error\': {\n        kind: \'error\';\n        failure: LlmFailure;\n    };\n}',
+   },
++  {
++    name: 'FrontmostProcess',
++    declaration: 'export interface FrontmostProcess {\n    name: string;\n    bundleId?: string;\n    pid: number;\n}',
++  },
+   {
+     name: 'FsDirEntry',
+     declaration: 'export interface FsDirEntry {\n    name: string;\n    type: \'file\' | \'directory\' | \'other\';\n    target: FsTarget;\n    version?: FsVersion;\n    size?: number;\n}',
+@@ -4082,6 +4376,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
      name: 'GrantRecord',
      declaration: 'export interface GrantRecord {\n    readonly kind: \'grant\';\n    readonly payload: unknown;\n}',
    },
@@ -2542,7 +3054,7 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
    {
      name: 'ImageAttachmentLimits',
      declaration: 'export interface ImageAttachmentLimits {\n    maxImageBytes: number;\n    maxImagesPerMessage: number;\n    maxMessageImageBytes: number;\n    maxImagePixels: number;\n    maxImageDimension: number;\n    mediaTypes: readonly ImageMediaType[];\n}',
-@@ -4214,6 +4435,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+@@ -4214,6 +4520,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
      name: 'JsonValue',
      declaration: 'export type JsonValue = null | boolean | number | string | JsonValue[] | {\n    [key: string]: JsonValue;\n};',
    },
@@ -2553,26 +3065,38 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
    {
      name: 'KnobState',
      declaration: 'export interface KnobState {\n    preset: string | null;\n    sandbox: SandboxMode | null;\n    approval: ApprovalPolicy | null;\n}',
-@@ -4338,6 +4563,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+@@ -4338,6 +4648,30 @@ export const TYPE_API: readonly TypeApiEntry[] = [
      name: 'LspRange',
      declaration: 'export interface LspRange {\n    readonly start: LspPosition;\n    readonly end: LspPosition;\n}',
    },
++  {
++    name: 'MacosActionReceipt',
++    declaration: 'export interface MacosActionReceipt extends ScreenshotResult {\n    targetState: \'present\' | \'missing\' | \'unscoped\';\n    window?: MacosWindow;\n}',
++  },
++  {
++    name: 'MacosAppIdentityRule',
++    declaration: 'export interface MacosAppIdentityRule {\n    name?: string;\n    bundleId?: string;\n    pid?: number;\n}',
++  },
 +  {
 +    name: 'MacosApplication',
 +    declaration: 'export interface MacosApplication {\n    name: string;\n    bundleId?: string;\n    pid: number;\n    active: boolean;\n    hidden: boolean;\n}',
 +  },
 +  {
++    name: 'MacosCompletionState',
++    declaration: 'export interface MacosCompletionState {\n    frontmostProcess?: FrontmostProcess;\n    windows: readonly MacosWindow[];\n    observedAt: string;\n}',
++  },
++  {
 +    name: 'MacosUseRuntimeSettings',
-+    declaration: 'export interface MacosUseRuntimeSettings {\n    commandTimeoutMs: number;\n    allowedApps: readonly string[];\n    deniedApps: readonly string[];\n    excludedScreenshotApps: readonly string[];\n    maxElementsPerSnapshot: number;\n}',
++    declaration: 'export interface MacosUseRuntimeSettings {\n    commandTimeoutMs: number;\n    allowedApps: readonly string[];\n    deniedApps: readonly string[];\n    excludedScreenshotApps: readonly string[];\n    maxElementsPerSnapshot: number;\n    readAppGrants?: readonly MacosAppIdentityRule[];\n    controlAppGrants?: readonly MacosAppIdentityRule[];\n    deniedAppIdentities?: readonly MacosAppIdentityRule[];\n}',
 +  },
 +  {
 +    name: 'MacosWindow',
-+    declaration: 'export interface MacosWindow {\n    id: number;\n    app: string;\n    pid: number;\n    title: string;\n    bounds: ScreenBounds;\n    onScreen: boolean;\n}',
++    declaration: 'export interface MacosWindow {\n    id: number;\n    app: string;\n    bundleId?: string;\n    layer?: number;\n    pid: number;\n    title: string;\n    bounds: ScreenBounds;\n    onScreen: boolean;\n}',
 +  },
    {
      name: 'ManualCompactAgentContext',
      declaration: 'export interface ManualCompactAgentContext extends CompactionAgentContext {\n    runMaintenance<T>(task: (signal: AbortSignal) => Promise<T>): Promise<T>;\n}',
-@@ -4470,6 +4707,26 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+@@ -4470,14 +4804,42 @@ export const TYPE_API: readonly TypeApiEntry[] = [
      name: 'ModelReasoningEffort',
      declaration: 'export interface ModelReasoningEffort {\n    readonly id: string;\n    readonly name: string;\n    readonly description?: string;\n}',
    },
@@ -2582,15 +3106,15 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
 +  },
 +  {
 +    name: 'MoveAtRequest',
-+    declaration: 'export interface MoveAtRequest {\n    x: number;\n    y: number;\n}',
++    declaration: 'export interface MoveAtRequest extends BrowserOwnerScope {\n    x: number;\n    y: number;\n    observationId: string;\n}',
 +  },
 +  {
 +    name: 'MoveRequest',
-+    declaration: 'export interface MoveRequest {\n    x: number;\n    y: number;\n}',
++    declaration: 'export interface MoveRequest {\n    x: number;\n    y: number;\n    target?: ObservedWindowTarget;\n    observationId?: string;\n    restoreObservedFocus?: boolean;\n}',
 +  },
 +  {
 +    name: 'NavigateRequest',
-+    declaration: 'export interface NavigateRequest {\n    url: string;\n}',
++    declaration: 'export interface NavigateRequest extends BrowserOwnerScope {\n    url: string;\n}',
 +  },
 +  {
 +    name: 'NextActionRequest',
@@ -2599,18 +3123,23 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
    {
      name: 'ObjectJsonSchema',
      declaration: 'export type ObjectJsonSchema = JsonSchemaNode & {\n    type: \'object\';\n};',
-@@ -4478,6 +4735,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+   },
++  {
++    name: 'ObservedWindowTarget',
++    declaration: 'export interface ObservedWindowTarget {\n    observationId: string;\n    window: MacosWindow;\n}',
++  },
+   {
      name: 'OneShotSubagentDescriptorData',
      declaration: 'export interface OneShotSubagentDescriptorData extends SubagentDescriptorBase {\n    readonly mode: \'one-shot\';\n    readonly label?: string;\n}',
    },
 +  {
 +    name: 'OpenAppRequest',
-+    declaration: 'export interface OpenAppRequest {\n    name: string;\n}',
++    declaration: 'export interface OpenAppRequest {\n    name?: string;\n    bundleId?: string;\n}',
 +  },
    {
      name: 'PermissionSelect',
      declaration: 'export interface PermissionSelect {\n    options: PresetOption[];\n    currentValue: string;\n}',
-@@ -4662,6 +4923,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+@@ -4662,6 +5024,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
      name: 'ResumeAgentOptions',
      declaration: 'export interface ResumeAgentOptions {\n    readonly resumeSessionId: SessionId;\n    readonly agentOptions?: AgentOptions;\n    readonly signal?: AbortSignal;\n    readonly setup?: AgentSetup;\n}',
    },
@@ -2621,7 +3150,7 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
    {
      name: 'RunnerFailureRule',
      declaration: 'export interface RunnerFailureRule {\n    allowedExitCodes?: readonly number[];\n    fatalSignatures: readonly string[];\n    informationalLines?: readonly string[];\n}',
-@@ -4710,6 +4975,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+@@ -4710,6 +5076,30 @@ export const TYPE_API: readonly TypeApiEntry[] = [
      name: 'ScopeKey',
      declaration: 'export type ScopeKey = object;',
    },
@@ -2630,17 +3159,29 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
 +    declaration: 'export interface ScreenBounds {\n    x: number;\n    y: number;\n    width: number;\n    height: number;\n}',
 +  },
 +  {
++    name: 'ScreenCaptureGeometry',
++    declaration: 'export interface ScreenCaptureGeometry {\n    displayId: number;\n    globalPointRect: ScreenBounds;\n    capturePixels: ScreenPixelSize;\n}',
++  },
++  {
++    name: 'ScreenObservationResult',
++    declaration: 'export interface ScreenObservationResult extends ScreenshotResult {\n    captureGeometry: ScreenCaptureGeometry;\n    frontmostProcess?: FrontmostProcess;\n    targetWindow?: MacosWindow;\n}',
++  },
++  {
++    name: 'ScreenPixelSize',
++    declaration: 'export interface ScreenPixelSize {\n    width: number;\n    height: number;\n}',
++  },
++  {
 +    name: 'ScreenshotResult',
-+    declaration: 'export interface ScreenshotResult {\n    pngBase64: string;\n}',
++    declaration: 'export interface ScreenshotResult {\n    pngBase64: string;\n    observationId: string;\n    observedAt: string;\n}',
 +  },
 +  {
 +    name: 'ScrollRequest',
-+    declaration: 'export interface ScrollRequest {\n    direction: \'up\' | \'down\' | \'left\' | \'right\';\n    amount?: number;\n}',
++    declaration: 'export interface ScrollRequest {\n    direction: \'up\' | \'down\' | \'left\' | \'right\';\n    amount?: number;\n    target?: ObservedWindowTarget;\n    observationId?: string;\n    restoreObservedFocus?: boolean;\n}',
 +  },
    {
      name: 'SearchFileMatches',
      declaration: 'export interface SearchFileMatches {\n    path: string;\n    matches: SearchLineMatch[];\n}',
-@@ -5998,6 +6275,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
+@@ -5998,6 +6388,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
      name: 'WebUpgradeRoute',
      declaration: 'export interface WebUpgradeRoute {\n    path: string;\n    handler: (req: IncomingMessage, socket: Duplex, head: Buffer) => void | Promise<void>;\n}',
    },
@@ -2650,7 +3191,7 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
 +  },
 +  {
 +    name: 'WindowStateResult',
-+    declaration: 'export interface WindowStateResult {\n    window: MacosWindow;\n    pngBase64: string;\n    elements: readonly AccessibilityElement[];\n    truncated: boolean;\n}',
++    declaration: 'export interface WindowStateResult {\n    window: MacosWindow;\n    pngBase64: string;\n    elements: readonly AccessibilityElement[];\n    truncated: boolean;\n    observationId: string;\n    observedAt: string;\n}',
 +  },
 +  {
 +    name: 'WindowTarget',
@@ -2660,7 +3201,7 @@ index 8edd7adb9d450ac949734687587e31bd20d0c3ee..5df6d3ed775a93133088f46b5fc3119a
      name: 'WorkflowAgentEndInfo',
      declaration: 'export interface WorkflowAgentEndInfo extends WorkflowAgentInfo {\n    outcome: WorkflowAgentOutcome;\n}',
 diff --git a/packages/session-query/session-log-export/src/archive.ts b/packages/session-query/session-log-export/src/archive.ts
-index 2f7d1fbd1169a6199ba2bb6b8f906f6c158a7b6a..b1ec2e7e607c326ceed2d45463cad36b76cacaaf 100644
+index 2f7d1fbd11..b1ec2e7e60 100644
 --- a/packages/session-query/session-log-export/src/archive.ts
 +++ b/packages/session-query/session-log-export/src/archive.ts
 @@ -144,11 +144,13 @@ function collectEventImageRefs(event: unknown, refs: Map<string, ImageAttachment
@@ -2678,13 +3219,13 @@ index 2f7d1fbd1169a6199ba2bb6b8f906f6c158a7b6a..b1ec2e7e607c326ceed2d45463cad36b
    if (carrier.inserted !== undefined) {
      for (const message of carrier.inserted) collectImageRefs(message.content, refs)
 diff --git a/packages/session-query/session-log-export/tests/archive.host.spec.ts b/packages/session-query/session-log-export/tests/archive.host.spec.ts
-index c41846039a2bd019de673a1f8d85e9b34941a468..68ba46e40c9acc3883a4cef7b4b97957c9d3c628 100644
+index c41846039a..68ba46e40c 100644
 --- a/packages/session-query/session-log-export/tests/archive.host.spec.ts
 +++ b/packages/session-query/session-log-export/tests/archive.host.spec.ts
 @@ -644,6 +644,20 @@ describe('session.export download endpoint', () => {
      expect(Object.keys(files).sort()).toEqual(['media/nested-1.webp', 'session.jsonl'])
    })
- 
+
 +  it('collects UI-only media referenced from tool-result presentation metadata', async () => {
 +    const presentation = '{"type":"tool/result","seq":2,"time":2000,"data":{"output":"ok","meta":{"content":[{"type":"image","attachment":{"attachmentId":"presentation-1","mediaType":"image/png","bytes":4,"width":2,"height":2}}]}}}'
 +    const root = artifact('session-root', undefined, [
@@ -2703,7 +3244,7 @@ index c41846039a2bd019de673a1f8d85e9b34941a468..68ba46e40c9acc3883a4cef7b4b97957
      const block = (id: string, mediaType: string) =>
        `{"type":"image","attachment":{"attachmentId":"${id}","mediaType":"${mediaType}","bytes":4,"width":2,"height":2}}`
 diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
-index 06d5d75a109ab21a16a98f6fcfdb7bbda4e33f7d..c4cd52f55902d46796a1663498517fd03caf43ea 100644
+index 06d5d75a10..5351927a18 100644
 --- a/pnpm-lock.yaml
 +++ b/pnpm-lock.yaml
 @@ -156,6 +156,9 @@ importers:
@@ -2746,10 +3287,10 @@ index 06d5d75a109ab21a16a98f6fcfdb7bbda4e33f7d..c4cd52f55902d46796a1663498517fd0
        '@deepseek-ai/dsh-tool-pwsh':
          specifier: workspace:^
          version: link:../../packages/shell/tool-pwsh
-@@ -6585,6 +6597,154 @@ importers:
+@@ -6585,6 +6597,163 @@ importers:
          specifier: workspace:^
          version: link:../../core/tools
- 
+
 +  packages/macos-use/browser-use:
 +    dependencies:
 +      '@deepseek-ai/schemastery':
@@ -2762,6 +3303,9 @@ index 06d5d75a109ab21a16a98f6fcfdb7bbda4e33f7d..c4cd52f55902d46796a1663498517fd0
 +      '@deepseek-ai/cordis':
 +        specifier: workspace:^
 +        version: link:../../../vendor/cordis
++      '@deepseek-ai/dsh-agent':
++        specifier: workspace:^
++        version: link:../../core/agent
 +      '@deepseek-ai/dsh-invariants':
 +        specifier: workspace:^
 +        version: link:../../runtime-diagnostics/invariants
@@ -2800,6 +3344,9 @@ index 06d5d75a109ab21a16a98f6fcfdb7bbda4e33f7d..c4cd52f55902d46796a1663498517fd0
 +      '@deepseek-ai/cordis':
 +        specifier: workspace:^
 +        version: link:../../../vendor/cordis
++      '@deepseek-ai/dsh-agent':
++        specifier: workspace:^
++        version: link:../../core/agent
 +      '@deepseek-ai/dsh-invariants':
 +        specifier: workspace:^
 +        version: link:../../runtime-diagnostics/invariants
@@ -2822,6 +3369,9 @@ index 06d5d75a109ab21a16a98f6fcfdb7bbda4e33f7d..c4cd52f55902d46796a1663498517fd0
 +      '@deepseek-ai/cordis':
 +        specifier: workspace:^
 +        version: link:../../../vendor/cordis
++      '@deepseek-ai/dsh-agent':
++        specifier: workspace:^
++        version: link:../../core/agent
 +      '@deepseek-ai/dsh-api-remotes':
 +        specifier: workspace:^
 +        version: link:../../api/remotes
@@ -2901,8 +3451,108 @@ index 06d5d75a109ab21a16a98f6fcfdb7bbda4e33f7d..c4cd52f55902d46796a1663498517fd0
    packages/mcp/mcp-client:
      dependencies:
        '@deepseek-ai/schemastery':
+diff --git a/scripts/check-workspace-constraints.spec.ts b/scripts/check-workspace-constraints.spec.ts
+index c0d13d2366..ead9aeb8c2 100644
+--- a/scripts/check-workspace-constraints.spec.ts
++++ b/scripts/check-workspace-constraints.spec.ts
+@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
+ import {
+   checkExperimentalDependencyIsolation,
+   checkExperimentalManifest,
++  checkWorkspaceManifest,
+   expectedDshPackageFiles,
+   type WorkspaceManifest,
+ } from './check-workspace-constraints.ts'
+@@ -89,3 +90,51 @@ describe('package payload constraints', () => {
+     ])
+   })
+ })
++
++describe('external release member repositories', () => {
++  const externalUrl = 'git+https://github.com/chenjie1129/deepseek-harness-macos-use.git'
++  const dir = 'packages/macos-use/browser-use'
++  const external: WorkspaceManifest = {
++    dir,
++    manifest: {
++      name: 'external-browser-use-fixture',
++      publishConfig: { access: 'public' },
++      repository: { type: 'git', url: externalUrl, directory: dir },
++    },
++  }
++
++  it('accepts the standalone repository only at an explicitly mapped directory', () => {
++    expect(checkWorkspaceManifest(external)).toEqual([])
++    expect(checkWorkspaceManifest({
++      ...external,
++      dir: 'packages/other/browser-use',
++      manifest: {
++        ...external.manifest,
++        repository: { ...external.manifest.repository, directory: 'packages/other/browser-use' },
++      },
++    })).toEqual([
++      'packages/other/browser-use/package.json: external-browser-use-fixture: release member repository must use git+https://github.com/deepseek-ai/deepseek-harness.git with directory packages/other/browser-use',
++    ])
++  })
++
++  it('still requires the exact URL and exact package directory', () => {
++    expect(checkWorkspaceManifest({
++      ...external,
++      manifest: {
++        ...external.manifest,
++        repository: { ...external.manifest.repository, url: 'git+https://github.com/example/wrong.git' },
++      },
++    })).toEqual([
++      `${dir}/package.json: external-browser-use-fixture: release member repository must use ${externalUrl} with directory ${dir}`,
++    ])
++    expect(checkWorkspaceManifest({
++      ...external,
++      manifest: {
++        ...external.manifest,
++        repository: { ...external.manifest.repository, directory: 'packages/macos-use/gui-model' },
++      },
++    })).toEqual([
++      `${dir}/package.json: external-browser-use-fixture: release member repository must use ${externalUrl} with directory ${dir}`,
++    ])
++  })
++})
+diff --git a/scripts/check-workspace-constraints.ts b/scripts/check-workspace-constraints.ts
+index e76c248aa7..ff97092430 100644
+--- a/scripts/check-workspace-constraints.ts
++++ b/scripts/check-workspace-constraints.ts
+@@ -48,6 +48,17 @@ const repositoryUrl = 'git+https://github.com/deepseek-harness/deepseek-harness.
+  * their trusted publishing against the repository that runs the workflow.
+  */
+ const publishedRepositoryUrl = 'git+https://github.com/deepseek-ai/deepseek-harness.git'
++/**
++ * Standalone release members deliberately sourced from a different repository.
++ * The directory key keeps this exception narrow: packages outside these four
++ * exact paths continue to require the canonical Harness repository URL.
++ */
++const externalReleaseMemberRepositoryUrls: Readonly<Record<string, string>> = {
++  'packages/macos-use/browser-use': 'git+https://github.com/chenjie1129/deepseek-harness-macos-use.git',
++  'packages/macos-use/gui-model': 'git+https://github.com/chenjie1129/deepseek-harness-macos-use.git',
++  'packages/macos-use/macos-use': 'git+https://github.com/chenjie1129/deepseek-harness-macos-use.git',
++  'packages/macos-use/tool-macos-use': 'git+https://github.com/chenjie1129/deepseek-harness-macos-use.git',
++}
+ /** Private packages that participate in workspace checks but not releases. */
+ const experimentalPackageDirectory = /^packages\/experimental\/[^/]+$/
+ /** npm namespace reserved for private experimental packages. */
+@@ -311,10 +322,11 @@ export function checkWorkspaceManifest({ dir, manifest }: WorkspaceManifest): st
+     if (manifest.publishConfig?.access !== 'public') {
+       errors.push(`${label}: release member must set publishConfig.access to "public"`)
+     }
++    const expectedRepositoryUrl = externalReleaseMemberRepositoryUrls[dir] ?? publishedRepositoryUrl
+     if (manifest.repository?.type !== 'git'
+-      || manifest.repository.url !== publishedRepositoryUrl
++      || manifest.repository.url !== expectedRepositoryUrl
+       || manifest.repository.directory !== dir) {
+-      errors.push(`${label}: release member repository must use ${publishedRepositoryUrl} with directory ${dir}`)
++      errors.push(`${label}: release member repository must use ${expectedRepositoryUrl} with directory ${dir}`)
+     }
+   } else if (!experimentalPackageDirectory.test(dir) && manifest.private !== true) {
+     errors.push(`${label}: package.json must set "private": true`)
 diff --git a/scripts/gen-cordis-catalog.ts b/scripts/gen-cordis-catalog.ts
-index 1bae81253b379591a9fd3c1ceab627f8e859c7a8..d7b68332a272a779377cc26e7b3d1876b63a0f2f 100644
+index 1bae81253b..da253718b0 100644
 --- a/scripts/gen-cordis-catalog.ts
 +++ b/scripts/gen-cordis-catalog.ts
 @@ -60,6 +60,7 @@ export const SERVICE_PAGE: Record<string, string> = {
@@ -2927,11 +3577,16 @@ index 1bae81253b379591a9fd3c1ceab627f8e859c7a8..d7b68332a272a779377cc26e7b3d1876
    messageFeedback: 'feedback.md',
    permissionPresets: 'permission-presets.md',
    planMode: 'plan.md',
-@@ -354,6 +357,31 @@ export const LINK_MAP: Readonly<Record<string, string>> = {
+@@ -354,6 +357,41 @@ export const LINK_MAP: Readonly<Record<string, string>> = {
    RequestImageAttachment: 'attachment.md',
    SaveImageAttachment: 'attachment.md',
    StoredImageAttachment: 'attachment.md',
 +  BrowserScreenshotResult: 'tools.md',
++  BrowserPageState: 'tools.md',
++  BrowserPageStateRequest: 'tools.md',
++  BrowserScreenshotRequest: 'tools.md',
++  BrowserScrollRequest: 'tools.md',
++  BrowserUseRuntimeSettings: 'tools.md',
 +  ClickAtRequest: 'tools.md',
 +  ClickRequest: 'tools.md',
 +  ClickSelectorRequest: 'tools.md',
@@ -2940,8 +3595,11 @@ index 1bae81253b379591a9fd3c1ceab627f8e859c7a8..d7b68332a272a779377cc26e7b3d1876
 +  ExtractTextRequest: 'tools.md',
 +  FillSelectorRequest: 'tools.md',
 +  GuiAction: 'tools.md',
++  FrontmostProcess: 'tools.md',
 +  KeyPressRequest: 'tools.md',
 +  MacosApplication: 'tools.md',
++  MacosActionReceipt: 'tools.md',
++  MacosCompletionState: 'tools.md',
 +  MacosUseRuntimeSettings: 'tools.md',
 +  MacosWindow: 'tools.md',
 +  MoveAtRequest: 'tools.md',
@@ -2949,8 +3607,10 @@ index 1bae81253b379591a9fd3c1ceab627f8e859c7a8..d7b68332a272a779377cc26e7b3d1876
 +  NavigateRequest: 'tools.md',
 +  NextActionRequest: 'tools.md',
 +  OpenAppRequest: 'tools.md',
++  ObservedWindowTarget: 'tools.md',
 +  RunAppleScriptRequest: 'tools.md',
 +  ScreenshotResult: 'tools.md',
++  ScreenObservationResult: 'tools.md',
 +  ScrollRequest: 'tools.md',
 +  TypeTextRequest: 'tools.md',
 +  WindowStateRequest: 'tools.md',
@@ -2960,12 +3620,12 @@ index 1bae81253b379591a9fd3c1ceab627f8e859c7a8..d7b68332a272a779377cc26e7b3d1876
    ShellExecSpec: 'shell.md',
    ShellProcess: 'shell.md',
 diff --git a/scripts/gen-doc-graphs.ts b/scripts/gen-doc-graphs.ts
-index 0ea6043121d4d0a1377c656ce1472209fba6bf00..ef1f02c82988100f8cbbab38979f7568470b4928 100644
+index 0ea6043121..e4d77648dd 100644
 --- a/scripts/gen-doc-graphs.ts
 +++ b/scripts/gen-doc-graphs.ts
 @@ -98,6 +98,33 @@ const GROUP_ORDER = [
  ]
- 
+
  const SERVICE_ROLES: ServiceRole[] = [
 +  {
 +    key: 'browserUse',
@@ -2974,7 +3634,7 @@ index 0ea6043121d4d0a1377c656ce1472209fba6bf00..ef1f02c82988100f8cbbab38979f7568
 +    mode: 'seam',
 +    implementations: ['browser-use'],
 +    consumers: ['tool-macos-use'],
-+    note: 'One lazy Playwright browser page supplies selector and screenshot-coordinate actions; the model-facing consumer owns task policy and presentation.',
++    note: 'One lazy, isolated Playwright BrowserContext and page per Harness Agent supplies selector and screenshot-coordinate actions; the model-facing consumer owns task policy and presentation.',
 +  },
 +  {
 +    key: 'guiModel',
@@ -2992,13 +3652,13 @@ index 0ea6043121d4d0a1377c656ce1472209fba6bf00..ef1f02c82988100f8cbbab38979f7568
 +    mode: 'seam',
 +    implementations: ['macos-use'],
 +    consumers: ['tool-macos-use'],
-+    note: 'One native provider owns screenshots, Accessibility state, window and application discovery, pointer and keyboard actions, and AppleScript under live application policy.',
++    note: 'One native provider owns screenshots, Accessibility state, window and application discovery, pointer and keyboard actions, and generated guarded JXA under live application policy; it never executes caller-supplied AppleScript.',
 +  },
    {
      key: 'attachments',
      pkg: 'attachment',
 diff --git a/scripts/gen-tool-catalog.ts b/scripts/gen-tool-catalog.ts
-index 36e0b0833cad949592000ab41ee45791c9442f10..419a4dff3acbb528b337ede3a491e6e50c70c05b 100644
+index 36e0b0833c..419a4dff3a 100644
 --- a/scripts/gen-tool-catalog.ts
 +++ b/scripts/gen-tool-catalog.ts
 @@ -56,6 +56,10 @@ import * as ToolGoal from '@deepseek-ai/dsh-tool-goal'
@@ -3039,8 +3699,178 @@ index 36e0b0833cad949592000ab41ee45791c9442f10..419a4dff3acbb528b337ede3a491e6e5
    {
      pkg: '@deepseek-ai/dsh-tool-ralph',
      dir: 'tool-ralph',
+diff --git a/scripts/verify-cordis-config.spec.ts b/scripts/verify-cordis-config.spec.ts
+index ec0385af10..d2b5d2a902 100644
+--- a/scripts/verify-cordis-config.spec.ts
++++ b/scripts/verify-cordis-config.spec.ts
+@@ -14,6 +14,7 @@ import {
+   metadataExpressionErrors,
+   packageTestFixtureDependencyErrors,
+   packageTestPluginDependencyErrors,
++  validateMacosUseIntegrationComposition,
+ } from './verify-cordis-config.ts'
+
+ describe('verify-cordis-config metadata expressions', () => {
+@@ -153,3 +154,46 @@ describe('package-owned Loader test dependency closures', () => {
+     }
+   })
+ })
++
++describe('macOS-use normal-profile integration overlay', () => {
++  const valid = `
++- insert:
++    - id: macos-use
++      name: '@deepseek-ai/dsh-macos-use'
++    - id: browser-use
++      name: '@deepseek-ai/dsh-browser-use'
++    - id: gui-model
++      name: '@deepseek-ai/dsh-gui-model'
++    - id: tool-macos-use
++      name: '@deepseek-ai/dsh-tool-macos-use'
++`
++
++  function withOverlay(source: string, assertion: (root: string) => void): void {
++    const fixture = mkdtempSync(join(tmpdir(), 'dsh-macos-use-integration-'))
++    try {
++      const directory = join(fixture, 'integration')
++      mkdirSync(directory, { recursive: true })
++      writeFileSync(join(directory, 'macos-use.cordis.patch.yml'), source)
++      assertion(fixture)
++    } finally {
++      rmSync(fixture, { recursive: true, force: true })
++    }
++  }
++
++  it('accepts the exact four mount-only rows', () => {
++    withOverlay(valid, (fixture) => {
++      expect(validateMacosUseIntegrationComposition(fixture)).toEqual([])
++    })
++  })
++
++  it('rejects hidden YAML settings and roster drift', () => {
++    const invalid = valid
++      .replace("      name: '@deepseek-ai/dsh-gui-model'", "      name: '@deepseek-ai/dsh-gui-model'\n      config:\n        model: hidden-default")
++      .replace('    - id: browser-use', '    - id: stale-browser-use')
++    withOverlay(invalid, (fixture) => {
++      const problems = validateMacosUseIntegrationComposition(fixture)
++      expect(problems.some(problem => problem.includes('all adjustable settings belong to Plugin Configuration'))).toBe(true)
++      expect(problems.some(problem => problem.includes('must mount browser-use'))).toBe(true)
++    })
++  })
++})
+diff --git a/scripts/verify-cordis-config.ts b/scripts/verify-cordis-config.ts
+index 4c1da68ba9..0cc66f5fa0 100644
+--- a/scripts/verify-cordis-config.ts
++++ b/scripts/verify-cordis-config.ts
+@@ -10,7 +10,7 @@
+  * Loader fixtures resolve from their package manifest.
+  */
+
+-import { globSync, readFileSync } from 'node:fs'
++import { existsSync, globSync, readFileSync } from 'node:fs'
+ import { dirname, relative, resolve } from 'node:path'
+ import { Script } from 'node:vm'
+ import ts from 'typescript'
+@@ -36,6 +36,14 @@ const root = resolve(import.meta.dirname, '..')
+ const appOverlayFiles = new Set([
+   ...globSync('apps/cli/config/examples/**/*.yml', { cwd: root }),
+ ])
++/** Opt-in, non-evaluation composition shipped with the standalone plugin. */
++const MACOS_USE_INTEGRATION_FILE = 'integration/macos-use.cordis.patch.yml'
++const MACOS_USE_INTEGRATION_ROWS = [
++  ['macos-use', '@deepseek-ai/dsh-macos-use'],
++  ['browser-use', '@deepseek-ai/dsh-browser-use'],
++  ['gui-model', '@deepseek-ai/dsh-gui-model'],
++  ['tool-macos-use', '@deepseek-ai/dsh-tool-macos-use'],
++] as const
+ const metadataFields = ['id', 'name', 'group', 'inject', 'intercept', 'isolate'] as const
+
+ /** The adaptive directory-picker chooser package (mounts a backend row at boot). */
+@@ -74,6 +82,7 @@ if (import.meta.main) {
+   errors.push(...validateAppResolution())
+   errors.push(...validatePackageTestResolution())
+   errors.push(...packageTestFixtureDependencyErrors())
++  errors.push(...validateMacosUseIntegrationComposition())
+   errors.push(...validateSourcePlaneResolution())
+   errors.push(...validatePresetPlaneSeparation())
+   errors.push(...validateClientHalvesDeclared())
+@@ -165,6 +174,63 @@ function loadEntries(file: string): unknown[] {
+   return isUnknownArray(document) ? document : []
+ }
+
++/**
++ * Keep the standalone plugin's normal-profile overlay mount-only.
++ *
++ * Agent settings belong to the Plugin Configuration page. Encoding any of
++ * them in this reusable patch would create a second, invisible source of truth
++ * and would also make the install instructions differ from the normal product
++ * path. The exact row roster prevents an integration patch from silently
++ * mounting only the evaluation subset or reviving a removed capability.
++ *
++ * @param repoRoot - repository root containing the integration overlay.
++ * @returns one diagnostic per structural or roster violation.
++ */
++export function validateMacosUseIntegrationComposition(repoRoot: string = root): string[] {
++  const path = resolve(repoRoot, MACOS_USE_INTEGRATION_FILE)
++  if (!existsSync(path)) return [`${MACOS_USE_INTEGRATION_FILE}: required opt-in mount overlay is missing`]
++  const document = loadCordisYaml(readFileSync(path, 'utf8'))
++  if (!isUnknownArray(document) || document.length !== 1 || !isRecord(document[0])) {
++    return [`${MACOS_USE_INTEGRATION_FILE}: must contain exactly one patch entry`]
++  }
++  const patch = document[0]
++  const patchKeys = Object.keys(patch).sort()
++  if (patchKeys.length !== 1 || patchKeys[0] !== 'insert' || !isUnknownArray(patch.insert)) {
++    return [`${MACOS_USE_INTEGRATION_FILE}: patch entry must contain only an insert list`]
++  }
++  const problems: string[] = []
++  if (patch.insert.length !== MACOS_USE_INTEGRATION_ROWS.length) {
++    problems.push(
++      `${MACOS_USE_INTEGRATION_FILE}: insert must contain exactly ${MACOS_USE_INTEGRATION_ROWS.length} mount rows`,
++    )
++  }
++  for (let index = 0; index < Math.max(patch.insert.length, MACOS_USE_INTEGRATION_ROWS.length); index++) {
++    const row = patch.insert[index]
++    const expected = MACOS_USE_INTEGRATION_ROWS[index]
++    if (expected === undefined) {
++      problems.push(`${MACOS_USE_INTEGRATION_FILE}: insert[${index}] is an unexpected extra row`)
++      continue
++    }
++    if (!isRecord(row)) {
++      problems.push(`${MACOS_USE_INTEGRATION_FILE}: insert[${index}] must be a mount row`)
++      continue
++    }
++    const keys = Object.keys(row).sort()
++    if (keys.length !== 2 || keys[0] !== 'id' || keys[1] !== 'name') {
++      problems.push(
++        `${MACOS_USE_INTEGRATION_FILE}: insert[${index}] must contain only id and name; `
++        + 'all adjustable settings belong to Plugin Configuration',
++      )
++    }
++    if (row.id !== expected[0] || row.name !== expected[1]) {
++      problems.push(
++        `${MACOS_USE_INTEGRATION_FILE}: insert[${index}] must mount ${expected[0]} as ${expected[1]}`,
++      )
++    }
++  }
++  return problems
++}
++
+ /**
+  * Row ids declared anywhere in one config file, including inside group `config`
+  * lists — a preset nests most of its rows in `isolate` groups.
+@@ -239,7 +305,9 @@ function validateAppResolution(): string[] {
+   }
+   const shipped = new Set(globSync('*.cordis.yml', { cwd: resolve(root, 'apps/cli/config') })
+     .map(file => `apps/cli/config/${file}`))
+-  const appReferences = pluginReferences.filter(reference => shipped.has(reference.file) || appOverlayFiles.has(reference.file))
++  const appReferences = pluginReferences.filter(reference => shipped.has(reference.file)
++    || appOverlayFiles.has(reference.file)
++    || reference.file === MACOS_USE_INTEGRATION_FILE)
+   violations.push(...missingPluginDependencies(
+     appReferences,
+     appDependencies,
 diff --git a/scripts/verify-package-readme-model-experience.ts b/scripts/verify-package-readme-model-experience.ts
-index 1caf31ec917095e678587c74ad45172cd5a1eac6..61bd740953d134c2a0757c882801313b14ed1ca7 100644
+index 1caf31ec91..25a7d31262 100644
 --- a/scripts/verify-package-readme-model-experience.ts
 +++ b/scripts/verify-package-readme-model-experience.ts
 @@ -128,6 +128,8 @@ const SENTENCE_MODEL_EXPERIENCE: Readonly<Record<string, SentenceContract>> = {
@@ -3052,8 +3882,83 @@ index 1caf31ec917095e678587c74ad45172cd5a1eac6..61bd740953d134c2a0757c882801313b
    'packages/subprocess/subprocess': { kind: 'indirect', reason: 'The seam delegates all model rendering to consumer seams such as the bash executor family.' },
    'packages/e2b/subprocess-e2b': { kind: 'indirect', reason: 'The remote spawn backend delegates model rendering to consumer seams such as the bash executor family.' },
    'packages/subprocess/subprocess-local': { kind: 'indirect', reason: 'The spawn backend delegates model rendering to consumer seams such as the bash executor family.' },
+@@ -181,6 +183,17 @@ const SENTENCE_MODEL_EXPERIENCE: Readonly<Record<string, SentenceContract>> = {
+   'packages/workflow/workflow': { kind: 'indirect', reason: 'The service delegates parent and child model rendering to its consumer and engine.' },
+ }
+
++/**
++ * Structured tool packages whose source repository intentionally does not
++ * carry Harness's generated tool catalog. Their integrated README must still
++ * name concrete schema families inline, while the Harness generator owns the
++ * exact catalog after installation. Keep this list exact and audited: it is
++ * not a general escape hatch for missing catalog links.
++ */
++const TOOL_SCHEMA_CATALOG_LINK_EXEMPTIONS: Readonly<Record<string, string>> = {
++  'packages/macos-use/tool-macos-use': 'The standalone release has no Harness-generated docs/tool-catalog.md; the integrated Harness generator emits and verifies the exact 21-tool catalog.',
++}
++
+ interface Failure {
+   path: string
+   message: string
+@@ -273,6 +286,7 @@ let verbatimBlockCount = 0
+ let systemPromptEntryCount = 0
+ let toolSchemaEntryCount = 0
+ let kvCacheEffectCount = 0
++const usedToolSchemaCatalogLinkExemptions = new Set<string>()
+
+ for (const [pkg, reason] of Object.entries(NO_MODEL_EXPERIENCE_SECTION)) {
+   if (!scannedPackages.has(pkg)) {
+@@ -295,6 +309,15 @@ for (const [pkg, contract] of Object.entries(SENTENCE_MODEL_EXPERIENCE)) {
+   }
+ }
+
++for (const [pkg, reason] of Object.entries(TOOL_SCHEMA_CATALOG_LINK_EXEMPTIONS)) {
++  if (!scannedPackages.has(pkg)) {
++    failures.push({ path: `${pkg}/README.md`, message: 'tool-schema catalog-link exemption does not name a scanned package' })
++  }
++  if (reason.trim().length === 0) {
++    failures.push({ path: `${pkg}/README.md`, message: 'tool-schema catalog-link exemption must retain its audit justification' })
++  }
++}
++
+ for (const packageJson of packageJsons) {
+   const pkg = packageJson.slice(0, -'/package.json'.length)
+   const readme = packageJson.replace(/package\.json$/, 'README.md')
+@@ -537,9 +560,13 @@ for (const packageJson of packageJsons) {
+     if (!/\bschemas?\b/i.test(entry.title)) continue
+     const fragments = toolCatalogLinkFragments(entry.modelView.raw)
+     if (fragments.length === 0) {
+-      failures.push({ path: readme, message: `line ${entry.heading.index}: tool-schema entry must link an anchored section of ../../../docs/tool-catalog.md` })
+-      catalogError = true
+-      break
++      if (TOOL_SCHEMA_CATALOG_LINK_EXEMPTIONS[pkg] === undefined) {
++        failures.push({ path: readme, message: `line ${entry.heading.index}: tool-schema entry must link an anchored section of ../../../docs/tool-catalog.md` })
++        catalogError = true
++        break
++      }
++      usedToolSchemaCatalogLinkExemptions.add(pkg)
++      continue
+     }
+     const invalid = fragments.find(fragment => !toolCatalogFragments.has(fragment))
+     if (invalid !== undefined) {
+@@ -557,8 +584,14 @@ for (const packageJson of packageJsons) {
+   structuredCount += 1
+ }
+
++for (const pkg of Object.keys(TOOL_SCHEMA_CATALOG_LINK_EXEMPTIONS)) {
++  if (!usedToolSchemaCatalogLinkExemptions.has(pkg)) {
++    failures.push({ path: `${pkg}/README.md`, message: 'stale tool-schema catalog-link exemption; remove it or retain a schema entry that needs it' })
++  }
++}
++
+ if (failures.length === 0) {
+-  console.log(`verify-package-readme-model-experience: ${packageJsons.length} README(s) checked (${omittedSectionCount} audited omissions, ${structuredCount} structured, ${modelContextEntryCount} model-context entries, ${kvCacheEffectCount} KV-cache fields, ${systemPromptEntryCount} fenced system-prompt entries, ${toolSchemaEntryCount} catalog-linked tool-schema entries, ${explainedNoneCount} explained none, ${indirectCount} indirect, ${verbatimBlockCount} verbatim markdown blocks), all conform.`)
++  console.log(`verify-package-readme-model-experience: ${packageJsons.length} README(s) checked (${omittedSectionCount} audited omissions, ${structuredCount} structured, ${modelContextEntryCount} model-context entries, ${kvCacheEffectCount} KV-cache fields, ${systemPromptEntryCount} fenced system-prompt entries, ${toolSchemaEntryCount} tool-schema entries, ${explainedNoneCount} explained none, ${indirectCount} indirect, ${verbatimBlockCount} verbatim markdown blocks), all conform.`)
+   process.exit(0)
+ }
+
 diff --git a/tsconfig.base.json b/tsconfig.base.json
-index 661a546bf8eaae2770a69fb10874b99efc08b385..ad94326af59ae9753165a9bc5a69e98a92892f1d 100644
+index 661a546bf8..ad94326af5 100644
 --- a/tsconfig.base.json
 +++ b/tsconfig.base.json
 @@ -72,6 +72,7 @@
@@ -3101,7 +4006,7 @@ index 661a546bf8eaae2770a69fb10874b99efc08b385..ad94326af59ae9753165a9bc5a69e98a
        "@deepseek-ai/dsh-tool-pwsh-persistent": ["./packages/shell/tool-pwsh-persistent/src"],
        "@deepseek-ai/dsh-tool-pwsh-persistent/invariant": ["./packages/shell/tool-pwsh-persistent/src/invariant.ts"],
 diff --git a/tsconfig.client.json b/tsconfig.client.json
-index ddeb2e84b71cc56b0d4f0db21d2e2e8e7ec2bbd6..3cf6a9c62740c4a7115c37b8e87b1bc6a40d8b82 100644
+index ddeb2e84b7..3cf6a9c627 100644
 --- a/tsconfig.client.json
 +++ b/tsconfig.client.json
 @@ -69,6 +69,7 @@
@@ -3113,7 +4018,7 @@ index ddeb2e84b71cc56b0d4f0db21d2e2e8e7ec2bbd6..3cf6a9c62740c4a7115c37b8e87b1bc6
      { "path": "./packages/client/ui-workflow-run" },
      { "path": "./packages/client/ui-workspace" },
 diff --git a/tsconfig.host.json b/tsconfig.host.json
-index 561cee9b175c9614f6b8e5a70ac74c3694e19329..b1e846e22101e6a2a19571ad727b8d70407e07bd 100644
+index 561cee9b17..b1e846e221 100644
 --- a/tsconfig.host.json
 +++ b/tsconfig.host.json
 @@ -302,6 +302,10 @@

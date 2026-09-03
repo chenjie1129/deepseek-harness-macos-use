@@ -3,6 +3,11 @@
 import { Buffer } from 'node:buffer'
 import type { ImageAttachmentLimits } from '@deepseek-ai/dsh-attachment'
 import sharp from 'sharp'
+import {
+  LIVE_PREVIEW_MAX_BYTES,
+  LIVE_PREVIEW_MAX_DIMENSION,
+  type LiveScreenshotPreview,
+} from './progress.ts'
 
 const MAX_RESIZE_PASSES = 6
 
@@ -51,4 +56,51 @@ export async function fitPngToAttachmentLimits(
     scale *= Math.min(0.9, Math.sqrt(limits.maxImageBytes / output.byteLength) * 0.9)
   }
   return output
+}
+
+/**
+ * Produce a small lossy preview for live UI polling. The original PNG remains
+ * the GUI model's grounding input and the durable attachment's source.
+ * @param pngBase64 - source PNG encoded without a data-URL prefix.
+ * @returns bounded JPEG preview metadata and its process-local data URL.
+ */
+export async function createLiveScreenshotPreview(pngBase64: string): Promise<LiveScreenshotPreview> {
+  const input = Buffer.from(pngBase64, 'base64')
+  const metadata = await sharp(input, { failOn: 'error', limitInputPixels: false }).metadata()
+  const sourceWidth = metadata.width
+  const sourceHeight = metadata.height
+  if (sourceWidth < 1 || sourceHeight < 1) {
+    throw new Error('Screenshot dimensions could not be determined.')
+  }
+  let width = Math.max(1, Math.round(sourceWidth * Math.min(
+    1,
+    LIVE_PREVIEW_MAX_DIMENSION / sourceWidth,
+    LIVE_PREVIEW_MAX_DIMENSION / sourceHeight,
+  )))
+  let height = Math.max(1, Math.round(sourceHeight * Math.min(
+    1,
+    LIVE_PREVIEW_MAX_DIMENSION / sourceWidth,
+    LIVE_PREVIEW_MAX_DIMENSION / sourceHeight,
+  )))
+  let output = Buffer.alloc(0)
+  for (let pass = 0; pass < MAX_RESIZE_PASSES; pass += 1) {
+    output = await sharp(input, { failOn: 'error', limitInputPixels: false })
+      .resize({ width, height, fit: 'fill' })
+      .jpeg({ quality: Math.max(35, 72 - pass * 7), mozjpeg: true })
+      .toBuffer()
+    if (output.byteLength <= LIVE_PREVIEW_MAX_BYTES) break
+    const scale = Math.min(0.85, Math.sqrt(LIVE_PREVIEW_MAX_BYTES / output.byteLength) * 0.9)
+    width = Math.max(1, Math.floor(width * scale))
+    height = Math.max(1, Math.floor(height * scale))
+  }
+  if (output.byteLength > LIVE_PREVIEW_MAX_BYTES) {
+    throw new Error('Screenshot could not be reduced to the live-preview byte limit.')
+  }
+  return {
+    dataUrl: `data:image/jpeg;base64,${output.toString('base64')}`,
+    mediaType: 'image/jpeg',
+    bytes: output.byteLength,
+    width,
+    height,
+  }
 }

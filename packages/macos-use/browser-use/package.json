@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-browser-use",
-  "description": "Browser-use capability seam (ctx.browserUse): a real Playwright-driven Chromium browser for navigation, DOM-selector actions, coordinate-grounded actions, and screenshots",
+  "description": "Browser-use capability seam (ctx.browserUse): isolated per-Agent Playwright Chromium contexts with DNS-pinned guarded navigation, semantic and screenshot-bound coordinate actions",
   "version": "0.1.2-alpha.1",
   "publishConfig": {
     "access": "public"
@@ -36,10 +36,12 @@
     "playwright": "^1.49.0"
   },
   "peerDependencies": {
+    "@deepseek-ai/dsh-agent": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^",
     "@deepseek-ai/cordis": "workspace:^"
   },
   "devDependencies": {
+    "@deepseek-ai/dsh-agent": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^",
     "@deepseek-ai/cordis": "workspace:^"
   }

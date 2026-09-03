@@ -1,0 +1,16 @@
+# Mount the macOS computer-use plugin into a normal Harness profile. Configure
+# every adjustable GUI Model and GUI Agent setting visually on the Plugin
+# Configuration page after the profile starts.
+
+- insert:
+    - id: macos-use
+      name: '@deepseek-ai/dsh-macos-use'
+
+    - id: browser-use
+      name: '@deepseek-ai/dsh-browser-use'
+
+    - id: gui-model
+      name: '@deepseek-ai/dsh-gui-model'
+
+    - id: tool-macos-use
+      name: '@deepseek-ai/dsh-tool-macos-use'

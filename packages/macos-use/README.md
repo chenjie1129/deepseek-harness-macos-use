@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This family lets an agent operate the local Mac and a real Chromium page, inspect macOS Accessibility state, and delegate screenshot grounding to an OpenAI-compatible vision model. `macos-use` owns native desktop control, `browser-use` owns the managed browser, `gui-model` owns vision decisions, and `tool-macos-use` exposes those capabilities to an agent. All adjustable agent settings appear on the Plugin Configuration page, including the default-on per-step screenshot switch and emergency stop. The package boundary does not bypass macOS permissions, application policy, or user confirmations.
+This family lets an agent operate the local Mac and an isolated Chromium page, inspect macOS Accessibility state, and delegate screenshot grounding to an OpenAI-compatible vision model. `macos-use` owns native desktop control, `browser-use` owns per-Agent managed browser contexts, `gui-model` owns vision decisions, and `tool-macos-use` exposes those capabilities to an agent. All adjustable agent settings appear on the Plugin Configuration page, including default-deny application/network grants, default-on confirmation before every GUI mutation, the default-on per-step screenshot switch, and emergency stop. Every-mutation confirmation should be disabled only when an equivalent trusted safety or approval boundary exists. The package boundary does not bypass macOS permissions, application policy, or user confirmations.
 
 ## Table of Contents
 
@@ -26,9 +26,9 @@ Choose the package that owns the behavior you need; the tool package composes al
 
 | Package | `ctx` key | Role |
 |---|---|---|
-| [`macos-use`](macos-use/README.md) | `macosUse` | Captures screens and controls permitted macOS applications and windows |
+| [`macos-use`](macos-use/README.md) | `macosUse` | Captures exact authorized foreground/window pixels and controls permitted macOS applications and windows |
 | [`gui-model`](gui-model/README.md) | `guiModel` | Selects one validated GUI action from a screenshot and task |
-| [`browser-use`](browser-use/README.md) | `browserUse` | Drives one Playwright Chromium page through selector or coordinate actions |
+| [`browser-use`](browser-use/README.md) | `browserUse` | Drives an isolated Playwright Chromium context/page per Agent through a DNS-pinned policy proxy |
 | [`tool-macos-use`](tool-macos-use/README.md) | — | Registers primitive tools, autonomous task loops, visual settings, and screenshot presentation |
 
 <a id="related-documentation"></a>

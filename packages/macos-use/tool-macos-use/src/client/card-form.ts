@@ -1,6 +1,7 @@
 /** Staged settings form shared by the plugin-owned visual configuration cards. */
 
 import { createSnapshotStore, type SnapshotStore } from '@deepseek-ai/dsh-client-store'
+import type { JsonValue, SettingsPathOpView } from '@deepseek-ai/dsh-api-remotes/client'
 import type { SettingsScope, SettingsScopeSnapshot } from '@deepseek-ai/dsh-client-ui-settings/client'
 
 /** One validated settings-field mutation planned from staged text. */
@@ -17,6 +18,9 @@ export interface CardFieldSpec {
 export interface CardSecretSpec {
   field: string
   write: (text: string) => Promise<boolean>
+  /** Capture the exact credential target when the user stages removal. */
+  prepareRemove: () => () => Promise<boolean>
+  configured: () => boolean
 }
 
 /** Render state for one staged card field. */
@@ -47,11 +51,13 @@ export interface CardActions {
 interface StagedEdit {
   text: string
   clear: boolean
+  remove?: () => Promise<boolean>
 }
 
-interface PlannedWrite {
-  run: (() => Promise<boolean>) | undefined
-}
+type PlannedWrite =
+  | { kind: 'setting'; field: string; op: SettingsPathOpView; landed: () => boolean }
+  | { kind: 'secret'; field: string; run: () => Promise<boolean> }
+  | { kind: 'invalid'; field: string }
 
 /**
  * Define a numeric settings field with optional integer and range bounds.
@@ -82,13 +88,20 @@ export function numberField(
 /**
  * Define a trimmed text settings field whose empty value clears the override.
  * @param field - settings field name.
+ * @param validate - optional predicate for accepting a non-empty trimmed value.
  * @returns field formatting and parsing contract.
  */
-export function textField(field: string): CardFieldSpec {
+export function textField(field: string, validate?: (value: string) => boolean): CardFieldSpec {
   return {
     field,
     format: value => typeof value === 'string' ? value : '',
-    parse: text => text.trim() === '' ? { kind: 'clear' } : { kind: 'set', value: text.trim() },
+    parse: (text) => {
+      const trimmed = text.trim()
+      // Empty is an explicit override. Otherwise a composition-layer allowlist
+      // or endpoint would spring back after the user visibly cleared it.
+      if (trimmed === '') return { kind: 'set', value: '' }
+      return validate?.(trimmed) === false ? undefined : { kind: 'set', value: trimmed }
+    },
   }
 }
 
@@ -148,7 +161,7 @@ export class CardForm<T> {
       available: snapshot.status === 'ready',
       writable: snapshot.writable,
       dirty: plan.length > 0,
-      invalid: plan.some(item => item.run === undefined),
+      invalid: plan.some(item => item.kind === 'invalid'),
       saving: this.saving,
       failed: this.failed,
     }
@@ -192,17 +205,54 @@ export class CardForm<T> {
     }
   }
 
+  /**
+   * Stage removal of one configured write-only secret through the card's Save action.
+   * @param field - registered secret field to remove when the form is saved.
+   */
+  removeSecret(field: string): void {
+    const secret = this.secrets.get(field)
+    if (secret === undefined) throw new Error(`macos-use settings card has no secret ${field}`)
+    if (!secret.configured()) return
+    this.stage(field, { text: '', clear: true, remove: secret.prepareRemove() })
+  }
+
   /** Commit every valid staged mutation through the revision-fenced scope. */
   async save(): Promise<void> {
     const plan = this.plan()
-    const writes = plan.flatMap(item => item.run === undefined ? [] : [item.run])
-    if (plan.length === 0 || this.saving || writes.length !== plan.length) return
+    if (plan.length === 0 || this.saving || plan.some(item => item.kind === 'invalid')) return
+    const settings = plan.filter((item): item is Extract<PlannedWrite, { kind: 'setting' }> => item.kind === 'setting')
+    const secrets = plan.filter((item): item is Extract<PlannedWrite, { kind: 'secret' }> => item.kind === 'secret')
+    const plannedEdits = new Map(plan.map(item => [item.field, this.staged.get(item.field)]))
     this.saving = true
     this.failed = false
     this.publish()
     let landed = true
-    for (const write of writes) landed = await write() && landed
-    if (landed) this.staged.clear()
+    try {
+      // Ordinary fields are one namespace transaction. Besides preventing
+      // half-applied safety grants, this guarantees a newly staged credential
+      // reference is active before its write-only secret is stored.
+      if (settings.length > 0) {
+        await this.scope.mutate(settings.map(item => item.op))
+        landed = settings.every(item => item.landed())
+      }
+      if (landed) {
+        for (const secret of secrets) {
+          if (!await secret.run()) {
+            landed = false
+            break
+          }
+        }
+      }
+    } catch {
+      landed = false
+    }
+    if (landed) {
+      // A field may be edited again while a remote mutation is settling. Clear
+      // only the exact staged object this save planned; later user input wins.
+      for (const [field, edit] of plannedEdits) {
+        if (edit !== undefined && this.staged.get(field) === edit) this.staged.delete(field)
+      }
+    }
     this.saving = false
     this.failed = !landed
     this.publish()
@@ -213,32 +263,50 @@ export class CardForm<T> {
     for (const [field, staged] of this.staged) {
       const secret = this.secrets.get(field)
       if (secret !== undefined) {
+        if (staged.clear) {
+          // The target is captured when Remove is clicked. The ordinary
+          // settings transaction may change the active reference before this
+          // operation executes, so resolving it here would remove the new
+          // reference and silently leave the old secret behind.
+          if (staged.remove !== undefined) plan.push({ kind: 'secret', field, run: staged.remove })
+          continue
+        }
         const value = staged.text.trim()
-        if (value !== '') plan.push({ run: () => secret.write(value) })
+        if (value !== '') plan.push({ kind: 'secret', field, run: () => secret.write(value) })
         continue
       }
       const spec = this.spec(field)
       if (staged.clear) {
-        if (this.stored(field)) plan.push({ run: () => this.clear(field) })
+        if (this.stored(field)) {
+          plan.push({
+            kind: 'setting',
+            field,
+            op: { op: 'unset', path: [field] },
+            landed: () => !this.stored(field),
+          })
+        }
         continue
       }
       if (staged.text === spec.format(this.sectionValue(field))) continue
       const write = spec.parse(staged.text)
-      if (write === undefined) plan.push({ run: undefined })
-      else if (write.kind === 'clear') plan.push({ run: () => this.clear(field) })
-      else plan.push({ run: () => this.store(field, write.value) })
+      if (write === undefined) plan.push({ kind: 'invalid', field })
+      else if (write.kind === 'clear') {
+        plan.push({
+          kind: 'setting',
+          field,
+          op: { op: 'unset', path: [field] },
+          landed: () => !this.stored(field),
+        })
+      } else {
+        plan.push({
+          kind: 'setting',
+          field,
+          op: { op: 'set', path: [field], value: write.value as JsonValue },
+          landed: () => this.stored(field) && this.userLayer()?.[field] === write.value,
+        })
+      }
     }
     return plan
-  }
-
-  private async clear(field: string): Promise<boolean> {
-    await this.scope.unset(field)
-    return !this.stored(field)
-  }
-
-  private async store(field: string, value: unknown): Promise<boolean> {
-    await this.scope.set(field, value)
-    return this.userLayer()?.[field] === value
   }
 
   private stage(field: string, edit: StagedEdit): void {

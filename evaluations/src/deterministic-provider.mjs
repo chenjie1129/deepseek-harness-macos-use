@@ -130,6 +130,10 @@ export async function startDeterministicProvider({ host = '127.0.0.1', port = 0 
                 task: 'Find order A-1042 and use the visible control to mark it Reviewed and save the change.',
                 url,
                 max_steps: 3,
+                postcondition: {
+                  url_contains: '/orders',
+                  text_contains: 'Reviewed',
+                },
               }),
             },
           }],

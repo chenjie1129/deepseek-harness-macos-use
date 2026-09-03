@@ -34,6 +34,10 @@
         taskTimeoutMs: 30000
         showStepScreenshots: true
         browserHeadless: true
-        confirmAppleScript: true
-        confirmDestructiveActions: true
+        browserAllowedDomains: 127.0.0.1
+        browserAllowPrivateNetwork: true
+        # The controlled fixture has no interactive approval surface. Production keeps
+        # both confirmation layers enabled by default and is tested separately.
+        confirmDestructiveActions: false
+        confirmEveryMutation: false
         singleActiveTask: true

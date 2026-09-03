@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-macos-use",
-  "description": "macOS desktop-control capability seam (ctx.macosUse): screenshots, System Events GUI automation, app launch, and AppleScript execution",
+  "description": "macOS desktop-control capability seam (ctx.macosUse): include-only foreground-window screenshots, exact-window observations, guarded native GUI actions, and exact app launch",
   "version": "0.1.2-alpha.1",
   "publishConfig": {
     "access": "public"
@@ -36,11 +36,13 @@
     "sharp": "^0.35.3"
   },
   "peerDependencies": {
+    "@deepseek-ai/dsh-agent": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^",
     "@deepseek-ai/dsh-subprocess": "workspace:^",
     "@deepseek-ai/cordis": "workspace:^"
   },
   "devDependencies": {
+    "@deepseek-ai/dsh-agent": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^",
     "@deepseek-ai/dsh-subprocess": "workspace:^",
     "@deepseek-ai/cordis": "workspace:^"

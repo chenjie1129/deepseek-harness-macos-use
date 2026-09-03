@@ -32,14 +32,26 @@ function toolResults(events) {
 
 function taskPresentation(result) {
   if (result === undefined || !isRecord(result.meta) || !Array.isArray(result.meta.content)) {
-    return { completed: undefined, stepImageCount: 0 }
+    return { completed: undefined, stepImageCount: 0, verificationStatus: undefined }
   }
   const content = result.meta.content
   const first = content.length > 0 && isRecord(content[0]) ? content[0] : undefined
   const firstText = first?.type === 'text' && typeof first.text === 'string' ? first.text : ''
+  const verificationStatus = typeof result.meta.verificationStatus === 'string'
+    ? result.meta.verificationStatus
+    : undefined
   return {
-    completed: firstText.startsWith('Completed:') ? true : firstText.startsWith('Stopped:') ? false : undefined,
+    completed: verificationStatus === 'verified'
+      ? true
+      : verificationStatus === undefined
+        ? firstText.startsWith('Completed:')
+          ? true
+          : firstText.startsWith('Stopped:')
+            ? false
+            : undefined
+        : false,
     stepImageCount: content.filter(item => isRecord(item) && item.type === 'image').length,
+    verificationStatus,
   }
 }
 
@@ -58,7 +70,9 @@ function projectTurnReason(reason) {
 
 function projectToolCall(call) {
   if ((call.name === 'browser_use_task' || call.name === 'computer_use_task') && isRecord(call.arguments)) {
-    const allowed = call.name === 'browser_use_task' ? ['task', 'url', 'max_steps'] : ['task', 'max_steps']
+    const allowed = call.name === 'browser_use_task'
+      ? ['task', 'url', 'max_steps', 'postcondition']
+      : ['task', 'max_steps', 'postcondition']
     return {
       callId: call.callId,
       name: call.name,
@@ -113,6 +127,13 @@ export function scoreRun(caseDefinition, run, oracle) {
       { expected: caseDefinition.expected.taskCompleted, actual: presentation.completed },
     ))
   }
+  if (caseDefinition.expected.taskVerification !== undefined) {
+    checks.push(check(
+      'task verification status',
+      presentation.verificationStatus === caseDefinition.expected.taskVerification,
+      { expected: caseDefinition.expected.taskVerification, actual: presentation.verificationStatus },
+    ))
+  }
   if (caseDefinition.expected.stepScreenshots === 'present') {
     checks.push(check('step screenshots present', presentation.stepImageCount > 0, { count: presentation.stepImageCount }))
   } else if (caseDefinition.expected.stepScreenshots === 'absent') {
@@ -130,6 +151,7 @@ export function scoreRun(caseDefinition, run, oracle) {
     trace: {
       tools: calls.map(projectToolCall),
       taskCompleted: presentation.completed,
+      taskVerification: presentation.verificationStatus,
       stepImageCount: presentation.stepImageCount,
       turnReason: safeTurnReason,
       finalResponse: run.finalResponse,

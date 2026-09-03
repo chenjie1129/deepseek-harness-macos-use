@@ -10,6 +10,7 @@
   "references": [
     { "path": "../../../vendor/cordis" },
     { "path": "../../../vendor/schemastery" },
+    { "path": "../../core/agent" },
     { "path": "../../subprocess/subprocess" },
     { "path": "../../runtime-diagnostics/invariants" }
   ]

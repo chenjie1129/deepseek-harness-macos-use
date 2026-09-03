@@ -6,7 +6,46 @@ import type { PreToolDecision, ToolExecution, ToolRunContext } from '@deepseek-a
 import type {} from '@deepseek-ai/dsh-user-approval'
 import type { ResolvedSettings } from './settings.ts'
 
-const DESTRUCTIVE_TASK = /\b(delete|remove|trash|erase|uninstall|purchase|buy|pay|transfer|send|submit|post|publish)\b/i
+// This is deliberately a conservative prompt heuristic, not a semantic effect boundary. Raw
+// coordinate clicks cannot reveal whether the pixel is Delete, Send, Buy, or something harmless.
+const HIGH_IMPACT_TASK_PATTERNS = [
+  /\b(delete|remove|trash|erase|uninstall|purchase|buy|pay|transfer|send|submit|post|publish|checkout|order)\b/i,
+  /删除|移除|清空|抹掉|卸载|购买|买下|付款|支付|转账|汇款|发送|提交|发布|发帖|下单/,
+  /削除|消去|ゴミ箱|アンインストール|購入|買う|支払(?:い|う)?|決済|送金|送信|提出|投稿|公開|注文/,
+]
+
+const DIRECT_MUTATING_TOOLS = new Set([
+  'computer_click',
+  'computer_type',
+  'computer_move',
+  'computer_drag',
+  'computer_scroll',
+  'computer_key',
+  'computer_open_app',
+  'computer_focus_window',
+  'browser_navigate',
+  'browser_click',
+  'browser_fill',
+])
+
+/** Exact surface owned by this package; prefix-matching would interfere with unrelated plugins. */
+const OWNED_GUI_TOOLS = new Set([
+  ...DIRECT_MUTATING_TOOLS,
+  'computer_screenshot',
+  'computer_list_apps',
+  'computer_list_windows',
+  'computer_screenshot_window',
+  'computer_get_window_state',
+  'computer_abort',
+  'computer_use_task',
+  'browser_extract_text',
+  'browser_screenshot',
+  'browser_use_task',
+])
+
+function looksHighImpactTask(task: string): boolean {
+  return HIGH_IMPACT_TASK_PATTERNS.some(pattern => pattern.test(task))
+}
 
 function record(value: unknown): Readonly<Record<string, unknown>> {
   return typeof value === 'object' && value !== null && !Array.isArray(value) ? value as Readonly<Record<string, unknown>> : {}
@@ -19,21 +58,47 @@ function record(value: unknown): Readonly<Record<string, unknown>> {
  * @returns an approval explanation, or undefined when the call can proceed normally.
  */
 export function directApprovalReason(exec: ToolExecution, settings: ResolvedSettings): string | undefined {
-  if (exec.name === 'computer_run_applescript' && settings.confirmAppleScript) {
-    return 'The GUI agent wants to run arbitrary AppleScript. Review the script before allowing it once.'
+  const args = record(exec.arguments)
+  if (settings.confirmEveryMutation) {
+    if (DIRECT_MUTATING_TOOLS.has(exec.name)) {
+      return `The GUI agent wants to run ${exec.name}, which changes GUI state. Allow this action once?`
+    }
+    if (exec.name === 'browser_use_task' && typeof args.url === 'string') {
+      return 'The browser task will navigate to its starting URL. Allow this navigation once?'
+    }
   }
   if (!settings.confirmDestructiveActions) return undefined
-  const args = record(exec.arguments)
   if (exec.name === 'computer_drag') return 'Dragging can move or replace user data. Allow this drag once?'
   if (exec.name === 'computer_key') {
     const combo = typeof args.combo === 'string' ? args.combo.toLowerCase() : ''
     if (/delete|backspace|cmd\+x|command\+x/.test(combo)) return `The GUI agent wants to press destructive key combo ${JSON.stringify(combo)}.`
   }
-  if ((exec.name === 'computer_use_task' || exec.name === 'browser_use_task')
-      && typeof args.task === 'string' && DESTRUCTIVE_TASK.test(args.task)) {
+  // Desktop task approval is deliberately deferred until the first concrete
+  // model-selected mutation. Asking here would focus the same-Mac Harness UI
+  // before computer_use_task takes the screenshot that grounds that action.
+  if (exec.name === 'browser_use_task'
+      && typeof args.task === 'string' && looksHighImpactTask(args.task)) {
     return 'This autonomous GUI task appears to send, submit, purchase, transfer, publish, or delete something. Allow it once?'
   }
   return undefined
+}
+
+/**
+ * Return the one deferred high-impact desktop-task reason, when per-mutation
+ * confirmation is disabled. The caller asks only after a concrete mutation is
+ * grounded in a desktop screenshot, then restores that exact observation.
+ * @param task - natural-language desktop task.
+ * @param settings - live visual safety settings captured for this task run.
+ * @returns a one-shot reason or undefined when no deferred prompt is needed.
+ */
+export function deferredDesktopTaskApprovalReason(
+  task: string,
+  settings: ResolvedSettings,
+): string | undefined {
+  if (settings.confirmEveryMutation || !settings.confirmDestructiveActions || !looksHighImpactTask(task)) {
+    return undefined
+  }
+  return 'This autonomous desktop task appears to send, submit, purchase, transfer, publish, or delete something. Allow its first concrete action once?'
 }
 
 /**
@@ -48,8 +113,7 @@ export function guiPreExecutionDecision(
   settings: ResolvedSettings,
   activeTask: boolean,
 ): PreToolDecision | undefined {
-  const guiTool = exec.name.startsWith('computer_') || exec.name.startsWith('browser_')
-  if (!guiTool || exec.name === 'computer_abort') return undefined
+  if (!OWNED_GUI_TOOLS.has(exec.name) || exec.name === 'computer_abort') return undefined
   if (settings.singleActiveTask && activeTask) {
     return { kind: 'deny', reason: 'another GUI task is active; abort it or wait for it to finish' }
   }
@@ -67,13 +131,14 @@ function actionApprovalReason(action: GuiAction): string | undefined {
 }
 
 /**
- * Ask inside an autonomous desktop task immediately before a destructive model-selected action.
+ * Ask inside an autonomous GUI task immediately before a model-selected action.
  * @param ctx - plugin context supplying the approval capability.
  * @param exec - parent autonomous tool execution.
  * @param action - next model-selected GUI action.
  * @param settings - live visual safety settings.
  * @param signal - task cancellation signal forwarded to the prompt.
- * @returns once no confirmation is needed or the action was allowed once.
+ * @param deferredTaskReason - optional one-shot desktop task-level reason deferred until this grounded action.
+ * @returns true only when an approval prompt was shown and allowed once.
  */
 export async function approveAutonomousAction(
   ctx: Context,
@@ -81,10 +146,12 @@ export async function approveAutonomousAction(
   action: GuiAction,
   settings: ResolvedSettings,
   signal: AbortSignal,
-): Promise<void> {
-  if (!settings.confirmDestructiveActions) return
-  const reason = actionApprovalReason(action)
-  if (reason === undefined) return
+  deferredTaskReason?: string,
+): Promise<boolean> {
+  const reason = settings.confirmEveryMutation
+    ? `The GUI model selected ${action.kind}, which changes GUI state. Allow this action once?`
+    : deferredTaskReason ?? (settings.confirmDestructiveActions ? actionApprovalReason(action) : undefined)
+  if (reason === undefined) return false
   const approval = ctx.get('approval')
   if (approval === undefined || exec.agent === undefined) {
     throw new Error(`${reason} Approval is required but no user approval channel is available.`)
@@ -96,5 +163,6 @@ export async function approveAutonomousAction(
     reason,
     signal,
   })
-  if (outcome !== 'allowed-once') throw new Error(`destructive GUI action was not approved (${outcome})`)
+  if (outcome !== 'allowed-once') throw new Error(`GUI action was not approved (${outcome})`)
+  return true
 }

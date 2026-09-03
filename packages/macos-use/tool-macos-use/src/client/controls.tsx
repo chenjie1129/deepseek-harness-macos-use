@@ -190,13 +190,21 @@ export function SecretField(props: {
   disabled: boolean
   configured: boolean
   onEdit: (text: string) => void
+  onRemove: () => void
 }) {
   return (
     <div className={css.field}>
       <div className={css.fieldHead}>
         <label className={css.fieldLabel} htmlFor={props.id}>{props.t(props.label)}</label>
-        <span className={props.configured ? css.badge : css.badgeMuted}>
-          {props.t(props.configured ? 'guiModel.apiKeySet' : 'guiModel.apiKeyUnset')}
+        <span className={css.badges}>
+          <span className={props.configured ? css.badge : css.badgeMuted}>
+            {props.t(props.configured ? 'guiModel.apiKeySet' : 'guiModel.apiKeyUnset')}
+          </span>
+          {props.configured ? (
+            <button type="button" className={css.reset} disabled={props.disabled} onClick={props.onRemove}>
+              {props.t('guiModel.apiKeyRemove')}
+            </button>
+          ) : null}
         </span>
       </div>
       <input

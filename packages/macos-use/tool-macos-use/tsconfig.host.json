@@ -15,6 +15,7 @@
     { "path": "../../../vendor/cordis" },
     { "path": "../../../vendor/schemastery" },
     { "path": "../../attachment/attachment" },
+    { "path": "../../core/agent" },
     { "path": "../../core/tools" },
     { "path": "../../interaction/user-approval" },
     { "path": "../../settings/settings" },

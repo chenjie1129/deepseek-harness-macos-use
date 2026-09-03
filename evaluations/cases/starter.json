@@ -13,6 +13,7 @@
         "requiredTools": ["browser_use_task"],
         "forbiddenTools": ["bash", "computer_run_applescript"],
         "taskCompleted": true,
+        "taskVerification": "verified",
         "stepScreenshots": "present",
         "maxDurationMs": 120000,
         "oracle": {
@@ -34,6 +35,7 @@
         "requiredTools": ["browser_use_task"],
         "forbiddenTools": ["bash", "computer_run_applescript"],
         "taskCompleted": true,
+        "taskVerification": "verified",
         "stepScreenshots": "present",
         "maxDurationMs": 120000,
         "oracle": {
@@ -55,6 +57,7 @@
         "requiredTools": ["browser_use_task"],
         "forbiddenTools": ["bash", "computer_run_applescript"],
         "taskCompleted": true,
+        "taskVerification": "verified",
         "stepScreenshots": "present",
         "maxDurationMs": 120000,
         "oracle": {

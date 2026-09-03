@@ -13,7 +13,7 @@ test('reports hash settings and redact secrets and inline image bytes', async (c
   const output = join(root, 'reports')
   await mkdir(home)
   await writeFile(suitePath, '{"formatVersion":1}', 'utf8')
-  await writeFile(join(home, 'settings.yaml'), 'gui-model:\n  apiKey: never-print-this\n', 'utf8')
+  await writeFile(join(home, 'settings.yaml'), 'gui-model:\n  apiKeyEnv: GUI_MODEL_API_KEY\n', 'utf8')
   const report = await buildReport({
     suite: { name: 'redaction', cases: [] },
     suitePath,
@@ -31,7 +31,7 @@ test('reports hash settings and redact secrets and inline image bytes', async (c
       trial: 1,
       pass: true,
       durationMs: 1,
-      checks: [{ name: 'redaction', pass: true, details: { apiKey: 'never-print-this', screenshot: 'data:image/png;base64,AAAA' } }],
+      checks: [{ name: 'redaction', pass: true, details: { authorization: 'Bearer never-print-this', screenshot: 'data:image/png;base64,AAAA' } }],
     }],
     serverInfo: { name: 'deepseek-harness-sdk-runtime', version: 'test' },
   })

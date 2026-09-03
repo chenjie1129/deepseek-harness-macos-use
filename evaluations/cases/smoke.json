@@ -13,6 +13,7 @@
         "requiredTools": ["browser_use_task"],
         "forbiddenTools": ["bash", "computer_run_applescript"],
         "taskCompleted": true,
+        "taskVerification": "verified",
         "stepScreenshots": "present",
         "maxDurationMs": 30000,
         "oracle": {

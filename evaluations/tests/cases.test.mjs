@@ -11,6 +11,7 @@ function validCase(id = 'one') {
       requiredTools: ['browser_use_task'],
       forbiddenTools: ['bash'],
       taskCompleted: true,
+      taskVerification: 'verified',
       stepScreenshots: 'present',
       maxDurationMs: 1000,
       oracle: { type: 'http-json', url: '{{fixtureBaseUrl}}/api/state', path: ['ok'], equals: true },
@@ -23,6 +24,7 @@ test('validates and renders a prompt suite without changing the prompt contract'
   const rendered = renderVariables(suite, { fixtureBaseUrl: 'http://127.0.0.1:4000' })
   assert.equal(rendered.cases[0].prompt, 'Visit http://127.0.0.1:4000/orders')
   assert.equal(rendered.cases[0].expected.oracle.url, 'http://127.0.0.1:4000/api/state')
+  assert.equal(rendered.cases[0].expected.taskVerification, 'verified')
 })
 
 test('rejects duplicate case ids', () => {
@@ -34,4 +36,13 @@ test('rejects duplicate case ids', () => {
 
 test('rejects unknown template variables', () => {
   assert.throws(() => renderVariables('{{unknown}}', {}), /unknown evaluation variable/)
+})
+
+test('rejects an unknown task verification status', () => {
+  const candidate = validCase()
+  candidate.expected.taskVerification = 'looks-good'
+  assert.throws(
+    () => validateSuite({ formatVersion: 1, name: 'suite', cases: [candidate] }),
+    /known verification status/,
+  )
 })

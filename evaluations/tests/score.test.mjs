@@ -8,6 +8,7 @@ function caseDefinition() {
       requiredTools: ['browser_use_task'],
       forbiddenTools: ['bash'],
       taskCompleted: true,
+      taskVerification: 'verified',
       stepScreenshots: 'present',
       maxDurationMs: 1_000,
     },
@@ -21,7 +22,10 @@ function events() {
       type: 'tool/result',
       data: {
         message: { source: { callId: 'call-1' }, content: [{ type: 'text', text: 'tool result' }] },
-        meta: { content: [{ type: 'text', text: 'Completed: reviewed' }, { type: 'image', image: { id: 'step-1' } }] },
+        meta: {
+          content: [{ type: 'text', text: 'Postcondition verified: reviewed' }, { type: 'image', image: { id: 'step-1' } }],
+          verificationStatus: 'verified',
+        },
       },
     },
     { type: 'turn/end', data: { turn: 1, reason: { kind: 'completed' } } },
@@ -37,6 +41,7 @@ test('passes only when tool behavior, presentation, duration, and oracle all pas
   })
   assert.equal(score.pass, true)
   assert.equal(score.trace.stepImageCount, 1)
+  assert.equal(score.trace.taskVerification, 'verified')
 })
 
 test('fails false completion even when the tool says completed and emits a screenshot', () => {

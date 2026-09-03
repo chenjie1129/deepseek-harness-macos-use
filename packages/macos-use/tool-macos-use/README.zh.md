@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-`dsh-tool-macos-use` 为智能体提供 22 个桌面与浏览器工具，包括基础操作和基于截图定位的自主任务循环。它会执行应用策略、用户确认、语义元素令牌、时间与步骤预算、单任务锁和立即中止。所有可调整的智能体设置都显示在插件配置页面中。默认情况下，每步截图都会存储并显示在对应步骤旁；关闭该设置后，不会存储或显示每步截图，但 GUI 模型私下使用的截图仍会保留。
+`dsh-tool-macos-use` 为智能体提供 21 个桌面与浏览器工具，包括基础操作和基于截图定位的自主任务循环。它会执行应用策略、用户确认、语义元素令牌、时间与步骤预算、单任务锁和按所有者隔离的中止。所有可调整的智能体设置都显示在插件配置页面中。每次直接或模型选择的 GUI 变更动作前的确认默认开启；只有存在等效、可信的安全或审批边界时才应关闭。默认情况下，每步的新鲜视觉证据也会存储并显示在对应步骤旁；关闭该设置后，不会存储或显示每步截图，但 GUI 模型私下使用的截图仍会保留。
 
 ## 目录
 
@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用此包
 
-请先挂载全部三个能力包，再挂载此消费方，然后在插件配置中设置智能体。
+请先挂载全部三个能力包，再挂载此消费方，然后在插件配置中设置智能体。浏览器网络访问及 macOS 应用读取/控制均默认拒绝；使用前必须在页面中显式加入域名和应用授权。从旧版允许式默认值升级时，需要迁移这些配置。
 
 ### 何时选择
 
@@ -36,29 +36,24 @@ kind: "package-reference"
 ```yaml
 - name: '@deepseek-ai/dsh-macos-use'
 - name: '@deepseek-ai/dsh-gui-model'
-  config:
-    baseURL: https://api.example.com/v1
-    model: some-vision-model
 - name: '@deepseek-ai/dsh-browser-use'
 - name: '@deepseek-ai/dsh-tool-macos-use'
-  config:
-    showStepScreenshots: true
 ```
 
 | 字段 | 默认值 | 含义 |
 |---|---|---|
-| `defaultMaxSteps` | `20` | 自主循环默认步骤预算 |
+| `defaultMaxSteps` | `20` | 自主循环默认步骤预算；可视化配置限制为 1–100 |
 | `taskTimeoutMs` | `120,000` | 自主任务截止时间 |
-| `showStepScreenshots` | `true` | 保存并显示每个步骤定位时使用的截图 |
-| `confirmAppleScript` | `true` | 执行任意 AppleScript 前询问 |
-| `confirmDestructiveActions` | `true` | 执行破坏性 GUI 操作前询问 |
+| `showStepScreenshots` | `true` | 保存并显示每一步的新鲜视觉证据 |
+| `confirmDestructiveActions` | `true` | 对部分高影响 GUI 操作启发式询问 |
+| `confirmEveryMutation` | `true` | 每次直接或自主 GUI 变更动作前单独询问 |
 | `singleActiveTask` | `true` | 同一时间只允许一个自主任务 |
 
-生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-tool-macos-use)是所有可接受字段的完整来源。GUI 智能体卡片还管理命令超时、辅助功能元素预算、Chromium 模式、应用允许与拒绝列表、截图排除项和紧急停止。
+表内全部字段，以及命令超时、辅助功能元素预算、Chromium 模式、显式浏览器域名授权、应用读取／控制授权、拒绝项、截图排除项和紧急停止，都由 GUI 智能体卡片可视化管理，无需在 YAML 中重复任何可调智能体参数。集成后的 Harness 文档生成器会从同一份实时 schema 生成完整配置目录。浏览器允许列表为空时会阻止网络导航（仍可用 `about:blank`）；旧版与精确应用授权都为空时不授权任何应用。
 
 ### 工具
 
-桌面基础工具包括 `computer_screenshot`、`computer_list_apps`、`computer_list_windows`、`computer_screenshot_window`、`computer_get_window_state`、`computer_click`、`computer_move`、`computer_drag`、`computer_type`、`computer_key`、`computer_scroll`、`computer_open_app`、`computer_focus_window`、`computer_run_applescript` 和 `computer_abort`。浏览器基础工具包括 `browser_navigate`、`browser_click`、`browser_fill`、`browser_extract_text` 和 `browser_screenshot`。`computer_use_task` 与 `browser_use_task` 会捕获截图、请求一个 GUI 模型动作、执行该动作并重复此过程，直到返回 `done` 或循环因边界停止。
+桌面基础工具包括 `computer_screenshot`、`computer_list_apps`、`computer_list_windows`、`computer_screenshot_window`、`computer_get_window_state`、`computer_click`、`computer_move`、`computer_drag`、`computer_type`、`computer_key`、`computer_scroll`、`computer_open_app`、`computer_focus_window` 和 `computer_abort`。浏览器基础工具包括 `browser_navigate`、`browser_click`、`browser_fill`、`browser_extract_text` 和 `browser_screenshot`。`computer_use_task` 与 `browser_use_task` 会捕获截图、请求一个 GUI 模型动作、执行该动作并重复此过程，直到返回 `done` 或循环因边界停止。模型可见的 `computer_abort` 只能停止调用它的 Agent 所拥有的任务；插件配置中的紧急停止明确作用于全局。任意模型生成的 AppleScript 不会暴露，因为应用授权无法可靠限制它的读取和副作用。
 
 -----
 
@@ -68,7 +63,7 @@ kind: "package-reference"
 <details>
 <summary>实现内部细节 — 点击展开</summary>
 
-该包基于 `ctx.macosUse`、`ctx.browserUse`、`ctx.guiModel` 和 `ctx.attachments` 注册所有工具。`computer_get_window_state` 会签发不透明元素令牌；指针工具会重新解析令牌的当前中心点，并在更新快照或窗口几何变化后拒绝该令牌。存储图片前，该包会缩小副本，以满足附件字节、像素与边长限制，同时保留 GUI 定位所需的原始像素。
+该包基于 `ctx.macosUse`、`ctx.browserUse`、`ctx.guiModel` 和 `ctx.attachments` 注册所有工具。`computer_get_window_state` 会签发绑定所有者的一次性元素令牌。基础操作会先同步预留令牌，再重新获取窗口/辅助功能快照，并在派发前复验精确进程、窗口、元素身份与边界。元素令牌使用 macOS 全局点坐标；显示器坐标观察只在黑色像素上包含已授权前台窗口，并保留截图像素坐标，供原生服务转换为全局 point。`computer_screenshot` 同样签发一次性的前台观察令牌，原始坐标/当前焦点操作必须携带它。存储图片前，该包会缩小副本，以满足附件字节、像素与边长限制，同时保留 GUI 定位所需的原始像素。
 
 任务结果会分离模型可见文本与仅 UI 可见的图片展示。常规渲染包含状态、摘要、动作日志和最终截图引用。`tool.call.toolview` 投影从结果元数据读取持久图片引用，并逐步显示它们，而不会把这些像素发送给驱动模型。当前输出 schema 接受附件服务可选的 `originalDimensions` 元数据。
 
@@ -91,7 +86,7 @@ kind: "package-reference"
 - [macOS-use 包映射](../README.zh.md) — 此消费方组合的能力包。
 - [GUI 模型包](../gui-model/README.zh.md) — 自主循环发起的视觉请求。
 - [架构](../../../docs/architecture.zh.md) — 结果元数据、附件授权与当前 Harness 集成。
-- [生成的工具目录](../../../docs/tool-catalog.zh.md#deepseek-aidsh-tool-macos-use) — 从运行中插件收集的精确 schema。
+- 集成后的 Harness 文档生成器会从运行中的插件输出精确工具目录。
 
 -----
 
@@ -102,11 +97,11 @@ kind: "package-reference"
 
 #### 模型看到的内容
 
-驱动模型会看到生成的 [`computer_*`、`browser_*`、`computer_use_task` 与 `browser_use_task` schema](../../../docs/tool-catalog.zh.md#deepseek-aidsh-tool-macos-use)。GUI 提供方端点与凭据属于部署设置，不是模型参数。
+驱动模型会看到生成的 `computer_*`、`browser_*`、`computer_use_task` 与 `browser_use_task` schema。GUI 提供方端点与凭据属于部署设置，不是模型参数。
 
 #### Token 影响
 
-包可见时，每个请求都会发送 22 个固定 schema；`defaultMaxSteps` 只会改变一个任务参数的说明。
+包可见时，每个请求都会发送 21 个固定 schema；`defaultMaxSteps` 只会改变一个任务参数的说明。
 
 #### KV 缓存影响
 
@@ -130,9 +125,13 @@ kind: "package-reference"
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- GUI 模型请求与决策发生在驱动会话日志之外。启用的每步截图是最终工具结果中的持久 UI 展示元数据，不是独立流式会话事件。
-- 确认只对当前操作有效。该插件不会创建持久权限，也不会替代 macOS 的辅助功能与屏幕录制控制。
-- GUI 模型请求失败会中止任务工具；没有重试、恢复或局部持久子步骤记录。
+- GUI 模型请求与决策发生在驱动会话日志之外。调用活动期间及结束后的短暂时间内，绑定 Agent Context 与调用的进程内 RPC 可显示有严格上限的 JPEG 预览，且不会追加自定义会话事件。普通模型/动作/审批失败会返回结构化停止结果，开启后的步骤截图会成为可回放的持久展示元数据。若 Harness 在外层硬中断、来不及写入最终结果，UI 只能退化到短时保留的受限预览。
+- 附件接口没有事务回滚或删除操作。如果 Harness 外层硬中断恰好发生在步骤图片已保存、最终结果尚未写入之间，该图片可能成为附件存储中的无引用对象；彻底解决需要上游附件生命周期能力。
+- context-only 进度 Remote 可防止根 API 与意外跨 scope 调用，但本地单用户 Harness 没有按连接隔离的 Session ACL；它不声称能抵御伪造其他活动 Agent wire identity 的恶意同源 RPC 客户端，完整隔离依赖上游 Gateway 认证/能力令牌。
+- `confirmDestructiveActions` 是基于中英日措辞和动作类型的启发式规则，不是可靠的语义副作用边界；原始坐标点击无法判断目标究竟是“删除”“发送”还是“购买”。确认只对当前操作有效，不会创建持久权限，也不会替代 macOS 的辅助功能与屏幕录制控制。
+- `confirmEveryMutation` 是默认开启的安全边界，会为每个 GUI 变更类直接工具及每个非 wait/done 自主动作单独询问；没有审批响应方时会默认拒绝。只有存在等效、可信的安全或审批边界时才应关闭。关闭后，若已配置，`confirmDestructiveActions` 仍会生效，但该启发式规则不是语义效果保证。
+- 插件自身的同机桌面动作审批只会在动作已经由截图定位后发起。若审批 UI 抢走焦点，只有获准的动作才会重激活该精确已观察窗口，并且仅在身份、几何与像素仍一致时继续；否则停止并要求重新观察。若其他策略在外层 `computer_use_task` 执行前询问，审批包装器会在显示 UI 前私下绑定精确前台目标；获得一次性允许后先恢复并复验，再拍摄新截图并让 GUI 模型重新决策。被拒绝的审批不会重激活任何目标。托管浏览器动作维持原有审批行为，因为 Harness 焦点不会改变隔离页面目标。审批应答器必须通过公开的 `approval/request` 瀑布继续委托：若后来注册的监听器排在该包装器之前，并在不调用 `next()` 的情况下直接作答，插件无法观察或安全重绑定该审批，因此部署组合必须让恢复包装器保持在最外层。
+- 当前没有自动重试或恢复。插件可捕获的失败会返回结构化停止结果并保留已保存步骤；只有 Harness 外层强制取消可能阻止最终持久结果写入。
 - 辅助功能元素质量因应用而异；没有有效边界的控件不能通过令牌定位。
 
 <a id="dev-note"></a>
