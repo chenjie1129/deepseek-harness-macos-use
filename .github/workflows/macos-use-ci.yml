@@ -22,8 +22,6 @@ jobs:
       HARNESS_SHA: cd5ef8148158c3a752a658978873241fdf8e2bbc
       NODE_VERSION: 22.22.0
       PNPM_VERSION: 11.7.0
-      ARTIFACT_DIR: ${{ runner.temp }}/macos-use-artifacts
-      DSH_HOME: ${{ runner.temp }}/macos-use-dsh-home
       # CI boots real Web and SDK profiles; never report those runs to the
       # production telemetry exporter mounted by the upstream alpha.1 bundle.
       DSH_TELEMETRY_DISABLED: '1'
@@ -56,6 +54,13 @@ jobs:
           corepack prepare "pnpm@${PNPM_VERSION}" --activate
           node --version
           pnpm --version
+
+      - name: Prepare isolated runtime paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "ARTIFACT_DIR=$RUNNER_TEMP/macos-use-artifacts" >> "$GITHUB_ENV"
+          echo "DSH_HOME=$RUNNER_TEMP/macos-use-dsh-home" >> "$GITHUB_ENV"
 
       - name: Integrate plugin into clean Harness
         shell: bash
