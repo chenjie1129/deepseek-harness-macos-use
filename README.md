@@ -75,7 +75,7 @@ The repository includes a [prompt-level evaluation runner](evaluations/README.md
 
 ## Current verification boundary
 
-At the current source freeze, the plugin Vitest gate passes **330 tests across 22 files**, and the plugin Host and Client TypeScript projects plus the full integrated Harness build pass on the proven alpha.1 base. These checks cover configuration, policy, lifecycle, actions, progress, attachment metadata, the screenshot switch, and output redaction. The separate prompt-evaluator suite passes **19 tests across 8 files**, and its deterministic prompt-to-browser smoke passes against an independent HTTP oracle.
+At the current source freeze, the plugin Vitest gate passes **346 tests across 23 files**, and the plugin Host and Client TypeScript projects plus the full integrated Harness build pass on the proven alpha.1 base. These checks cover configuration, policy, lifecycle, actions, progress, attachment metadata, the screenshot switch, and output redaction. The separate prompt-evaluator suite passes **19 tests across 8 files**, and its deterministic prompt-to-browser smoke passes against an independent HTTP oracle.
 
 A dedicated Playwright Chromium render bundles the actual `SettingsCards` and `GuiTaskView` components. It verifies every configuration control, both default-on safety/screenshot switches, one inline step image when screenshots are on, zero when off, and clean console/request/overflow state.
 

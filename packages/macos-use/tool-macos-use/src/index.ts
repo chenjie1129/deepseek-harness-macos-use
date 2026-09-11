@@ -622,6 +622,7 @@ export function apply(ctx: Context, config: Config = {}): void {
       allowedDomains: next.browserAllowedDomains,
       deniedDomains: next.browserDeniedDomains,
       allowPrivateNetwork: next.browserAllowPrivateNetwork,
+      backend: next.browserBackend,
     })
     if (next.abortRevision > lastAbortRevision) coordinator.abortAll('All GUI tasks aborted from Plugin Configuration')
     lastAbortRevision = next.abortRevision

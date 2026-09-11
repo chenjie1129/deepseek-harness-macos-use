@@ -17,8 +17,10 @@ import { chromium } from 'playwright'
 import type { Browser, BrowserContext, Page } from 'playwright'
 import { startPinnedBrowserProxy } from './pinned-proxy.ts'
 import type { PinnedBrowserProxy, PinnedBrowserProxyOptions } from './pinned-proxy.ts'
+import { EgoBrowserBackend } from './ego-backend.ts'
 import { BrowserUseError } from './types.ts'
 import type {
+  BrowserBackendType,
   BrowserScreenshotResult,
   BrowserScreenshotRequest,
   BrowserPageState,
@@ -37,7 +39,9 @@ import type {
 } from './types.ts'
 
 export { BrowserUseError } from './types.ts'
+export { EgoBrowserBackend } from './ego-backend.ts'
 export type {
+  BrowserBackendType,
   BrowserScreenshotResult,
   BrowserScreenshotRequest,
   BrowserOwnerScope,
@@ -67,10 +71,19 @@ declare module '@deepseek-ai/cordis' {
 export interface Config {
   /** Run Chromium headless. Defaults to true; set false to watch the browser drive itself. */
   headless?: boolean
+  /** Browser automation backend. 'playwright' (default) is the secure isolated backend; 'ego' is experimental and requires the ego lite app. */
+  backend?: BrowserBackendType
+  /** Command used to invoke the ego-browser CLI when backend is 'ego'. Defaults to 'ego-browser'. */
+  egoBrowserCommand?: string
+  /** Timeout in milliseconds for one ego-browser CLI invocation. Defaults to 30000. */
+  egoBrowserTimeoutMs?: number
 }
 
 const BROWSER_USE_DEFAULT_HEADLESS = true
 const BROWSER_USE_DEFAULT_ALLOW_PRIVATE_NETWORK = false
+const BROWSER_USE_DEFAULT_BACKEND: BrowserBackendType = 'playwright'
+const BROWSER_USE_DEFAULT_EGO_COMMAND = 'ego-browser'
+const BROWSER_USE_DEFAULT_EGO_TIMEOUT_MS = 30_000
 const BROWSER_USE_CHROMIUM_ARGS = [
   '--disable-blink-features=WebTransport',
   '--disable-quic',
@@ -133,6 +146,9 @@ async function awaitAbortable<T>(
 
 export const Config: z<Config> = z.object({
   headless: z.boolean(),
+  backend: z.union(['playwright', 'ego'] as const).default('playwright'),
+  egoBrowserCommand: z.string().default('ego-browser'),
+  egoBrowserTimeoutMs: z.number().step(1).min(1000).default(30000),
 })
 
 interface BrowserObservation {
@@ -292,6 +308,10 @@ export class BrowserUseService extends Service {
 
   private headless: boolean
   private runtime: BrowserUseRuntimeSettings
+  private backendType: BrowserBackendType
+  private ego: EgoBrowserBackend | undefined
+  private egoCommand: string
+  private egoTimeoutMs: number
   private browser: Browser | undefined
   private browserPromise: Promise<Browser> | undefined
   private proxy: PinnedBrowserProxy | undefined
@@ -302,11 +322,15 @@ export class BrowserUseService extends Service {
   constructor(ctx: Context, config: Config = {}) {
     super(ctx, 'browserUse')
     this.headless = config.headless ?? BROWSER_USE_DEFAULT_HEADLESS
+    this.backendType = config.backend ?? BROWSER_USE_DEFAULT_BACKEND
+    this.egoCommand = config.egoBrowserCommand ?? BROWSER_USE_DEFAULT_EGO_COMMAND
+    this.egoTimeoutMs = config.egoBrowserTimeoutMs ?? BROWSER_USE_DEFAULT_EGO_TIMEOUT_MS
     this.runtime = {
       headless: this.headless,
       allowedDomains: [],
       deniedDomains: [],
       allowPrivateNetwork: BROWSER_USE_DEFAULT_ALLOW_PRIVATE_NETWORK,
+      backend: this.backendType,
     }
     ctx.on('agent/disposed', ({ agent }) => {
       void this.releaseOwner(agent.id).catch((error: unknown) => {
@@ -326,10 +350,13 @@ export class BrowserUseService extends Service {
       this.browser = undefined
       const proxy = this.proxy
       this.proxy = undefined
+      const ego = this.ego
+      this.ego = undefined
       await Promise.all([...contexts].map(async context => context.close().catch(() => {})))
       await browser?.close().catch(() => {})
       await proxy?.close().catch(() => {})
       await browserPromise?.then(async pending => pending.close().catch(() => {})).catch(() => {})
+      await ego?.dispose().catch(() => {})
     }, 'browser-use teardown')
   }
 
@@ -347,6 +374,8 @@ export class BrowserUseService extends Service {
    * @param settings - complete live browser policy and launch-mode projection.
    */
   configure(settings: BrowserUseRuntimeSettings): void {
+    const nextBackend = settings.backend ?? BROWSER_USE_DEFAULT_BACKEND
+    const backendChanged = this.backendType !== nextBackend
     const retireContext = this.headless !== settings.headless
       || this.runtime.allowPrivateNetwork !== settings.allowPrivateNetwork
       || this.runtime.allowedDomains.length !== settings.allowedDomains.length
@@ -354,11 +383,18 @@ export class BrowserUseService extends Service {
       || this.runtime.deniedDomains.length !== settings.deniedDomains.length
       || this.runtime.deniedDomains.some((value, index) => value !== settings.deniedDomains[index])
     this.headless = settings.headless
+    this.backendType = nextBackend
     this.runtime = {
       headless: settings.headless,
       allowedDomains: [...settings.allowedDomains],
       deniedDomains: [...settings.deniedDomains],
       allowPrivateNetwork: settings.allowPrivateNetwork,
+      backend: nextBackend,
+    }
+    if (backendChanged) {
+      const ego = this.ego
+      this.ego = undefined
+      void ego?.dispose().catch(() => {})
     }
     if (!retireContext) return
     this.generation += 1
@@ -380,6 +416,26 @@ export class BrowserUseService extends Service {
     void browserPromise?.catch(() => {})
   }
 
+  private isEgo(): boolean {
+    return this.backendType === 'ego'
+  }
+
+  private assertCoordinateActionSupported(): void {
+    if (this.isEgo()) {
+      throw new BrowserUseError(
+        'coordinate browser actions are not supported by the experimental Ego backend; use selector-based browser_navigate/browser_click/browser_fill or switch back to the Playwright backend',
+        'BROWSER_USE_UNSUPPORTED_ACTION',
+      )
+    }
+  }
+
+  private ensureEgoBackend(): EgoBrowserBackend {
+    if (this.ego === undefined) {
+      this.ego = new EgoBrowserBackend(this.ctx.logger, this.egoCommand, this.egoTimeoutMs)
+    }
+    return this.ego
+  }
+
   /**
    * Navigate the active tab, launching the browser first if needed.
    * @param request - absolute URL to load.
@@ -388,6 +444,7 @@ export class BrowserUseService extends Service {
   async navigate(request: NavigateRequest, signal?: AbortSignal): Promise<void> {
     signal?.throwIfAborted()
     await this.assertNavigationAllowed(request.url, signal)
+    if (this.isEgo()) return this.ensureEgoBackend().navigate(request, signal)
     const [page, state] = await this.ensurePage(request.ownerId, signal)
     state.observation = undefined
     await this.runAction(state, () => page.goto(request.url, { waitUntil: 'domcontentloaded' }), signal)
@@ -401,6 +458,7 @@ export class BrowserUseService extends Service {
    */
   async clickSelector(request: ClickSelectorRequest, signal?: AbortSignal): Promise<void> {
     signal?.throwIfAborted()
+    if (this.isEgo()) return this.ensureEgoBackend().clickSelector(request, signal)
     const [page, state] = await this.ensurePage(request.ownerId, signal)
     state.observation = undefined
     await this.runAction(state, () => page.locator(request.selector).first().click(), signal)
@@ -413,6 +471,7 @@ export class BrowserUseService extends Service {
    */
   async fillSelector(request: FillSelectorRequest, signal?: AbortSignal): Promise<void> {
     signal?.throwIfAborted()
+    if (this.isEgo()) return this.ensureEgoBackend().fillSelector(request, signal)
     const [page, state] = await this.ensurePage(request.ownerId, signal)
     state.observation = undefined
     await this.runAction(state, () => page.locator(request.selector).first().fill(request.text), signal)
@@ -426,6 +485,7 @@ export class BrowserUseService extends Service {
    */
   async extractText(request: ExtractTextRequest, signal?: AbortSignal): Promise<string> {
     signal?.throwIfAborted()
+    if (this.isEgo()) return this.ensureEgoBackend().extractText(request, signal)
     const [page, state] = await this.ensurePage(request.ownerId, signal)
     const selector = request.selector ?? 'body'
     const limit = Math.max(1, Math.min(MAX_BROWSER_TEXT_CHARS,
@@ -453,6 +513,7 @@ export class BrowserUseService extends Service {
    */
   async clickAt(request: ClickAtRequest, signal?: AbortSignal): Promise<void> {
     signal?.throwIfAborted()
+    this.assertCoordinateActionSupported()
     const [page, state] = await this.ensurePage(request.ownerId, signal)
     const observation = this.consumeObservation(state, page, request.observationId)
     await this.runObservationBoundAction(
@@ -473,6 +534,7 @@ export class BrowserUseService extends Service {
    */
   async moveAt(request: MoveAtRequest, signal?: AbortSignal): Promise<void> {
     signal?.throwIfAborted()
+    this.assertCoordinateActionSupported()
     const [page, state] = await this.ensurePage(request.ownerId, signal)
     const observation = this.consumeObservation(state, page, request.observationId)
     await this.runObservationBoundAction(state, page, observation, () => page.mouse.move(request.x, request.y), signal)
@@ -485,6 +547,7 @@ export class BrowserUseService extends Service {
    */
   async dragAt(request: DragAtRequest, signal?: AbortSignal): Promise<void> {
     signal?.throwIfAborted()
+    this.assertCoordinateActionSupported()
     const [page, state] = await this.ensurePage(request.ownerId, signal)
     const observation = this.consumeObservation(state, page, request.observationId)
     await this.runObservationBoundAction(state, page, observation, async () => {
@@ -505,6 +568,7 @@ export class BrowserUseService extends Service {
    */
   async scroll(request: BrowserScrollRequest, signal?: AbortSignal): Promise<void> {
     signal?.throwIfAborted()
+    this.assertCoordinateActionSupported()
     const [page, state] = await this.ensurePage(request.ownerId, signal)
     const observation = this.consumeObservation(state, page, request.observationId)
     const amount = Math.max(1, Math.min(10, Math.trunc(request.amount ?? 1))) * 640
@@ -531,6 +595,7 @@ export class BrowserUseService extends Service {
    */
   async type(request: TypeTextRequest, signal?: AbortSignal): Promise<void> {
     signal?.throwIfAborted()
+    this.assertCoordinateActionSupported()
     const [page, state] = await this.ensurePage(request.ownerId, signal)
     const observation = this.consumeObservation(state, page, request.observationId)
     await this.runObservationBoundAction(
@@ -549,6 +614,7 @@ export class BrowserUseService extends Service {
    */
   async key(request: KeyPressRequest, signal?: AbortSignal): Promise<void> {
     signal?.throwIfAborted()
+    this.assertCoordinateActionSupported()
     const [page, state] = await this.ensurePage(request.ownerId, signal)
     const observation = this.consumeObservation(state, page, request.observationId)
     await this.runObservationBoundAction(
@@ -568,6 +634,7 @@ export class BrowserUseService extends Service {
    */
   async screenshot(request: BrowserScreenshotRequest, signal?: AbortSignal): Promise<BrowserScreenshotResult> {
     signal?.throwIfAborted()
+    if (this.isEgo()) return this.ensureEgoBackend().screenshot(request, signal)
     const [page, state] = await this.ensurePage(request.ownerId, signal)
     const buffer = await this.runAction(state, () => page.screenshot({ type: 'png' }), signal)
     const observation = {
@@ -593,6 +660,7 @@ export class BrowserUseService extends Service {
    */
   async pageState(request: BrowserPageStateRequest, signal?: AbortSignal): Promise<BrowserPageState> {
     signal?.throwIfAborted()
+    if (this.isEgo()) return this.ensureEgoBackend().pageState(request, signal)
     const [page, state] = await this.ensurePage(request.ownerId, signal)
     const selector = request.selector ?? 'body'
     const limit = Math.max(1, Math.min(MAX_BROWSER_TEXT_CHARS,
@@ -638,6 +706,12 @@ export class BrowserUseService extends Service {
    * @param ownerId - byte-exact trusted Agent/session identity.
    */
   async releaseOwner(ownerId: string): Promise<void> {
+    if (this.isEgo()) {
+      await this.ensureEgoBackend().releaseOwner(ownerId).catch((error: unknown) => {
+        this.ctx.logger.warn(`browser-use: ego releaseOwner failed for ${String(ownerId)}: ${String(error)}`)
+      })
+      return
+    }
     const state = this.owners.get(ownerId)
     if (state !== undefined) await this.retireOwnerState(state)
   }

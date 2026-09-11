@@ -59,6 +59,14 @@ corepack pnpm exec playwright install chromium
 
 需要给启动 Harness 的进程授予“辅助功能”和“屏幕录制”权限。显示器坐标截图绝不会捕获完整显示器：服务只把经过精确授权的前台窗口 id 传给原生截图命令，再把这些像素合成到其余为黑色、具有主显示器坐标几何的画布上。新鲜观察通过校验后，PNG 像素坐标才会转换成全局 macOS point，包括 Retina 1×／2× 和主显示器非零原点。被排除、不可读、位于副显示器、跨屏、部分超出或捕获期间变化的前台窗口，会在返回可传输像素前被拒绝。
 
+### Ego Lite 后端（实验性）
+
+在 GUI 智能体设置卡片中把 `browserBackend` 设为 `ego`，即可使用 ego lite 浏览器代替 Playwright。这需要先安装 [ego lite 应用](https://github.com/citrolabs/ego-lite)，并确保 `ego-browser` CLI 位于 PATH 中。
+
+**该后端不具备默认 Playwright 后端的固定代理网络隔离能力。** 仅在受信任的网络上启用它，并配合严格限定范围的域名授权。完整风险说明请参见 [architecture.md](architecture.zh.md#实验性-ego-lite-后端)。
+
+启用 `ego` 时，只有基于选择器的浏览器工具（`browser_navigate`、`browser_click`、`browser_fill`、`browser_extract_text`、`browser_screenshot`）可用。`browser_use_task` 自主循环与坐标动作不受支持。
+
 ## 安全边界
 
 插件不暴露调用方自定义的任意 AppleScript；内部原生脚本会把最后一次目标校验与输入事件绑定在一起。应用拒绝规则优先于授权。背景窗口、桌面、菜单、覆盖层和其他应用绝不会进入显示器坐标 raster，因此不依赖事后遮盖；针对被排除内容的精确窗口截图会直接失败。每个直接或模型选择的 GUI 变更动作前的一次性确认默认开启。只有当部署提供等效、可信的安全或审批边界时，才应关闭它。关闭后，按配置启用的启发式确认仍会覆盖部分破坏性拖动、按键与任务措辞，但它不是语义效果保证。
@@ -69,7 +77,7 @@ corepack pnpm exec playwright install chromium
 
 ## 已完成的验证
 
-在当前源码冻结点，插件 Vitest 门禁在 **22 个文件中通过 330 项测试**，Host 与 Client TypeScript 项目以及完整集成 Harness 构建也在支持的 alpha.1 基线上通过。逻辑门禁覆盖设置持久化、可视化配置卡注册、默认拒绝策略、提供方边界、观察归属与清理、浏览器隔离、原生动作保护、原子完成校验、键入文本输出脱敏、进度边界、授权附件元数据，以及截图开关默认开启／关闭路径。
+在当前源码冻结点，插件 Vitest 门禁在 **23 个文件中通过 346 项测试**，Host 与 Client TypeScript 项目以及完整集成 Harness 构建也在支持的 alpha.1 基线上通过。逻辑门禁覆盖设置持久化、可视化配置卡注册、默认拒绝策略、提供方边界、观察归属与清理、浏览器隔离、原生动作保护、原子完成校验、键入文本输出脱敏、进度边界、授权附件元数据，以及截图开关默认开启／关闭路径。
 
 独立的提示词评测器在 **8 个文件中通过 19 项测试**。它的确定性“提示词到浏览器”冒烟测试也通过了真实 Harness SDK／工具循环与 Playwright 路径，最终状态由独立 HTTP 判定器验证。
 

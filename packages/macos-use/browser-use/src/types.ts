@@ -9,6 +9,11 @@ export type BrowserUseErrorCode =
   | 'BROWSER_USE_ACTION_FAILED'
   | 'BROWSER_USE_URL_BLOCKED'
   | 'BROWSER_USE_STALE_OBSERVATION'
+  | 'BROWSER_USE_BACKEND_UNAVAILABLE'
+  | 'BROWSER_USE_UNSUPPORTED_ACTION'
+
+/** Selects the browser automation backend. 'playwright' is the secure default; 'ego' is experimental. */
+export type BrowserBackendType = 'playwright' | 'ego'
 
 /** Raised by every {@link BrowserUseService} method on a launch or action failure. */
 export class BrowserUseError extends Error {
@@ -43,6 +48,8 @@ export interface BrowserUseRuntimeSettings {
   deniedDomains: readonly string[]
   /** Permit loopback, link-local, and private IP destinations. Defaults to false. */
   allowPrivateNetwork: boolean
+  /** Active browser backend. Defaults to 'playwright'; 'ego' requires the ego lite app and is experimental. */
+  backend?: BrowserBackendType
 }
 
 /** Arguments to {@link BrowserUseService.navigate}. */
