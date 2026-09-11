@@ -16,6 +16,7 @@ const DEFAULT_MAX_ELEMENTS = 250
 const DEFAULT_SHOW_STEP_SCREENSHOTS = true
 const DEFAULT_BROWSER_HEADLESS = true
 const DEFAULT_BROWSER_ALLOW_PRIVATE_NETWORK = false
+const DEFAULT_BROWSER_BACKEND = 'playwright' as const
 const DEFAULT_CONFIRM_DESTRUCTIVE = true
 const DEFAULT_CONFIRM_EVERY_MUTATION = true
 const DEFAULT_SINGLE_ACTIVE_TASK = true
@@ -54,6 +55,8 @@ export interface Config {
   browserDeniedDomains?: string
   /** Permit the managed browser to navigate to loopback, link-local, and private-network targets. */
   browserAllowPrivateNetwork?: boolean
+  /** Browser automation backend: 'playwright' (secure default, isolated with pinned proxy) or 'ego' (experimental, requires ego lite app, no pinned-proxy network isolation). */
+  browserBackend?: 'playwright' | 'ego'
   /** Legacy comma/newline name grants; empty grants no app when precise grants are also empty. */
   allowedApps?: string
   /** Comma/newline list of applications desktop actions must never control. */
@@ -86,6 +89,7 @@ export const Config: z<Config> = z.object({
   browserAllowedDomains: z.string().default(''),
   browserDeniedDomains: z.string().default(''),
   browserAllowPrivateNetwork: z.boolean().default(DEFAULT_BROWSER_ALLOW_PRIVATE_NETWORK),
+  browserBackend: z.union(['playwright', 'ego'] as const).default(DEFAULT_BROWSER_BACKEND),
   allowedApps: z.string().default(''),
   deniedApps: z.string().default(''),
   readAppGrants: z.string().default(''),
@@ -109,6 +113,7 @@ export interface ResolvedSettings {
   browserAllowedDomains: readonly string[]
   browserDeniedDomains: readonly string[]
   browserAllowPrivateNetwork: boolean
+  browserBackend: 'playwright' | 'ego'
   allowedApps: readonly string[]
   deniedApps: readonly string[]
   readAppGrants: readonly MacosAppIdentityRule[]
@@ -195,6 +200,7 @@ export function resolveSettings(config: Config): ResolvedSettings {
     browserAllowedDomains: parseAppList(config.browserAllowedDomains),
     browserDeniedDomains: parseAppList(config.browserDeniedDomains),
     browserAllowPrivateNetwork: config.browserAllowPrivateNetwork ?? DEFAULT_BROWSER_ALLOW_PRIVATE_NETWORK,
+    browserBackend: config.browserBackend ?? DEFAULT_BROWSER_BACKEND,
     allowedApps: parseAppList(config.allowedApps),
     deniedApps: parseAppList(config.deniedApps),
     readAppGrants: parseAppIdentityRules(config.readAppGrants),

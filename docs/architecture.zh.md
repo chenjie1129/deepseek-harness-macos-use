@@ -19,6 +19,19 @@ Harness 可以编辑文件并运行 shell 命令，但对于仅通过 macOS GUI 
 - `@deepseek-ai/dsh-gui-model` 负责一次独立的截图到动作请求，并校验返回的动作联合类型。
 - `@deepseek-ai/dsh-tool-macos-use` 负责面向模型的基础 schema，以及有边界的桌面和浏览器动作循环。
 
+## 实验性 Ego Lite 后端
+
+除默认的 Playwright 安全后端外，`@deepseek-ai/dsh-browser-use` 还可通过 [ego lite](https://github.com/citrolabs/ego-lite) 的 `ego-browser` CLI 驱动该浏览器。这是一项**实验性**集成，由 `browserBackend` 设置选择（默认值：`playwright`）。
+
+**风险警告——启用前必读：**
+
+- **不具备固定代理的网络隔离。** Playwright 后端把每次导航、重定向、子资源请求和 WebSocket 都强制送入带认证的环回代理，由代理校验主机名、对出站连接做 DNS 固定，并拒绝私有网络目标。Ego 后端直接驱动 ego lite 浏览器，**不**提供等效的网络隔离。导航前仍会校验域名授权与拒绝规则，但子资源请求、DNS 行为与连接固定均由 ego lite 自身治理，而非本插件的代理。
+- **需要 ego lite 应用。** 必须已安装 `ego-browser` CLI 且位于 PATH 中。插件从不下载、安装或导入浏览器配置。CLI 缺失时会以 `BROWSER_USE_LAUNCH_FAILED` 报错并给出安装指引。
+- **操作集有限。** 首个 Ego 后端版本只映射 `navigate`、`clickSelector`、`fillSelector`、`extractText`、`screenshot`、`pageState` 和 `releaseOwner`。基于坐标的动作（`clickAt`、`moveAt`、`dragAt`、`scroll`、`type`、`key`）以及由视觉模型驱动的 `browser_use_task` 循环**不受支持**，会以 `BROWSER_USE_UNSUPPORTED_ACTION` 失败。
+- **并发被强制为 1。** 所有 Ego 操作通过单一互斥锁串行执行。多个智能体无法并发运行 Ego 浏览器操作。
+- **模型不提供 JavaScript。** Host 为 `ego-browser` CLI 生成固定的操作脚本。模型绝不提供原始 JavaScript、`evaluate` 表达式或 CDP 命令。
+- **owner 隔离。** 每个 Harness Agent 拥有自己的 ego lite Task Space。Task Space 会在 `releaseOwner`、Agent 销毁和服务拆除时释放。
+
 ## 安全与持久性
 
 macOS“辅助功能”和“屏幕录制”权限仍由宿主控制。浏览器网络和 macOS 应用访问默认拒绝；精确的读取／控制授权、全局应用拒绝规则、浏览器域名授权与私有网络访问都在可视化页面配置。控制授权必须有相同或更宽泛的读取授权，避免原生动作已经生效，却因动作后证据不可读而被报告成失败。拒绝规则优先于授权。显示器坐标路径绝不会生成完整显示器 raster：它只截取经过精确授权的前台窗口，再把它放到一张合成的全黑画布上；被排除、不可读、不在主屏、跨屏、部分超出或截图期间变化的目标均失败关闭。针对被排除内容的精确窗口截图也会直接失败。调用方自定义的任意 AppleScript 始终不可用。每个直接或模型选择的 GUI 变更动作前的一次性确认默认开启。只有当部署具备等效、可信的安全或审批边界时，操作者才应关闭它；关闭后仍可按配置对破坏性拖动、按键和任务意图进行启发式确认，但这不是语义效果保证。
@@ -39,7 +52,7 @@ macOS“辅助功能”和“屏幕录制”权限仍由宿主控制。浏览器
 
 ## 验证
 
-插件 Vitest 门禁在 22 个文件中通过 330 项测试，Host 与 Client TypeScript 项目以及完整集成 Harness 构建也在已经证明的 Harness `0.1.2-alpha.1` 基线上通过。测试覆盖目标受约束的原生脚本构造、macOS 服务行为、观察 owner／并发／过期、Retina 几何、只包含前台窗口的截图、任务协调与中止、GUI 响应解析与有界请求、浏览器隔离／网络代理／策略／操作、策略确认、原子后置条件验证、键入文本输出脱敏、输出 schema 校验、可视化设置卡注册、进度生命周期、授权附件加载，以及有边界的任务循环执行。另外，提示词评测器在 8 个文件中通过 19 项测试，并通过了使用独立 HTTP 判定器的确定性“提示词到浏览器”冒烟测试。
+插件 Vitest 门禁在 23 个文件中通过 346 项测试，Host 与 Client TypeScript 项目以及完整集成 Harness 构建也在已经证明的 Harness `0.1.2-alpha.1` 基线上通过。测试覆盖目标受约束的原生脚本构造、macOS 服务行为、观察 owner／并发／过期、Retina 几何、只包含前台窗口的截图、任务协调与中止、GUI 响应解析与有界请求、浏览器隔离／网络代理／策略／操作、Ego 后端生命周期／并发／CLI 缺失诊断、策略确认、原子后置条件验证、键入文本输出脱敏、输出 schema 校验、可视化设置卡注册、进度生命周期、授权附件加载，以及有边界的任务循环执行。另外，提示词评测器在 8 个文件中通过 19 项测试，并通过了使用独立 HTTP 判定器的确定性“提示词到浏览器”冒烟测试。
 
 发布证据会分别记录逻辑、类型、构建、打包、兼容性、确定性提示词、真实提供方与渲染 UI 门禁。渲染 UI 门禁会打包实际的 `SettingsCards` 与 `GuiTaskView` 组件，验证默认开启、开启时 1 张图片、关闭时 0 张图片、无控制台／请求问题及无水平溢出。确定性 fixture 不代表真实第三方提供方兼容性，当前证据也不宣称完成了解锁原生 macOS 应用后的截图／动作 E2E，或 `0.1.2-alpha.5` 精确源码的编译／构建／启动兼容性。
 

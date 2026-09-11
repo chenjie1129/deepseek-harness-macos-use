@@ -59,6 +59,14 @@ corepack pnpm exec playwright install chromium
 
 Grant Accessibility and Screen Recording permissions to the process that launches Harness. A display-coordinate screenshot never captures the full display: the service passes only the exact authorized foreground-window id to the native capture command, then composites those pixels onto an otherwise black canvas with the main display's coordinate geometry. Its PNG pixel coordinates are converted to global macOS points after a fresh observation is validated, including Retina 1×/2× scaling and a nonzero main-display origin. An excluded, unreadable, secondary-display, spanning, partially outside, or changing foreground window is rejected before transferable pixels are returned.
 
+### Ego Lite backend (experimental)
+
+Set `browserBackend` to `ego` in the GUI Agent settings card to use the ego lite browser instead of Playwright. This requires the [ego lite app](https://github.com/citrolabs/ego-lite) to be installed and the `ego-browser` CLI to be available on PATH.
+
+**This backend does not provide the pinned-proxy network isolation of the default Playwright backend.** Only enable it on trusted networks and with carefully scoped domain grants. See [architecture.md](architecture.md#experimental-ego-lite-backend) for the full risk statement.
+
+When `ego` is active, only selector-based browser tools (`browser_navigate`, `browser_click`, `browser_fill`, `browser_extract_text`, `browser_screenshot`) are available. The `browser_use_task` autonomous loop and coordinate actions are not supported.
+
 ## Security boundary
 
 The plugin does not expose caller-supplied arbitrary AppleScript; internal native scripts bind their final target check and input event together. Denied applications override grants. Background windows, the desktop, menus, overlays, and other applications are never included in a display-coordinate raster and therefore do not rely on after-the-fact masking; exact-window capture fails closed for excluded content. One-shot confirmation before every direct or model-selected GUI mutation is default-on. Turn it off only when the deployment supplies an equivalent trusted safety or approval boundary. When it is off, configured heuristic confirmation still covers some destructive drags, keys, and task wording, but it is not a semantic-effect guarantee.
@@ -69,7 +77,7 @@ An unsupported, malformed, oversized, stale, or otherwise uncertain model action
 
 ## Verification performed
 
-At the current source freeze, the plugin Vitest gate passes **330 tests across 22 files** and the Host and Client TypeScript projects plus the full integrated Harness build pass on the supported alpha.1 base. The logic gate covers settings persistence, visual card registration, fail-closed policy, provider bounds, observation ownership and cleanup, browser isolation, native action guards, atomic completion verification, typed-text output redaction, progress bounds, authorized attachment metadata, and the default-on/default-off screenshot paths.
+At the current source freeze, the plugin Vitest gate passes **346 tests across 23 files** and the Host and Client TypeScript projects plus the full integrated Harness build pass on the supported alpha.1 base. The logic gate covers settings persistence, visual card registration, fail-closed policy, provider bounds, observation ownership and cleanup, browser isolation, native action guards, atomic completion verification, typed-text output redaction, progress bounds, authorized attachment metadata, and the default-on/default-off screenshot paths.
 
 The separate prompt evaluator passes **19 tests across 8 files**. Its deterministic prompt-to-browser smoke also passes through the real Harness SDK/tool loop and Playwright path, with the final state checked by an independent HTTP oracle.
 

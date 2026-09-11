@@ -1109,6 +1109,7 @@ describe('tool-macos-use task presentation settings', () => {
       allowedDomains: ['example.com', 'api.example.com'],
       deniedDomains: ['private.example.com'],
       allowPrivateNetwork: true,
+      backend: 'playwright',
     })
     await ctx.fiber.dispose()
   })

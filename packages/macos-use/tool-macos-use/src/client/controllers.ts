@@ -89,6 +89,15 @@ export function validAppIdentityRules(value: string): boolean {
   return true
 }
 
+/**
+ * Restrict the visual backend selector to the two supported backends.
+ * @param value - candidate backend entered on the visual card.
+ * @returns whether the value is the secure Playwright backend or the experimental Ego backend.
+ */
+function validBrowserBackend(value: string): boolean {
+  return value === 'playwright' || value === 'ego'
+}
+
 /** GUI-model values visible through the settings scope. */
 export interface GuiModelSettings {
   apiKeyEnv?: string
@@ -270,6 +279,7 @@ export interface GuiAgentSettings {
   browserAllowedDomains?: string
   browserDeniedDomains?: string
   browserAllowPrivateNetwork?: boolean
+  browserBackend?: string
   allowedApps?: string
   deniedApps?: string
   readAppGrants?: string
@@ -293,6 +303,7 @@ export interface GuiAgentCardState extends CardShell {
   browserAllowedDomains: CardFieldState
   browserDeniedDomains: CardFieldState
   browserAllowPrivateNetwork: CardFieldState
+  browserBackend: CardFieldState
   allowedApps: CardFieldState
   deniedApps: CardFieldState
   readAppGrants: CardFieldState
@@ -330,6 +341,7 @@ export class GuiAgentCardController {
       textField('browserAllowedDomains'),
       textField('browserDeniedDomains'),
       booleanField('browserAllowPrivateNetwork'),
+      textField('browserBackend', validBrowserBackend),
       textField('allowedApps'),
       textField('deniedApps'),
       textField('readAppGrants', validAppIdentityRules),
@@ -355,6 +367,7 @@ export class GuiAgentCardController {
       browserAllowedDomains: this.form.field('browserAllowedDomains'),
       browserDeniedDomains: this.form.field('browserDeniedDomains'),
       browserAllowPrivateNetwork: this.form.field('browserAllowPrivateNetwork'),
+      browserBackend: this.form.field('browserBackend'),
       allowedApps: this.form.field('allowedApps'),
       deniedApps: this.form.field('deniedApps'),
       readAppGrants: this.form.field('readAppGrants'),

@@ -44,6 +44,7 @@ function agentState(): GuiAgentCardState {
     browserAllowedDomains: field(''),
     browserDeniedDomains: field(''),
     browserAllowPrivateNetwork: field('false'),
+    browserBackend: field('playwright'),
     allowedApps: field(''),
     deniedApps: field(''),
     readAppGrants: field(''),
